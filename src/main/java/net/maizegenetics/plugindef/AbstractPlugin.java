@@ -6,13 +6,32 @@
  */
 package net.maizegenetics.plugindef;
 
+import javafx.geometry.Insets;
+import javafx.geometry.Orientation;
+import javafx.geometry.Pos;
+import javafx.scene.Node;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+import javafx.stage.DirectoryChooser;
+import javafx.stage.FileChooser;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import javafx.stage.Window;
 import net.maizegenetics.dna.map.PositionList;
 import net.maizegenetics.dna.snp.GenotypeTable;
 import net.maizegenetics.dna.snp.io.JSONUtils;
 import net.maizegenetics.gui.DialogUtils;
 import net.maizegenetics.gui.SelectFromAvailableDialog;
 import net.maizegenetics.gui.SiteNamesAvailableListModel;
-import net.maizegenetics.gui.TaxaAvailableListModel;
 import net.maizegenetics.phenotype.GenotypePhenotype;
 import net.maizegenetics.prefs.TasselPrefs;
 import net.maizegenetics.taxa.TaxaList;
@@ -26,12 +45,6 @@ import org.apache.log4j.Logger;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
-import java.awt.event.WindowEvent;
 import java.io.BufferedReader;
 import java.io.File;
 import java.lang.reflect.Field;
@@ -65,7 +78,6 @@ abstract public class AbstractPlugin implements Plugin {
     private final List<PluginListener> myListeners = new ArrayList<>();
     private final List<Plugin> myInputs = new ArrayList<>();
     private DataSet myCurrentInputData = null;
-    private final Frame myParentFrame;
     private final boolean myIsInteractive;
     private boolean myTrace = false;
     private boolean myThreaded = false;
@@ -75,14 +87,13 @@ abstract public class AbstractPlugin implements Plugin {
      * Creates a new instance of AbstractPlugin
      */
     public AbstractPlugin() {
-        this(null, true);
+        this(true);
     }
 
     /**
      * Creates a new instance of AbstractPlugin
      */
-    public AbstractPlugin(Frame parentFrame, boolean isInteractive) {
-        myParentFrame = parentFrame;
+    public AbstractPlugin(boolean isInteractive) {
         myIsInteractive = isInteractive;
     }
 
@@ -339,7 +350,7 @@ abstract public class AbstractPlugin implements Plugin {
 
     }
 
-    private void setFieldsToConfigParameters(Map<String, JComponent> parameterFields) {
+    private void setFieldsToConfigParameters(Map<String, Node> parameterFields) {
 
         final List<PluginParameter<?>> parameterInstances = getParameterInstances();
         if (parameterInstances.isEmpty()) {
@@ -347,27 +358,27 @@ abstract public class AbstractPlugin implements Plugin {
         }
 
         for (final PluginParameter<?> current : parameterInstances) {
-            JComponent component = parameterFields.get(current.cmdLineName());
+            Node component = parameterFields.get(current.cmdLineName());
             setFieldToConfigParameters(component, current);
         }
 
     }
 
-    private void setFieldToConfigParameters(JComponent component, PluginParameter<?> parameter) {
+    private void setFieldToConfigParameters(Node component, PluginParameter<?> parameter) {
 
         Optional<String> configValue = ParameterCache.value(this, parameter.cmdLineName());
         if (!configValue.isPresent()) {
             return;
         }
         try {
-            if (component instanceof JTextField) {
-                ((JTextField) component).setText(configValue.get());
-            } else if (component instanceof JCheckBox) {
+            if (component instanceof TextField) {
+                ((TextField) component).setText(configValue.get());
+            } else if (component instanceof CheckBox) {
                 Boolean value = convert(configValue.get(), Boolean.class);
-                ((JCheckBox) component).setSelected(value);
-            } else if (component instanceof JComboBox) {
+                ((CheckBox) component).setSelected(value);
+            } else if (component instanceof ComboBox) {
                 Object value = convert(configValue.get(), parameter.valueType());
-                ((JComboBox) component).setSelectedItem(value);
+                ((ComboBox) component).getSelectionModel().select(value);
             }
         } catch (Exception e) {
             myLogger.warn("setFieldToConfigParameters: problem with configuration key: " + this.getClass().getName() + "." + parameter.cmdLineName() + "  value: " + configValue.get() + "\n" + e.getMessage());
@@ -706,159 +717,139 @@ abstract public class AbstractPlugin implements Plugin {
             return true;
         }
 
-        final JDialog dialog = new JDialog((Frame) null, null, true);
-        dialog.addWindowListener(new java.awt.event.WindowAdapter() {
-            @Override
-            public void windowClosing(WindowEvent e) {
-                parametersAreSet = false;
-                dialog.setVisible(false);
-            }
+        final Stage dialog = new Stage();
+        dialog.initModality(Modality.APPLICATION_MODAL);
+        dialog.setOnCloseRequest(event -> {
+            parametersAreSet = false;
+            dialog.close();
         });
 
-        final Map<String, JComponent> parameterFields = new HashMap<>();
+        final Map<String, Node> parameterFields = new HashMap<>();
 
         parametersAreSet = true;
 
-        JButton okButton = new JButton();
-        okButton.setActionCommand("Ok");
-        okButton.setText("Ok");
-        okButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    for (final PluginParameter<?> current : parameterInstances) {
-                        JComponent component = parameterFields.get(current.cmdLineName());
-                        if (current.parameterType() == PluginParameter.PARAMETER_TYPE.LABEL) {
-                            // do nothing
-                        } else if (current.parameterType() == PluginParameter.PARAMETER_TYPE.GENOTYPE_TABLE) {
-                            GenotypeWrapper input = (GenotypeWrapper) ((JComboBox) component).getSelectedItem();
-                            if (input != null) {
-                                setParameter(current.cmdLineName(), input.myObj);
-                            }
-                        } else if (current.parameterType() == PluginParameter.PARAMETER_TYPE.POSITION_LIST) {
-                            if (component instanceof JComboBox) {
-                                Object temp = ((JComboBox) component).getSelectedItem();
-                                if (temp == POSITION_LIST_NONE) {
-                                    setParameter(current.cmdLineName(), null);
-                                } else {
-                                    setParameter(current.cmdLineName(), ((Datum) temp).getData());
-                                }
-                            } else {
-                                String input = ((JTextField) component).getText().trim();
-                                setParameter(current.cmdLineName(), input);
-                            }
-                        } else if (TaxaList.class.isAssignableFrom(current.valueType())) {
-                            if (component instanceof JComboBox) {
-                                Object temp = ((JComboBox) component).getSelectedItem();
-                                if (temp == TAXA_LIST_NONE) {
-                                    setParameter(current.cmdLineName(), null);
-                                } else {
-                                    setParameter(current.cmdLineName(), ((Datum) temp).getData());
-                                }
-                            } else {
-                                String input = ((JTextField) component).getText().trim();
-                                setParameter(current.cmdLineName(), input);
-                            }
-                        } else if (current.parameterType() == PluginParameter.PARAMETER_TYPE.DISTANCE_MATRIX) {
-                            if (component instanceof JComboBox) {
-                                Object temp = ((JComboBox) component).getSelectedItem();
-                                if (temp == null) {
-                                    throw new IllegalArgumentException("setParametersViaGUI: must specify a distance matrix.");
-                                } else {
-                                    setParameter(current.cmdLineName(), ((Datum) temp).getData());
-                                }
-                            } else {
-                                String input = ((JTextField) component).getText().trim();
-                                setParameter(current.cmdLineName(), input);
-                            }
-                        } else if (current.parameterType() == PluginParameter.PARAMETER_TYPE.OBJECT_LIST_SINGLE_SELECT) {
-                            Object selectedObjects = ((JComboBox<?>) component).getSelectedItem();
-                            setParameter(current.cmdLineName(), selectedObjects);
-                        } else if (component instanceof JTextField) {
-                            String input = ((JTextField) component).getText().trim();
-                            setParameter(current.cmdLineName(), input);
-                        } else if (component instanceof JCheckBox) {
-                            if (((JCheckBox) component).isSelected()) {
-                                setParameter(current.cmdLineName(), Boolean.TRUE);
-                            } else {
-                                setParameter(current.cmdLineName(), Boolean.FALSE);
-                            }
-                        } else if (component instanceof JComboBox) {
-                            Enum temp = (Enum) ((JComboBox) component).getSelectedItem();
-                            setParameter(current.cmdLineName(), temp);
+        Button okButton = new Button("Ok");
+        okButton.setOnAction(event -> {
+            try {
+                for (final PluginParameter<?> current : parameterInstances) {
+                    Node component = parameterFields.get(current.cmdLineName());
+                    if (current.parameterType() == PluginParameter.PARAMETER_TYPE.LABEL) {
+                        // do nothing
+                    } else if (current.parameterType() == PluginParameter.PARAMETER_TYPE.GENOTYPE_TABLE) {
+                        GenotypeWrapper input = (GenotypeWrapper) ((ComboBox) component).getSelectionModel().getSelectedItem();
+                        if (input != null) {
+                            setParameter(current.cmdLineName(), input.myObj);
                         }
+                    } else if (current.parameterType() == PluginParameter.PARAMETER_TYPE.POSITION_LIST) {
+                        if (component instanceof ComboBox) {
+                            Object temp = ((ComboBox) component).getSelectionModel().getSelectedItem();
+                            if (temp == POSITION_LIST_NONE) {
+                                setParameter(current.cmdLineName(), null);
+                            } else {
+                                setParameter(current.cmdLineName(), ((Datum) temp).getData());
+                            }
+                        } else {
+                            String input = ((TextField) component).getText().trim();
+                            setParameter(current.cmdLineName(), input);
+                        }
+                    } else if (TaxaList.class.isAssignableFrom(current.valueType())) {
+                        if (component instanceof ComboBox) {
+                            Object temp = ((ComboBox) component).getSelectionModel().getSelectedItem();
+                            if (temp == TAXA_LIST_NONE) {
+                                setParameter(current.cmdLineName(), null);
+                            } else {
+                                setParameter(current.cmdLineName(), ((Datum) temp).getData());
+                            }
+                        } else {
+                            String input = ((TextField) component).getText().trim();
+                            setParameter(current.cmdLineName(), input);
+                        }
+                    } else if (current.parameterType() == PluginParameter.PARAMETER_TYPE.DISTANCE_MATRIX) {
+                        if (component instanceof ComboBox) {
+                            Object temp = ((ComboBox) component).getSelectionModel().getSelectedItem();
+                            if (temp == null) {
+                                throw new IllegalArgumentException("setParametersViaGUI: must specify a distance matrix.");
+                            } else {
+                                setParameter(current.cmdLineName(), ((Datum) temp).getData());
+                            }
+                        } else {
+                            String input = ((TextField) component).getText().trim();
+                            setParameter(current.cmdLineName(), input);
+                        }
+                    } else if (current.parameterType() == PluginParameter.PARAMETER_TYPE.OBJECT_LIST_SINGLE_SELECT) {
+                        Object selectedObjects = ((ComboBox<?>) component).getSelectionModel().getSelectedItem();
+                        setParameter(current.cmdLineName(), selectedObjects);
+                    } else if (component instanceof TextField) {
+                        String input = ((TextField) component).getText().trim();
+                        setParameter(current.cmdLineName(), input);
+                    } else if (component instanceof CheckBox) {
+                        if (((CheckBox) component).isSelected()) {
+                            setParameter(current.cmdLineName(), Boolean.TRUE);
+                        } else {
+                            setParameter(current.cmdLineName(), Boolean.FALSE);
+                        }
+                    } else if (component instanceof ComboBox) {
+                        Enum temp = (Enum) ((ComboBox) component).getSelectionModel().getSelectedItem();
+                        setParameter(current.cmdLineName(), temp);
                     }
-                } catch (Exception ex) {
-                    myLogger.debug(ex.getMessage(), ex);
-                    StringBuilder builder = new StringBuilder();
-                    builder.append("Problem Setting Parameters: ");
-                    builder.append("\n");
-                    builder.append(Utils.shortenStrLineLen(ExceptionUtils.getExceptionCauses(ex), 50));
-                    String str = builder.toString();
-                    DialogUtils.showError(str, null);
-                    return;
                 }
-                dialog.setVisible(false);
+            } catch (Exception ex) {
+                myLogger.debug(ex.getMessage(), ex);
+                StringBuilder builder = new StringBuilder();
+                builder.append("Problem Setting Parameters: ");
+                builder.append("\n");
+                builder.append(Utils.shortenStrLineLen(ExceptionUtils.getExceptionCauses(ex), 50));
+                String str = builder.toString();
+                DialogUtils.showError(str, null);
+                return;
+            }
+            dialog.close();
+        });
+
+        Button cancelButton = new Button("Cancel");
+        cancelButton.setOnAction(event -> {
+            parametersAreSet = false;
+            dialog.close();
+        });
+
+        Button defaultsButton = new Button("Defaults");
+        defaultsButton.setOnAction(event -> {
+            setFieldsToDefault(parameterFields);
+            setFieldsToConfigParameters(parameterFields);
+        });
+
+        Button userManualButton = new Button("User Manual");
+        userManualButton.setOnAction(event -> {
+            try {
+                Desktop desktop = Desktop.getDesktop();
+                URI uri = new URI(pluginUserManualURL());
+                desktop.browse(uri);
+            } catch (Exception ex) {
+                myLogger.debug(ex.getMessage(), ex);
             }
         });
 
-        JButton cancelButton = new JButton();
-        cancelButton.setText("Cancel");
-        cancelButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                parametersAreSet = false;
-                dialog.setVisible(false);
-            }
-        });
-
-        JButton defaultsButton = new JButton();
-        defaultsButton.setText("Defaults");
-        defaultsButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                setFieldsToDefault(parameterFields);
-                setFieldsToConfigParameters(parameterFields);
-            }
-        });
-
-        JButton userManualButton = new JButton();
-        userManualButton.setText("User Manual");
-        userManualButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    Desktop desktop = Desktop.getDesktop();
-                    URI uri = new URI(pluginUserManualURL());
-                    desktop.browse(uri);
-                } catch (Exception ex) {
-                    myLogger.debug(ex.getMessage(), ex);
-                }
-            }
-        });
-
-        JPanel panel = new JPanel();
-        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-        panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        VBox panel = new VBox();
+        panel.setPadding(new javafx.geometry.Insets(10.0));
 
         boolean show_citation = !DEFAULT_CITATION.equals(getCitation());
-        JTextPane citationText = null;
+        TextArea citationText = null;
         if (show_citation) {
-            citationText = new JTextPane();
-            citationText.setContentType("text/html");
-            citationText.setMargin(new Insets(5, 5, 5, 5));
+            citationText = new TextArea();
+            citationText.setPadding(new javafx.geometry.Insets(5.0));
+            //citationText.setContentType("text/html");
             citationText.setEditable(false);
-            JScrollPane scroll = new JScrollPane(citationText);
-            scroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-            scroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
-            scroll.setPreferredSize(new Dimension(scroll.getWidth(), 45));
-            panel.add(scroll);
+            ScrollPane scroll = new ScrollPane(citationText);
+            scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+            scroll.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+            scroll.setPrefSize(scroll.getWidth(), 45.0);
+            panel.getChildren().add(scroll);
         }
 
         for (final PluginParameter<?> current : getParameterInstances()) {
             if (current.parameterType() == PluginParameter.PARAMETER_TYPE.GENOTYPE_TABLE) {
                 Datum datum = getGenotypeTable();
-                JComboBox menu = new JComboBox();
+                ComboBox<GenotypeWrapper> menu = new ComboBox<>();
                 if (datum != null) {
                     String name = datum.getName();
                     GenotypeTable table;
@@ -871,179 +862,187 @@ abstract public class AbstractPlugin implements Plugin {
                     }
 
                     if (current.acceptsValue(GenotypeTable.GENOTYPE_TABLE_COMPONENT.Genotype) && table.hasGenotype()) {
-                        menu.addItem(new GenotypeWrapper(GenotypeTable.GENOTYPE_TABLE_COMPONENT.Genotype, "Genotype (" + name + ")"));
+                        menu.getItems().add(new GenotypeWrapper(GenotypeTable.GENOTYPE_TABLE_COMPONENT.Genotype, "Genotype (" + name + ")"));
                     }
                     if (current.acceptsValue(GenotypeTable.GENOTYPE_TABLE_COMPONENT.ReferenceProbability) && table.hasReferenceProbablity()) {
-                        menu.addItem(new GenotypeWrapper(GenotypeTable.GENOTYPE_TABLE_COMPONENT.ReferenceProbability, "Reference Probability (" + name + ")"));
+                        menu.getItems().add(new GenotypeWrapper(GenotypeTable.GENOTYPE_TABLE_COMPONENT.ReferenceProbability, "Reference Probability (" + name + ")"));
                     }
                     if (current.acceptsValue(GenotypeTable.GENOTYPE_TABLE_COMPONENT.AlleleProbability) && table.hasAlleleProbabilities()) {
-                        menu.addItem(new GenotypeWrapper(GenotypeTable.GENOTYPE_TABLE_COMPONENT.AlleleProbability, "Allele Probability (" + name + ")"));
+                        menu.getItems().add(new GenotypeWrapper(GenotypeTable.GENOTYPE_TABLE_COMPONENT.AlleleProbability, "Allele Probability (" + name + ")"));
                     }
                     if (current.acceptsValue(GenotypeTable.GENOTYPE_TABLE_COMPONENT.Depth) && table.hasDepth()) {
-                        menu.addItem(new GenotypeWrapper(GenotypeTable.GENOTYPE_TABLE_COMPONENT.Depth, "Depth (" + name + ")"));
+                        menu.getItems().add(new GenotypeWrapper(GenotypeTable.GENOTYPE_TABLE_COMPONENT.Depth, "Depth (" + name + ")"));
                     }
                     if (current.acceptsValue(GenotypeTable.GENOTYPE_TABLE_COMPONENT.Dosage) && table.hasDosage()) {
-                        menu.addItem(new GenotypeWrapper(GenotypeTable.GENOTYPE_TABLE_COMPONENT.Dosage, "Dosage (" + name + ")"));
+                        menu.getItems().add(new GenotypeWrapper(GenotypeTable.GENOTYPE_TABLE_COMPONENT.Dosage, "Dosage (" + name + ")"));
                     }
-                    menu.setSelectedIndex(0);
+                    menu.getSelectionModel().clearAndSelect(0);
                 }
                 createEnableDisableAction(current, parameterFields, menu);
-                JPanel temp = new JPanel(new FlowLayout(FlowLayout.CENTER));
-                temp.add(new JLabel(current.guiName()));
-                temp.add(menu);
-                temp.setToolTipText(getToolTip(current));
-                panel.add(temp);
+                FlowPane temp = new FlowPane(Orientation.HORIZONTAL);
+                temp.getChildren().add(new javafx.scene.control.Label(current.guiName()));
+                temp.getChildren().add(menu);
+                //temp.setToolTipText(getToolTip(current));
+                panel.getChildren().add(temp);
                 parameterFields.put(current.cmdLineName(), menu);
             } else if (current.parameterType() == PluginParameter.PARAMETER_TYPE.POSITION_LIST) {
                 Datum datum = getPositionList();
                 if (datum != null) {
-                    JComboBox menu = new JComboBox();
-                    menu.addItem(POSITION_LIST_NONE);
-                    menu.addItem(datum);
-                    menu.setSelectedIndex(0);
+                    ComboBox menu = new ComboBox();
+                    menu.getItems().add(POSITION_LIST_NONE);
+                    menu.getItems().add(datum);
+                    menu.getSelectionModel().select(0);
                     createEnableDisableAction(current, parameterFields, menu);
-                    JPanel temp = new JPanel(new FlowLayout(FlowLayout.CENTER));
-                    temp.add(new JLabel(current.guiName()));
-                    temp.add(menu);
-                    temp.setToolTipText(getToolTip(current));
-                    panel.add(temp);
+                    FlowPane temp = new FlowPane(Orientation.HORIZONTAL);
+                    temp.getChildren().add(new Label(current.guiName()));
+                    temp.getChildren().add(menu);
+                    //temp.setToolTipText(getToolTip(current));
+                    panel.getChildren().add(temp);
                     parameterFields.put(current.cmdLineName(), menu);
                 } else {
-                    JTextField field = new JTextField(TEXT_FIELD_WIDTH - 8);
-                    JButton browse = getOpenFile(dialog, field);
-                    JPanel line = getLine(current.guiName(), field, browse, getToolTip(current));
-                    createEnableDisableAction(current, parameterFields, new JComponent[]{field, browse}, field);
-                    panel.add(line);
+                    TextField field = new TextField();
+                    Button browse = getOpenFile(dialog, field);
+                    HBox line = getLine(current.guiName(), field, browse, getToolTip(current));
+                    createEnableDisableAction(current, parameterFields, new Node[]{field, browse}, field);
+                    panel.getChildren().add(line);
                     parameterFields.put(current.cmdLineName(), field);
                 }
             } else if (current.parameterType() == PluginParameter.PARAMETER_TYPE.DISTANCE_MATRIX) {
                 List<Datum> matrices = getDistanceMatrices();
                 if (!matrices.isEmpty()) {
-                    JComboBox menu = new JComboBox();
+                    ComboBox menu = new ComboBox();
                     for (Datum matrix : matrices) {
-                        menu.addItem(matrix);
+                        menu.getItems().add(matrix);
                     }
-                    menu.setSelectedIndex(0);
+                    menu.getSelectionModel().select(0);
                     createEnableDisableAction(current, parameterFields, menu);
-                    JPanel temp = new JPanel(new FlowLayout(FlowLayout.CENTER));
-                    temp.add(new JLabel(current.guiName()));
-                    temp.add(menu);
-                    temp.setToolTipText(getToolTip(current));
-                    panel.add(temp);
+                    FlowPane temp = new FlowPane(Orientation.HORIZONTAL);
+                    temp.getChildren().add(new Label(current.guiName()));
+                    temp.getChildren().add(menu);
+                    //temp.setToolTipText(getToolTip(current));
+                    panel.getChildren().add(temp);
                     parameterFields.put(current.cmdLineName(), menu);
                 } else {
-                    JTextField field = new JTextField(TEXT_FIELD_WIDTH - 8);
-                    JButton browse = getOpenFile(dialog, field);
-                    JPanel line = getLine(current.guiName(), field, browse, getToolTip(current));
-                    createEnableDisableAction(current, parameterFields, new JComponent[]{field, browse}, field);
-                    panel.add(line);
+                    TextField field = new TextField();
+                    Button browse = getOpenFile(dialog, field);
+                    HBox line = getLine(current.guiName(), field, browse, getToolTip(current));
+                    createEnableDisableAction(current, parameterFields, new Node[]{field, browse}, field);
+                    panel.getChildren().add(line);
                     parameterFields.put(current.cmdLineName(), field);
                 }
             } else if (current.parameterType() == PluginParameter.PARAMETER_TYPE.OBJECT_LIST_SINGLE_SELECT) {
-                JPanel listPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-                listPanel.add(new JLabel(current.guiName()));
-                JComboBox<?> list = new JComboBox<>(current.possibleValues().toArray());
-                list.setSelectedIndex(0);
+                FlowPane listPanel = new FlowPane(Orientation.HORIZONTAL);
+                listPanel.getChildren().add(new Label(current.guiName()));
+                ComboBox list = new ComboBox();
+                list.getItems().addAll(current.possibleValues().toArray());
+                list.getSelectionModel().select(0);
                 createEnableDisableAction(current, parameterFields, list);
-                listPanel.add(list);
-                listPanel.setToolTipText(getToolTip(current));
-                panel.add(listPanel);
+                listPanel.getChildren().add(list);
+                //listPanel.setToolTipText(getToolTip(current));
+                panel.getChildren().add(listPanel);
                 parameterFields.put(current.cmdLineName(), list);
             } else if (current.valueType().isEnum()) {
-                JComboBox menu = new JComboBox();
+                ComboBox menu = new ComboBox();
                 Object[] values = current.valueType().getEnumConstants();
                 for (Object item : values) {
-                    menu.addItem(item);
+                    menu.getItems().add(item);
                 }
-                menu.setSelectedItem(current.value());
+                menu.getSelectionModel().select(current.value());
                 createEnableDisableAction(current, parameterFields, menu);
-                JPanel temp = new JPanel(new FlowLayout(FlowLayout.CENTER));
-                temp.add(new JLabel(current.guiName()));
-                temp.add(menu);
-                temp.setToolTipText(getToolTip(current));
-                panel.add(temp);
+                FlowPane temp = new FlowPane(Orientation.HORIZONTAL);
+                temp.getChildren().add(new Label(current.guiName()));
+                temp.getChildren().add(menu);
+                //temp.setToolTipText(getToolTip(current));
+                panel.getChildren().add(temp);
                 parameterFields.put(current.cmdLineName(), menu);
             } else if (Boolean.class.isAssignableFrom(current.valueType())) {
-                JCheckBox check = new JCheckBox(current.guiName());
-                check.setToolTipText(getToolTip(current));
+                CheckBox check = new CheckBox(current.guiName());
+                check.setTooltip(new Tooltip(getToolTip(current)));
                 if (current.value() == Boolean.TRUE) {
                     check.setSelected(true);
                 } else {
                     check.setSelected(false);
                 }
                 createEnableDisableAction(current, parameterFields, check);
-                JPanel temp = new JPanel(new FlowLayout(FlowLayout.CENTER));
-                temp.add(check);
-                panel.add(temp);
+                FlowPane temp = new FlowPane(Orientation.HORIZONTAL);
+                temp.getChildren().add(check);
+                panel.getChildren().add(temp);
                 parameterFields.put(current.cmdLineName(), check);
             } else if (TaxaList.class.isAssignableFrom(current.valueType())) {
 
                 List<Datum> datums = getTaxaListDatum();
                 if (datums != null) {
-                    JComboBox menu = new JComboBox();
-                    menu.addItem(TAXA_LIST_NONE);
+                    ComboBox menu = new ComboBox();
+                    menu.getItems().add(TAXA_LIST_NONE);
                     for (Datum datum : datums) {
-                        menu.addItem(datum);
+                        menu.getItems().add(datum);
                     }
-                    menu.setSelectedIndex(0);
+                    menu.getSelectionModel().select(0);
                     createEnableDisableAction(current, parameterFields, menu);
-                    JPanel temp = new JPanel(new FlowLayout(FlowLayout.CENTER));
-                    temp.add(new JLabel(current.guiName()));
-                    temp.add(menu);
-                    temp.setToolTipText(getToolTip(current));
-                    panel.add(temp);
+                    FlowPane temp = new FlowPane(Orientation.HORIZONTAL);
+                    temp.getChildren().add(new Label(current.guiName()));
+                    temp.getChildren().add(menu);
+                    //temp.setToolTipText(getToolTip(current));
+                    panel.getChildren().add(temp);
                     parameterFields.put(current.cmdLineName(), menu);
                 } else {
                     TaxaList taxa = getTaxaList();
-                    JTextField field;
+                    TextField field;
                     if (taxa == null) {
-                        field = new JTextField(TEXT_FIELD_WIDTH);
+                        field = new TextField();
                     } else {
-                        field = new JTextField(TEXT_FIELD_WIDTH - 7);
+                        field = new TextField();
                     }
                     if (current.value() != null) {
                         field.setText(current.value().toString());
                     }
-                    JPanel taxaPanel = getTaxaListPanel(current.guiName(), field, current.description(), dialog, taxa);
-                    panel.add(taxaPanel);
+                    HBox taxaPanel = getTaxaListPanel(current.guiName(), field, current.description(), dialog, taxa);
+                    panel.getChildren().add(taxaPanel);
                     parameterFields.put(current.cmdLineName(), field);
                 }
 
             } else if (current.parameterType() == PluginParameter.PARAMETER_TYPE.SITE_NAME_LIST) {
                 PositionList positions = getSiteNameList();
-                JTextField field;
+                TextField field;
                 if (positions == null) {
-                    field = new JTextField(TEXT_FIELD_WIDTH);
+                    field = new TextField();
+                    field.setMinWidth(TEXT_FIELD_WIDTH);
                 } else {
-                    field = new JTextField(TEXT_FIELD_WIDTH - 7);
+                    field = new TextField();
+                    field.setMinWidth(TEXT_FIELD_WIDTH - 7);
                 }
                 if (current.value() != null) {
                     field.setText(current.value().toString());
                 }
-                JPanel positionsPanel = getPositionListPanel(current.guiName(), field, current.description(), dialog, positions);
+                HBox positionsPanel = new HBox();
+                //JPanel positionsPanel = getPositionListPanel(current.guiName(), field, current.description(), dialog, positions);
                 List<JComponent> componentList = new ArrayList<>();
-                for (Component component : positionsPanel.getComponents()) {
-                    if (component instanceof JComponent) {
-                        componentList.add((JComponent) component);
-                    }
-                }
-                createEnableDisableAction(current, parameterFields, componentList.toArray(new JComponent[0]), field);
-                panel.add(positionsPanel);
+                //for (Component component : positionsPanel.getComponents()) {
+                //    if (component instanceof JComponent) {
+                //        componentList.add((JComponent) component);
+                //    }
+                //}
+                createEnableDisableAction(current, parameterFields, componentList.toArray(new Node[0]), field);
+                panel.getChildren().add(positionsPanel);
                 parameterFields.put(current.cmdLineName(), field);
             } else if (current.parameterType() == PluginParameter.PARAMETER_TYPE.LABEL) {
-                JPanel temp = new JPanel(new FlowLayout(FlowLayout.CENTER));
-                JLabel label = new JLabel(current.guiName());
-                label.setFont(new Font("Dialog", Font.BOLD, 14));
-                temp.add(label);
-                panel.add(temp);
+                FlowPane temp = new FlowPane(Orientation.HORIZONTAL);
+                Label label = new Label(current.guiName());
+                label.setFont(new javafx.scene.text.Font("Dialog", 14.0));
+                //label.setFont(new Font("Dialog", Font.BOLD, 14));
+                temp.getChildren().add(label);
+                panel.getChildren().add(temp);
             } else {
-                final JTextField field;
+                final TextField field;
                 if (current.parameterType() == PluginParameter.PARAMETER_TYPE.PASSWORD) {
-                    field = new JPasswordField(TEXT_FIELD_WIDTH);
+                    field = new PasswordField();
+                    field.setMinWidth(TEXT_FIELD_WIDTH);
                 } else if (current.parameterType() != PluginParameter.PARAMETER_TYPE.NA) {
-                    field = new JTextField(TEXT_FIELD_WIDTH - 8);
+                    field = new TextField();
+                    field.setMinWidth(TEXT_FIELD_WIDTH - 8);
                 } else {
-                    field = new JTextField(TEXT_FIELD_WIDTH);
+                    field = new TextField();
+                    field.setMinWidth(TEXT_FIELD_WIDTH);
                 }
 
                 if (current.value() != null) {
@@ -1054,28 +1053,27 @@ abstract public class AbstractPlugin implements Plugin {
                     }
                 }
 
-                field.addFocusListener(new FocusAdapter() {
-                    @Override
-                    public void focusLost(FocusEvent e) {
-                        String input = field.getText().trim();
-                        try {
-                            if (!current.acceptsValue(input)) {
-                                JOptionPane.showMessageDialog(dialog, current.guiName() + " range: " + current.rangeToString());
-                                field.setText(getParameterInstance(current.cmdLineName()).value().toString());
-                            }
-                            if (Integer.class.isAssignableFrom(current.valueType())) {
-                                Integer temp = convert(field.getText(), Integer.class);
-                                if (temp == null) {
-                                    field.setText(null);
-                                } else {
-                                    field.setText(NumberFormat.getInstance().format(temp.intValue()));
-                                }
-                            }
-                        } catch (Exception ex) {
-                            myLogger.debug(ex.getMessage(), ex);
-                            JOptionPane.showMessageDialog(dialog, current.guiName() + ": " + ex.getMessage());
+                field.focusedProperty().addListener((observable, oldValue, newValue) -> {
+                    String input = field.getText().trim();
+                    try {
+                        if (!current.acceptsValue(input)) {
+                            Alert alert = new Alert(Alert.AlertType.ERROR, current.guiName() + " range: " + current.rangeToString(), ButtonType.OK);
+                            alert.showAndWait();
                             field.setText(getParameterInstance(current.cmdLineName()).value().toString());
                         }
+                        if (Integer.class.isAssignableFrom(current.valueType())) {
+                            Integer temp = convert(field.getText(), Integer.class);
+                            if (temp == null) {
+                                field.setText(null);
+                            } else {
+                                field.setText(NumberFormat.getInstance().format(temp.intValue()));
+                            }
+                        }
+                    } catch (Exception ex) {
+                        myLogger.debug(ex.getMessage(), ex);
+                        Alert alert = new Alert(Alert.AlertType.ERROR, current.guiName() + ": " + ex.getMessage(), ButtonType.OK);
+                        alert.showAndWait();
+                        field.setText(getParameterInstance(current.cmdLineName()).value().toString());
                     }
                 });
 
@@ -1086,71 +1084,74 @@ abstract public class AbstractPlugin implements Plugin {
                     label = current.guiName();
                 }
 
-                JPanel line = null;
+                HBox line;
                 if (current.parameterType() == PluginParameter.PARAMETER_TYPE.IN_FILE) {
-                    JButton browse = getOpenFile(dialog, field);
+                    Button browse = getOpenFile(dialog, field);
                     line = getLine(label, field, browse, getToolTip(current));
-                    createEnableDisableAction(current, parameterFields, new JComponent[]{field, browse}, field);
+                    createEnableDisableAction(current, parameterFields, new Node[]{field, browse}, field);
                 } else if (current.parameterType() == PluginParameter.PARAMETER_TYPE.OUT_FILE) {
-                    JButton browse = getSaveFile(dialog, field);
+                    Button browse = getSaveFile(dialog, field);
                     line = getLine(label, field, browse, getToolTip(current));
-                    createEnableDisableAction(current, parameterFields, new JComponent[]{field, browse}, field);
+                    createEnableDisableAction(current, parameterFields, new Node[]{field, browse}, field);
                 } else if (current.parameterType() == PluginParameter.PARAMETER_TYPE.IN_DIR) {
-                    JButton browse = getOpenDir(dialog, field);
+                    Button browse = getOpenDir(dialog, field);
                     line = getLine(label, field, browse, getToolTip(current));
-                    createEnableDisableAction(current, parameterFields, new JComponent[]{field, browse}, field);
+                    createEnableDisableAction(current, parameterFields, new Node[]{field, browse}, field);
                 } else if (current.parameterType() == PluginParameter.PARAMETER_TYPE.OUT_DIR) {
-                    JButton browse = getSaveDir(dialog, field);
+                    Button browse = getSaveDir(dialog, field);
                     line = getLine(label, field, browse, getToolTip(current));
-                    createEnableDisableAction(current, parameterFields, new JComponent[]{field, browse}, field);
+                    createEnableDisableAction(current, parameterFields, new Node[]{field, browse}, field);
                 } else {
                     line = getLine(label, field, null, getToolTip(current));
                     createEnableDisableAction(current, parameterFields, field);
                 }
-                panel.add(line);
+                panel.getChildren().add(line);
 
                 parameterFields.put(current.cmdLineName(), field);
             }
         }
 
-        JTabbedPane tabbedPane = new JTabbedPane();
-        tabbedPane.add(new JScrollPane(panel, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER), getButtonName());
+        TabPane tabbedPane = new TabPane();
+        ScrollPane scroll = new ScrollPane(panel);
+        scroll.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        tabbedPane.getTabs().add(new Tab(getButtonName(), scroll));
 
-        JPanel pnlButtons = new JPanel();
-        pnlButtons.setLayout(new FlowLayout());
-        pnlButtons.add(okButton);
-        pnlButtons.add(cancelButton);
-        pnlButtons.add(defaultsButton);
-        pnlButtons.add(userManualButton);
-        dialog.getContentPane().add(tabbedPane, BorderLayout.CENTER);
-        dialog.getContentPane().add(pnlButtons, BorderLayout.SOUTH);
+        FlowPane pnlButtons = new FlowPane(Orientation.HORIZONTAL);
+        pnlButtons.getChildren().add(okButton);
+        pnlButtons.getChildren().add(cancelButton);
+        pnlButtons.getChildren().add(defaultsButton);
+        pnlButtons.getChildren().add(userManualButton);
 
-        JTextPane helpText = new JTextPane();
-        helpText.setMargin(new Insets(10, 10, 10, 10));
+        BorderPane main = new BorderPane();
+        main.setCenter(tabbedPane);
+        main.setBottom(pnlButtons);
+        dialog.setScene(new Scene(main));
+
+        TextArea helpText = new TextArea();
+        helpText.setPadding(new Insets(10.0));
         helpText.setEditable(false);
-        helpText.setContentType("text/html");
-        tabbedPane.add(new JScrollPane(helpText), "Help");
-        dialog.pack();
+        //helpText.setContentType("text/html");
+        tabbedPane.getTabs().add(new Tab("Help", new ScrollPane(helpText)));
         if (show_citation) {
-            citationText.setText(getCitationHTML(dialog.getWidth() / 9));
-            dialog.setMinimumSize(null);
-            dialog.pack();
+            citationText.setText(getCitationHTML((int) (dialog.getWidth() / 9.0)));
+            //dialog.setMinimumSize(null);
         }
         helpText.setText(getUsageHTML());
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         if (screenSize.getHeight() - 125 < dialog.getHeight()) {
-            dialog.setSize(Math.max(dialog.getWidth(), 550), (int) screenSize.getHeight() - 125);
+            //dialog.setSize(Math.max(dialog.getWidth(), 550), (int) screenSize.getHeight() - 125);
         } else {
-            dialog.setSize(Math.max(dialog.getWidth(), 550), Math.max(dialog.getHeight(), 250));
+            //dialog.setSize(Math.max(dialog.getWidth(), 550), Math.max(dialog.getHeight(), 250));
         }
         dialog.setResizable(false);
         //dialog.setLocationRelativeTo(getParentFrame());
-        dialog.setVisible(true);
+        dialog.showAndWait();
         return parametersAreSet;
 
     }
 
-    private void setFieldsToDefault(Map<String, JComponent> parameterFields) {
+    private void setFieldsToDefault(Map<String, Node> parameterFields) {
 
         final List<PluginParameter<?>> parameterInstances = getParameterInstances();
         if (parameterInstances.isEmpty()) {
@@ -1158,27 +1159,27 @@ abstract public class AbstractPlugin implements Plugin {
         }
 
         for (final PluginParameter<?> current : parameterInstances) {
-            JComponent component = parameterFields.get(current.cmdLineName());
+            Node component = parameterFields.get(current.cmdLineName());
             setFieldToDefault(component, current);
         }
 
     }
 
-    private void setFieldToDefault(JComponent component, PluginParameter<?> current) {
-        if (component instanceof JTextField) {
+    private void setFieldToDefault(Node component, PluginParameter<?> current) {
+        if (component instanceof TextField) {
             Object defaultValue = current.defaultValue();
             if (defaultValue == null) {
-                ((JTextField) component).setText(null);
+                ((TextField) component).setText(null);
             } else {
-                ((JTextField) component).setText(defaultValue.toString());
+                ((TextField) component).setText(defaultValue.toString());
             }
             setParameter(current.cmdLineName(), defaultValue);
-        } else if (component instanceof JCheckBox) {
+        } else if (component instanceof CheckBox) {
             Boolean value = (Boolean) current.defaultValue();
-            ((JCheckBox) component).setSelected(value);
+            ((CheckBox) component).setSelected(value);
             setParameter(current.cmdLineName(), value);
-        } else if (component instanceof JComboBox) {
-            ((JComboBox) component).setSelectedItem(current.defaultValue());
+        } else if (component instanceof ComboBox) {
+            ((ComboBox) component).getSelectionModel().select(current.defaultValue());
             setParameter(current.cmdLineName(), current.defaultValue());
         }
     }
@@ -1311,65 +1312,62 @@ abstract public class AbstractPlugin implements Plugin {
         return builder.toString();
     }
 
-    private void createEnableDisableAction(PluginParameter<?> current, Map<String, JComponent> parameterFields, final JComponent component) {
-        createEnableDisableAction(current, parameterFields, new JComponent[]{component}, component);
+    private void createEnableDisableAction(PluginParameter<?> current, Map<String, Node> parameterFields, final Node component) {
+        createEnableDisableAction(current, parameterFields, new Node[]{component}, component);
     }
 
-    private void createEnableDisableAction(final PluginParameter<?> current, Map<String, JComponent> parameterFields, final JComponent[] components, final JComponent input) {
+    private void createEnableDisableAction(final PluginParameter<?> current, Map<String, Node> parameterFields, final Node[] components, final Node input) {
 
         if (current.dependentOnParameter() != null) {
-            JComponent depends = parameterFields.get(current.dependentOnParameter().cmdLineName());
-            if (depends instanceof JCheckBox) {
-                final JCheckBox checkBox = (JCheckBox) depends;
+            Node depends = parameterFields.get(current.dependentOnParameter().cmdLineName());
+            if (depends instanceof CheckBox) {
+                final CheckBox checkBox = (CheckBox) depends;
 
-                for (JComponent component : components) {
+                for (Node component : components) {
                     if (checkBox.isSelected() == (Boolean) current.dependentOnParameterValue()[0]) {
-                        component.setEnabled(true);
+                        component.setDisable(false);
                     } else {
-                        component.setEnabled(false);
+                        component.setDisable(true);
                     }
                 }
 
-                checkBox.addItemListener(new ItemListener() {
-
-                    @Override
-                    public void itemStateChanged(ItemEvent e) {
-                        for (JComponent component : components) {
-                            if (checkBox.isSelected() == (Boolean) current.dependentOnParameterValue()[0]) {
-                                component.setEnabled(true);
-                            } else {
-                                component.setEnabled(false);
-                            }
+                checkBox.setOnAction(event -> {
+                    for (Node component : components) {
+                        if (checkBox.isSelected() == (Boolean) current.dependentOnParameterValue()[0]) {
+                            component.setDisable(false);
+                        } else {
+                            component.setDisable(true);
                         }
                     }
                 });
 
-            } else if (depends instanceof JComboBox) {
-                final JComboBox comboBox = (JComboBox) depends;
+            } else if (depends instanceof ComboBox) {
+                final ComboBox comboBox = (ComboBox) depends;
 
-                for (JComponent component : components) {
+                for (Node component : components) {
                     Object[] values = current.dependentOnParameterValue();
-                    component.setEnabled(false);
+                    component.setDisable(true);
                     for (Object value : values) {
-                        if (comboBox.getSelectedItem() == value) {
-                            component.setEnabled(true);
+                        if (comboBox.getSelectionModel().getSelectedItem() == value) {
+                            component.setDisable(false);
                             break;
                         }
                     }
                 }
 
-                comboBox.addItemListener((ItemEvent e) -> {
-                    for (JComponent component : components) {
+                comboBox.setOnAction(event -> {
+                    for (Node component : components) {
                         Object[] values = current.dependentOnParameterValue();
-                        component.setEnabled(false);
+                        component.setDisable(true);
                         for (Object value : values) {
-                            if (comboBox.getSelectedItem() == value) {
-                                component.setEnabled(true);
+                            if (comboBox.getSelectionModel().getSelectedItem() == value) {
+                                component.setDisable(false);
                                 break;
                             }
                         }
                     }
                 });
+
             }
         }
 
@@ -1398,67 +1396,62 @@ abstract public class AbstractPlugin implements Plugin {
         return builder.toString();
     }
 
-    private JPanel getLine(String label, JTextField ref, JButton button, String description) {
+    private HBox getLine(String label, TextField ref, Button button, String description) {
 
-        JPanel result = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        result.setToolTipText(description);
+        HBox result = new HBox();
+        //result.setToolTipText(description);
 
-        result.add(new JLabel(label));
+        result.getChildren().add(new Label(label));
         ref.setEditable(true);
-        ref.setHorizontalAlignment(JTextField.LEFT);
-        ref.setAlignmentX(JTextField.CENTER_ALIGNMENT);
-        ref.setAlignmentY(JTextField.CENTER_ALIGNMENT);
-        ref.setMaximumSize(ref.getPreferredSize());
-        result.add(ref);
+        ref.setAlignment(Pos.CENTER_LEFT);
+        //ref.setMaximumSize(ref.getPreferredSize());
+        result.getChildren().add(ref);
         if (button != null) {
-            result.add(button);
+            result.getChildren().add(button);
         }
 
         return result;
 
     }
 
-    private JPanel getTaxaListPanel(String label, final JTextField ref, String description, final JDialog parent, final TaxaList taxa) {
+    private HBox getTaxaListPanel(String label, final TextField ref, String description, final Window parent, final TaxaList taxa) {
 
-        JPanel result = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        result.setToolTipText(description);
+        HBox result = new HBox();
+        //result.setToolTipText(description);
 
-        result.add(new JLabel(label));
+        result.getChildren().add(new Label(label));
         ref.setEditable(true);
-        ref.setHorizontalAlignment(JTextField.LEFT);
-        ref.setAlignmentX(JTextField.CENTER_ALIGNMENT);
-        ref.setAlignmentY(JTextField.CENTER_ALIGNMENT);
-        ref.setMaximumSize(ref.getPreferredSize());
-        result.add(ref);
+        ref.setAlignment(Pos.CENTER_LEFT);
+        result.getChildren().add(ref);
 
         if (taxa != null) {
-            final SelectFromAvailableDialog dialog = new SelectFromAvailableDialog(null, "Taxa Filter", new TaxaAvailableListModel(taxa));
-            JButton taxaButton = new JButton(new AbstractAction() {
-
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    dialog.setLocationRelativeTo(parent);
-                    dialog.setVisible(true);
-                    if (!dialog.isCanceled()) {
-                        int[] indicesToKeep = dialog.getDesiredIndices();
-                        StringBuilder builder = new StringBuilder();
-                        for (int i = 0; i < indicesToKeep.length; i++) {
-                            if (i != 0) {
-                                builder.append(",");
-                            }
-                            builder.append(taxa.taxaName(indicesToKeep[i]));
-                        }
-                        ref.setText(builder.toString());
-                    }
-                    dialog.setVisible(false);
-                }
-            });
-            taxaButton.setText("Select");
-            result.add(taxaButton);
+            //final SelectFromAvailableDialog dialog = new SelectFromAvailableDialog(null, "Taxa Filter", new TaxaAvailableListModel(taxa));
+//            Button taxaButton = new Button(new AbstractAction() {
+//
+//                @Override
+//                public void actionPerformed(ActionEvent e) {
+//                    dialog.setLocationRelativeTo(parent);
+//                    dialog.setVisible(true);
+//                    if (!dialog.isCanceled()) {
+//                        int[] indicesToKeep = dialog.getDesiredIndices();
+//                        StringBuilder builder = new StringBuilder();
+//                        for (int i = 0; i < indicesToKeep.length; i++) {
+//                            if (i != 0) {
+//                                builder.append(",");
+//                            }
+//                            builder.append(taxa.taxaName(indicesToKeep[i]));
+//                        }
+//                        ref.setText(builder.toString());
+//                    }
+//                    dialog.setVisible(false);
+//                }
+//            });
+            //taxaButton.setText("Select");
+            //result.getChildren().add(taxaButton);
         }
 
-        JButton browse = getOpenFile(parent, ref);
-        result.add(browse);
+        Button browse = getOpenFile(parent, ref);
+        result.getChildren().add(browse);
 
         return result;
 
@@ -1507,91 +1500,74 @@ abstract public class AbstractPlugin implements Plugin {
 
     }
 
-    private JButton getOpenFile(final JDialog parent, final JTextField textField) {
+    private Button getOpenFile(final Window parent, final TextField textField) {
 
-        final JFileChooser fileChooser = new JFileChooser(TasselPrefs.getOpenDir());
+        final FileChooser fileChooser = new FileChooser();
+        fileChooser.setInitialDirectory(new File(TasselPrefs.getOpenDir()));
 
-        JButton result = new JButton("Browse");
+        Button result = new Button("Browse");
 
-        result.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (fileChooser.showOpenDialog(parent) == JFileChooser.APPROVE_OPTION) {
-                    File file = fileChooser.getSelectedFile();
-                    textField.setText(file.getPath());
-                    TasselPrefs.putOpenDir(fileChooser.getCurrentDirectory().getPath());
-                }
+        result.setOnAction(event -> {
+            File file = fileChooser.showOpenDialog(parent);
+            if (file != null) {
+                textField.setText(file.getPath());
+                TasselPrefs.putOpenDir(Utils.getDirectory(file.getAbsolutePath()));
             }
+        });
 
+        return result;
+
+    }
+
+    private Button getSaveFile(final Window parent, final TextField textField) {
+
+        final FileChooser fileChooser = new FileChooser();
+        fileChooser.setInitialDirectory(new File(TasselPrefs.getSaveDir()));
+
+        Button result = new Button("Browse");
+
+        result.setOnAction(event -> {
+            File file = fileChooser.showSaveDialog(parent);
+            if (file != null) {
+                textField.setText(file.getPath());
+                TasselPrefs.putSaveDir(Utils.getDirectory(file.getAbsolutePath()));
+            }
         });
 
         return result;
     }
 
-    private JButton getSaveFile(final JDialog parent, final JTextField textField) {
+    private Button getOpenDir(final Window parent, final TextField textField) {
 
-        final JFileChooser fileChooser = new JFileChooser(TasselPrefs.getSaveDir());
+        final DirectoryChooser fileChooser = new DirectoryChooser();
+        fileChooser.setInitialDirectory(new File(Utils.getDirectory(TasselPrefs.getOpenDir())));
 
-        JButton result = new JButton("Browse");
+        Button result = new Button("Browse");
 
-        result.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (fileChooser.showSaveDialog(parent) == JFileChooser.APPROVE_OPTION) {
-                    File file = fileChooser.getSelectedFile();
-                    textField.setText(file.getPath());
-                    TasselPrefs.putSaveDir(fileChooser.getCurrentDirectory().getPath());
-                }
+        result.setOnAction(event -> {
+            File file = fileChooser.showDialog(parent);
+            if (file != null) {
+                textField.setText(file.getPath());
+                TasselPrefs.putOpenDir(file.getPath());
             }
-
         });
 
         return result;
     }
 
-    private JButton getOpenDir(final JDialog parent, final JTextField textField) {
+    private Button getSaveDir(final Window parent, final TextField textField) {
 
-        final JFileChooser fileChooser = new JFileChooser(Utils.getDirectory(TasselPrefs.getOpenDir()));
-        fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        final DirectoryChooser fileChooser = new DirectoryChooser();
+        fileChooser.setInitialDirectory(new File(Utils.getDirectory(TasselPrefs.getSaveDir())));
 
-        JButton result = new JButton("Browse");
+        Button result = new Button("Browse");
 
-        result.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (fileChooser.showOpenDialog(parent) == JFileChooser.APPROVE_OPTION) {
-                    File file = fileChooser.getSelectedFile();
-                    textField.setText(file.getPath());
-                    TasselPrefs.putOpenDir(file.getPath());
-                }
+        result.setOnAction(event -> {
+            File file = fileChooser.showDialog(parent);
+            if (file != null) {
+                textField.setText(file.getPath());
+                TasselPrefs.putSaveDir(file.getPath());
             }
-
-        });
-
-        return result;
-    }
-
-    private JButton getSaveDir(final JDialog parent, final JTextField textField) {
-
-        final JFileChooser fileChooser = new JFileChooser(Utils.getDirectory(TasselPrefs.getSaveDir()));
-        fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-
-        JButton result = new JButton("Browse");
-
-        result.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (fileChooser.showOpenDialog(parent) == JFileChooser.APPROVE_OPTION) {
-                    File file = fileChooser.getSelectedFile();
-                    textField.setText(file.getPath());
-                    TasselPrefs.putSaveDir(file.getPath());
-                }
-            }
-
         });
 
         return result;

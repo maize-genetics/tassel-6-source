@@ -6,11 +6,13 @@ import javafx.event.ActionEvent
 import javafx.event.EventHandler
 import javafx.scene.Scene
 import javafx.scene.control.*
+import javafx.scene.image.Image
 import javafx.scene.layout.BorderPane
 import javafx.scene.layout.HBox
 import javafx.scene.layout.VBox
 import javafx.stage.Stage
 import javafx.stage.WindowEvent
+import net.maizegenetics.analysis.data.GenotypeSummaryPlugin
 
 /**
  * @author Terry Casstevens
@@ -26,6 +28,7 @@ class TASSELGUI : Application() {
 
         val menuBar = MenuBar()
         menuBar.menus += fileMenu()
+        menuBar.menus += dataMenu()
 
         val dataTree = TreeView<Any>()
 
@@ -58,6 +61,19 @@ class TASSELGUI : Application() {
 
         return result
 
+    }
+
+    private fun dataMenu(): Menu {
+
+        val result = Menu("Data")
+
+        val plugin = GenotypeSummaryPlugin(true)
+        val temp = MenuItem(plugin.buttonName)
+        temp.onAction = EventHandler { plugin.performFunction(null) }
+
+        result.items += temp
+
+        return result
     }
 
     override fun stop() {

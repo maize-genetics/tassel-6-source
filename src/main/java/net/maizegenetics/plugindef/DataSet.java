@@ -4,6 +4,8 @@
  */
 package net.maizegenetics.plugindef;
 
+import net.maizegenetics.util.Tuple;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -140,14 +142,15 @@ public class DataSet {
         return myCreator;
     }
 
-    public <T> T data(Class<T> theClass) {
+    public <T> Tuple<String, T> data(Class<T> theClass) {
         List<Datum> temp = getDataOfType(theClass);
         if (temp == null || temp.isEmpty()) {
             throw new IllegalStateException("DataSet: data: no data of type: " + theClass.getName());
         } else if (temp.size() > 1) {
             throw new IllegalStateException("DataSet: data: multiple data of type: " + theClass.getName());
         }
-        return (T) temp.get(0).getData();
+        Datum result = temp.get(0);
+        return new Tuple(result.getName(), (T) result.getData());
     }
 
     public List<Datum> getDataOfType(Class theClass) {
