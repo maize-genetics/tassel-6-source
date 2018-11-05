@@ -12,26 +12,28 @@ import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.web.WebEngine;
+import javafx.scene.web.WebView;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import javafx.stage.Window;
 import net.maizegenetics.dna.map.PositionList;
 import net.maizegenetics.dna.snp.GenotypeTable;
 import net.maizegenetics.dna.snp.io.JSONUtils;
+import net.maizegenetics.gui.AlertUtils;
 import net.maizegenetics.gui.DialogUtils;
-import net.maizegenetics.gui.SelectFromAvailableDialog;
-import net.maizegenetics.gui.SiteNamesAvailableListModel;
 import net.maizegenetics.phenotype.GenotypePhenotype;
 import net.maizegenetics.prefs.TasselPrefs;
 import net.maizegenetics.taxa.TaxaList;
@@ -42,14 +44,10 @@ import net.maizegenetics.util.ExceptionUtils;
 import net.maizegenetics.util.Utils;
 import org.apache.log4j.Logger;
 
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.ActionEvent;
 import java.io.BufferedReader;
 import java.io.File;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
-import java.net.URI;
 import java.text.NumberFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -132,7 +130,7 @@ abstract public class AbstractPlugin implements Plugin {
 
             if (isInteractive()) {
                 myLogger.debug(e.getMessage(), e);
-                DialogUtils.showError(e.getMessage() + "\n", null);
+                AlertUtils.showError(e.getMessage() + "\n");
             } else {
                 myLogger.debug(e.getMessage(), e);
                 printUsage();
@@ -821,22 +819,23 @@ abstract public class AbstractPlugin implements Plugin {
         Button userManualButton = new Button("User Manual");
         userManualButton.setOnAction(event -> {
             try {
-                Desktop desktop = Desktop.getDesktop();
-                URI uri = new URI(pluginUserManualURL());
-                desktop.browse(uri);
+                initUserManualWindow();
+                webEngine.load(pluginUserManualURL());
+                userManual.show();
             } catch (Exception ex) {
                 myLogger.debug(ex.getMessage(), ex);
             }
         });
 
-        VBox panel = new VBox();
-        panel.setPadding(new javafx.geometry.Insets(10.0));
+        VBox panel = new VBox(15.0);
+        panel.setPadding(new Insets(20.0));
+        panel.setAlignment(Pos.CENTER);
 
         boolean show_citation = !DEFAULT_CITATION.equals(getCitation());
         TextArea citationText = null;
         if (show_citation) {
             citationText = new TextArea();
-            citationText.setPadding(new javafx.geometry.Insets(5.0));
+            citationText.setPadding(new Insets(5.0));
             //citationText.setContentType("text/html");
             citationText.setEditable(false);
             ScrollPane scroll = new ScrollPane(citationText);
@@ -931,15 +930,17 @@ abstract public class AbstractPlugin implements Plugin {
                     parameterFields.put(current.cmdLineName(), field);
                 }
             } else if (current.parameterType() == PluginParameter.PARAMETER_TYPE.OBJECT_LIST_SINGLE_SELECT) {
-                FlowPane listPanel = new FlowPane(Orientation.HORIZONTAL);
-                listPanel.getChildren().add(new Label(current.guiName()));
+                GridPane temp = new GridPane();
+                temp.setAlignment(Pos.CENTER);
+                temp.setHgap(20.0);
+                temp.add(new Label(current.guiName()), 0, 0);
                 ComboBox list = new ComboBox();
                 list.getItems().addAll(current.possibleValues().toArray());
                 list.getSelectionModel().select(0);
                 createEnableDisableAction(current, parameterFields, list);
-                listPanel.getChildren().add(list);
+                temp.add(list, 1, 0);
                 //listPanel.setToolTipText(getToolTip(current));
-                panel.getChildren().add(listPanel);
+                panel.getChildren().add(temp);
                 parameterFields.put(current.cmdLineName(), list);
             } else if (current.valueType().isEnum()) {
                 ComboBox menu = new ComboBox();
@@ -949,24 +950,23 @@ abstract public class AbstractPlugin implements Plugin {
                 }
                 menu.getSelectionModel().select(current.value());
                 createEnableDisableAction(current, parameterFields, menu);
-                FlowPane temp = new FlowPane(Orientation.HORIZONTAL);
-                temp.getChildren().add(new Label(current.guiName()));
-                temp.getChildren().add(menu);
+                GridPane temp = new GridPane();
+                temp.setAlignment(Pos.CENTER);
+                temp.setHgap(20.0);
+                //HBox.setHgrow(temp, Priority.ALWAYS);
+                temp.add(new Label(current.guiName()), 0, 0);
+                temp.add(menu, 1, 0);
+                //temp.getChildren().add(new Label(current.guiName()));
+                //temp.getChildren().add(menu);
                 //temp.setToolTipText(getToolTip(current));
                 panel.getChildren().add(temp);
                 parameterFields.put(current.cmdLineName(), menu);
             } else if (Boolean.class.isAssignableFrom(current.valueType())) {
                 CheckBox check = new CheckBox(current.guiName());
                 check.setTooltip(new Tooltip(getToolTip(current)));
-                if (current.value() == Boolean.TRUE) {
-                    check.setSelected(true);
-                } else {
-                    check.setSelected(false);
-                }
+                check.setSelected((Boolean) current.value());
                 createEnableDisableAction(current, parameterFields, check);
-                FlowPane temp = new FlowPane(Orientation.HORIZONTAL);
-                temp.getChildren().add(check);
-                panel.getChildren().add(temp);
+                panel.getChildren().add(check);
                 parameterFields.put(current.cmdLineName(), check);
             } else if (TaxaList.class.isAssignableFrom(current.valueType())) {
 
@@ -1016,7 +1016,7 @@ abstract public class AbstractPlugin implements Plugin {
                 }
                 HBox positionsPanel = new HBox();
                 //JPanel positionsPanel = getPositionListPanel(current.guiName(), field, current.description(), dialog, positions);
-                List<JComponent> componentList = new ArrayList<>();
+                List<Node> componentList = new ArrayList<>();
                 //for (Component component : positionsPanel.getComponents()) {
                 //    if (component instanceof JComponent) {
                 //        componentList.add((JComponent) component);
@@ -1113,41 +1113,89 @@ abstract public class AbstractPlugin implements Plugin {
 
         TabPane tabbedPane = new TabPane();
         ScrollPane scroll = new ScrollPane(panel);
+        scroll.setMinSize(500.0, 200.0);
+        scroll.setFitToWidth(true);
+        scroll.setFitToHeight(true);
         scroll.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
         scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         tabbedPane.getTabs().add(new Tab(getButtonName(), scroll));
 
         FlowPane pnlButtons = new FlowPane(Orientation.HORIZONTAL);
+        pnlButtons.setAlignment(Pos.CENTER);
+        pnlButtons.setHgap(15.0);
+        pnlButtons.setVgap(15.0);
         pnlButtons.getChildren().add(okButton);
         pnlButtons.getChildren().add(cancelButton);
         pnlButtons.getChildren().add(defaultsButton);
         pnlButtons.getChildren().add(userManualButton);
 
         BorderPane main = new BorderPane();
+        main.setPadding(new Insets(15.0));
         main.setCenter(tabbedPane);
         main.setBottom(pnlButtons);
-        dialog.setScene(new Scene(main));
+        BorderPane.setMargin(pnlButtons, new Insets(20.0, 0.0, 10.0, 0.0));
 
-        TextArea helpText = new TextArea();
-        helpText.setPadding(new Insets(10.0));
-        helpText.setEditable(false);
-        //helpText.setContentType("text/html");
-        tabbedPane.getTabs().add(new Tab("Help", new ScrollPane(helpText)));
+        WebView browser = new WebView();
+        browser.prefHeightProperty().bind(dialog.heightProperty());
+        browser.prefWidthProperty().bind(dialog.widthProperty());
+        WebEngine webEngine = browser.getEngine();
+        webEngine.loadContent(getUsageHTML());
+        tabbedPane.getTabs().add(new Tab("Help", browser));
         if (show_citation) {
             citationText.setText(getCitationHTML((int) (dialog.getWidth() / 9.0)));
             //dialog.setMinimumSize(null);
         }
-        helpText.setText(getUsageHTML());
-        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-        if (screenSize.getHeight() - 125 < dialog.getHeight()) {
-            //dialog.setSize(Math.max(dialog.getWidth(), 550), (int) screenSize.getHeight() - 125);
-        } else {
-            //dialog.setSize(Math.max(dialog.getWidth(), 550), Math.max(dialog.getHeight(), 250));
-        }
+        //Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        //if (screenSize.getHeight() - 125 < dialog.getHeight()) {
+        //dialog.setSize(Math.max(dialog.getWidth(), 550), (int) screenSize.getHeight() - 125);
+        //} else {
+        //dialog.setSize(Math.max(dialog.getWidth(), 550), Math.max(dialog.getHeight(), 250));
+        //}
+
         dialog.setResizable(false);
-        //dialog.setLocationRelativeTo(getParentFrame());
+
+        Scene scene = new Scene(main);
+        scene.getStylesheets().add("/javafx/AppStyle.css");
+        dialog.setScene(scene);
+
+        dialog.sizeToScene();
+
         dialog.showAndWait();
         return parametersAreSet;
+
+    }
+
+    private static Stage userManual;
+    private static WebEngine webEngine;
+
+    private static void initUserManualWindow() {
+
+        if (userManual != null) {
+            return;
+        }
+
+        userManual = new Stage(StageStyle.DECORATED);
+        userManual.initModality(Modality.NONE);
+        userManual.setTitle("User Manual");
+        userManual.setResizable(false);
+
+        WebView browser = new WebView();
+        browser.setPrefWidth(Double.MAX_VALUE);
+        VBox.setVgrow(browser, Priority.ALWAYS);
+        HBox.setHgrow(browser, Priority.ALWAYS);
+        webEngine = browser.getEngine();
+
+        Button close = new Button("Close");
+        close.setOnAction(event1 -> userManual.close());
+
+        VBox main = new VBox();
+        main.setAlignment(Pos.CENTER);
+        main.setPadding(new Insets(10.0));
+        main.setSpacing(10.0);
+        main.getChildren().add(browser);
+        main.getChildren().add(close);
+
+        userManual.setScene(new Scene(main, 750, 1000));
 
     }
 
@@ -1399,13 +1447,18 @@ abstract public class AbstractPlugin implements Plugin {
     private HBox getLine(String label, TextField ref, Button button, String description) {
 
         HBox result = new HBox();
-        //result.setToolTipText(description);
+        result.setAlignment(Pos.CENTER);
+        result.setPadding(new Insets(10.0));
+        result.setSpacing(15.0);
 
-        result.getChildren().add(new Label(label));
+        Label labelObj = new Label(label);
+        labelObj.setTooltip(new Tooltip(description));
+        result.getChildren().add(labelObj);
+
         ref.setEditable(true);
-        ref.setAlignment(Pos.CENTER_LEFT);
         //ref.setMaximumSize(ref.getPreferredSize());
         result.getChildren().add(ref);
+
         if (button != null) {
             result.getChildren().add(button);
         }
@@ -1457,48 +1510,48 @@ abstract public class AbstractPlugin implements Plugin {
 
     }
 
-    private JPanel getPositionListPanel(String label, final JTextField ref, String description, final JDialog parent, final PositionList positions) {
-
-        JPanel result = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        result.setToolTipText(description);
-
-        result.add(new JLabel(label));
-        ref.setEditable(true);
-        ref.setHorizontalAlignment(JTextField.LEFT);
-        ref.setAlignmentX(JTextField.CENTER_ALIGNMENT);
-        ref.setAlignmentY(JTextField.CENTER_ALIGNMENT);
-        ref.setMaximumSize(ref.getPreferredSize());
-        result.add(ref);
-
-        if (positions != null) {
-            final SelectFromAvailableDialog dialog = new SelectFromAvailableDialog(null, "Site Name Filter", new SiteNamesAvailableListModel(positions));
-            JButton siteNamesButton = new JButton(new AbstractAction() {
-
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    dialog.setLocationRelativeTo(parent);
-                    dialog.setVisible(true);
-                    if (!dialog.isCanceled()) {
-                        int[] indicesToKeep = dialog.getDesiredIndices();
-                        StringBuilder builder = new StringBuilder();
-                        for (int i = 0; i < indicesToKeep.length; i++) {
-                            if (i != 0) {
-                                builder.append(",");
-                            }
-                            builder.append(positions.siteName(indicesToKeep[i]));
-                        }
-                        ref.setText(builder.toString());
-                    }
-                    dialog.setVisible(false);
-                }
-            });
-            siteNamesButton.setText("Select");
-            result.add(siteNamesButton);
-        }
-
-        return result;
-
-    }
+//    private JPanel getPositionListPanel(String label, final JTextField ref, String description, final JDialog parent, final PositionList positions) {
+//
+//        JPanel result = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+//        result.setToolTipText(description);
+//
+//        result.add(new JLabel(label));
+//        ref.setEditable(true);
+//        ref.setHorizontalAlignment(JTextField.LEFT);
+//        ref.setAlignmentX(JTextField.CENTER_ALIGNMENT);
+//        ref.setAlignmentY(JTextField.CENTER_ALIGNMENT);
+//        ref.setMaximumSize(ref.getPreferredSize());
+//        result.add(ref);
+//
+//        if (positions != null) {
+//            final SelectFromAvailableDialog dialog = new SelectFromAvailableDialog(null, "Site Name Filter", new SiteNamesAvailableListModel(positions));
+//            JButton siteNamesButton = new JButton(new AbstractAction() {
+//
+//                @Override
+//                public void actionPerformed(ActionEvent e) {
+//                    dialog.setLocationRelativeTo(parent);
+//                    dialog.setVisible(true);
+//                    if (!dialog.isCanceled()) {
+//                        int[] indicesToKeep = dialog.getDesiredIndices();
+//                        StringBuilder builder = new StringBuilder();
+//                        for (int i = 0; i < indicesToKeep.length; i++) {
+//                            if (i != 0) {
+//                                builder.append(",");
+//                            }
+//                            builder.append(positions.siteName(indicesToKeep[i]));
+//                        }
+//                        ref.setText(builder.toString());
+//                    }
+//                    dialog.setVisible(false);
+//                }
+//            });
+//            siteNamesButton.setText("Select");
+//            result.add(siteNamesButton);
+//        }
+//
+//        return result;
+//
+//    }
 
     private Button getOpenFile(final Window parent, final TextField textField) {
 

@@ -58,7 +58,7 @@ public class TASSELMainApp {
             builder.append("Use -Xmx option in start_tassel.pl or start_tassel.bat\n");
             builder.append("to increase heap size.");
             builder.append(" Included with tassel standalone zip.");
-            //myLogger.error(builder.toString());
+            myLogger.error(builder.toString());
         } catch (Exception e) {
             e.printStackTrace();
         }

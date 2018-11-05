@@ -5,6 +5,7 @@
 package net.maizegenetics.plugindef;
 
 import net.maizegenetics.util.Tuple;
+import net.maizegenetics.util.Utils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -142,12 +143,15 @@ public class DataSet {
         return myCreator;
     }
 
-    public <T> Tuple<String, T> data(Class<T> theClass) {
-        List<Datum> temp = getDataOfType(theClass);
+    public static <T> Tuple<String, T> data(DataSet input, Class<T> theClass) {
+        if (input == null) {
+            throw new IllegalArgumentException("Please select data of type: " + Utils.getBasename(theClass.getName()));
+        }
+        List<Datum> temp = input.getDataOfType(theClass);
         if (temp == null || temp.isEmpty()) {
-            throw new IllegalStateException("DataSet: data: no data of type: " + theClass.getName());
+            throw new IllegalArgumentException("Please select data of type: " + Utils.getBasename(theClass.getName()));
         } else if (temp.size() > 1) {
-            throw new IllegalStateException("DataSet: data: multiple data of type: " + theClass.getName());
+            throw new IllegalArgumentException("Please select one data of type: " + Utils.getBasename(theClass.getName()));
         }
         Datum result = temp.get(0);
         return new Tuple(result.getName(), (T) result.getData());
