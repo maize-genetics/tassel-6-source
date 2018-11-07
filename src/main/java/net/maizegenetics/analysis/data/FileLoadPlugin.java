@@ -19,7 +19,7 @@ import net.maizegenetics.dna.snp.io.JSONUtils;
 import net.maizegenetics.dna.snp.io.LineIndexBuilder;
 import net.maizegenetics.dna.snp.io.ReadNumericMarkerUtils;
 import net.maizegenetics.gui.AlertUtils;
-import net.maizegenetics.tassel.TASSELGUI;
+import net.maizegenetics.gui.FileChooserUtils;
 import net.maizegenetics.phenotype.Phenotype;
 import net.maizegenetics.phenotype.PhenotypeBuilder;
 import net.maizegenetics.plugindef.AbstractPlugin;
@@ -29,6 +29,7 @@ import net.maizegenetics.plugindef.PluginEvent;
 import net.maizegenetics.plugindef.PluginListener;
 import net.maizegenetics.plugindef.PluginParameter;
 import net.maizegenetics.prefs.TasselPrefs;
+import net.maizegenetics.tassel.TASSELGUI;
 import net.maizegenetics.taxa.distance.DistanceMatrixBuilder;
 import net.maizegenetics.taxa.distance.DistanceMatrixUtils;
 import net.maizegenetics.taxa.distance.ReadDistanceMatrix;
@@ -609,9 +610,9 @@ public class FileLoadPlugin extends AbstractPlugin {
      * Provides a open file chooser that remember the last location something was opened from
      */
     private File[] getOpenFilesByChooser() {
-        List<File> files = myOpenFileChooser.showOpenMultipleDialog(TASSELGUI.instance.getPrimaryStage());
-        if (files == null) return null;
-        return files.toArray(new File[files.size()]);
+        List<File> temp = FileChooserUtils.multipleFiles();
+        if (temp == null) return null;
+        return temp.toArray(new File[temp.size()]);
     }
 
     public String[] getOpenFiles() {

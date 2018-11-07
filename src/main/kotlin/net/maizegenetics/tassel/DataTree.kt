@@ -2,6 +2,9 @@ package net.maizegenetics.tassel
 
 import javafx.scene.control.TreeItem
 import javafx.scene.control.TreeView
+import javafx.scene.layout.HBox
+import javafx.scene.layout.Priority
+import javafx.scene.layout.VBox
 import net.maizegenetics.analysis.data.GenotypeSummaryPlugin
 import net.maizegenetics.dna.map.PositionList
 import net.maizegenetics.dna.map.TOPMInterface
@@ -12,6 +15,7 @@ import net.maizegenetics.plugindef.DataSet
 import net.maizegenetics.plugindef.Datum
 import net.maizegenetics.plugindef.PluginEvent
 import net.maizegenetics.plugindef.PluginListener
+import net.maizegenetics.prefs.TasselPrefs
 import net.maizegenetics.taxa.IdentifierSynonymizer
 import net.maizegenetics.taxa.TaxaList
 import net.maizegenetics.taxa.distance.DistanceMatrix
@@ -59,8 +63,15 @@ class DataTree : PluginListener {
     private val treeItems = HashMap<Any, TreeItem<Any>>()
 
     init {
+
         dataTree.isShowRoot = false
         treeRoot.isExpanded = true
+
+        dataTree.selectionModel.selectedItemProperty().addListener { observable, oldValue, newValue ->
+            val value = newValue.value
+            if (value is Datum) TASSELGUI.instance.changeViewer(value)
+        }
+
     }
 
     fun add(data: DataSet) {

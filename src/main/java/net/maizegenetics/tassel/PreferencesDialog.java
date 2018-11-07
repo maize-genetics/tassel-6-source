@@ -1,5 +1,6 @@
 package net.maizegenetics.tassel;
 
+import net.maizegenetics.gui.TasselLogging;
 import net.maizegenetics.plugindef.AbstractPlugin;
 import net.maizegenetics.plugindef.DataSet;
 import net.maizegenetics.plugindef.ParameterCache;
@@ -44,7 +45,7 @@ public class PreferencesDialog extends AbstractPlugin {
         TasselPrefs.putAlignmentRetainRareAlleles(retainRareAlleles());
 
         TasselPrefs.putLogSendToConsole(sendLogToConsole());
-        TasselLogging.updateLoggingLocation();
+        TasselLogging.Companion.updateLoggingLocation();
 
         TasselPrefs.putConfigFile(configFile());
         ParameterCache.load(TasselPrefs.getConfigFile());

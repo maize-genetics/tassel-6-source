@@ -1,13 +1,8 @@
 
 .tab-pane *.tab-header-background {
-    -fx-background-color: #F4F4F4
-}
-
-#font-button {
-    -fx-text-fill: rgb(49, 89, 23);
-    -fx-border-color: rgb(49, 89, 23);
-    -fx-border-radius: 5;
-    -fx-padding: 6 6 6 6;
+    -fx-background-color: #F4F4F4;
+    -fx-padding: 0.416667em 0.166667em 0.0em 0.0em;
+    -fx-border-width: 3
 }
 
 .button {

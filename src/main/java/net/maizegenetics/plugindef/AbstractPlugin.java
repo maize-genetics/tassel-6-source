@@ -6,21 +6,20 @@
  */
 package net.maizegenetics.plugindef;
 
+import javafx.application.Platform;
+import javafx.concurrent.Task;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import javafx.stage.DirectoryChooser;
@@ -109,7 +108,14 @@ abstract public class AbstractPlugin implements Plugin {
             preProcessParameters(input);
 
             if (isInteractive()) {
-                if (!setParametersViaGUI()) {
+                Task<Boolean> task = new Task<Boolean>() {
+                    @Override
+                    protected Boolean call() {
+                        return setParametersViaGUI();
+                    }
+                };
+                Platform.runLater(task);
+                if (!task.get()) {
                     return null;
                 }
             }
@@ -1927,11 +1933,8 @@ abstract public class AbstractPlugin implements Plugin {
      */
     @Override
     public void dataSetReturned(PluginEvent event) {
-
         DataSet input = (DataSet) event.getSource();
-
         performFunction(input);
-
     }
 
     /**
