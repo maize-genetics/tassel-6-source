@@ -17,15 +17,15 @@ enum class Factor {
     Dosage
 }
 
-class GenomicFactor(val factor: Factor, val chromosome: Chromosome, val startPos: Int, val endPos: Int = startPos) : Comparable<GenomicFactor> {
+class GenomicFactor(val factor: Factor, val startChr: Chromosome, val startPos: Int, val endChr: Chromosome = startChr, val endPos: Int = startPos) : Comparable<GenomicFactor> {
 
     override fun compareTo(other: GenomicFactor): Int {
-        val result = chromosome.compareTo(other.chromosome)
+        val result = startChr.compareTo(other.startChr)
         if (result != 0) return result
         return startPos.compareTo(other.startPos)
     }
 
-    val range: Range<ChrPos> by lazy { Range.closed(ChrPos(chromosome, startPos), ChrPos(chromosome, endPos)) }
+    val range: Range<ChrPos> by lazy { Range.closed(ChrPos(startChr, startPos), ChrPos(endChr, endPos)) }
 
 }
 
