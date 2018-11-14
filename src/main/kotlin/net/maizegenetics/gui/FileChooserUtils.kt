@@ -14,8 +14,8 @@ import java.io.File
  * Created November 05, 2018
  */
 
-private val open by lazy {
-    FileChooser().also { it.initialDirectory = File(TasselPrefs.getOpenDir()) }
+private val open = FileChooser().also {
+    it.initialDirectory = File(TasselPrefs.getOpenDir())
 }
 
 fun singeFile(): File? {

@@ -10,6 +10,7 @@ import javafx.scene.control.*
 import javafx.scene.image.ImageView
 import javafx.scene.input.KeyCombination
 import javafx.scene.layout.*
+import javafx.scene.paint.Paint
 import javafx.stage.Stage
 import javafx.stage.WindowEvent
 import net.maizegenetics.analysis.data.FileLoadPlugin
@@ -31,6 +32,11 @@ import java.util.*
  */
 
 private val myLogger = Logger.getLogger(TASSELGUI::class.java)
+
+private val EMPTY_NODE = StackPane().also {
+    it.background = Background(BackgroundFill(Paint.valueOf("grey"), null, null))
+    it.children += ImageView("/images/Tassel_Logo.png")
+}
 
 class TASSELGUI : Application() {
 
@@ -70,6 +76,8 @@ class TASSELGUI : Application() {
         myMainPane.top = HBox(leftMenuBar(), spacer, rightMenuBar())
         updatePluginsWithGlobalConfigParameters()
 
+        myMainPane.center = EMPTY_NODE
+
         myMainPane.left = left
         myMainPane.bottom = myProgressViewer.view
 
@@ -107,6 +115,10 @@ class TASSELGUI : Application() {
         })
 
         result.items += createMenuItem(FileLoadPlugin(true))
+
+        result.items += MenuItem("Delete", ImageView("/images/trash.gif")).also {
+            it.onAction = EventHandler { myDataTree.deleteSelectedNodes() }
+        }
 
         result.items += createMenuItem(PreferencesDialog(true))
 
@@ -175,6 +187,7 @@ class TASSELGUI : Application() {
         val data = datum.data
         when (data) {
             is TableReport -> myMainPane.center = TableReportViewer(data).view
+            else -> myMainPane.center = EMPTY_NODE
         }
     }
 

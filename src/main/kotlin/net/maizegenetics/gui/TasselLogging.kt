@@ -58,6 +58,7 @@ class TasselLogging private constructor() : AbstractPlugin() {
     override fun performFunction(input: DataSet?): DataSet? {
         LoggingUtils.setupLogging(printStream)
         Platform.runLater { dialog.show() }
+        fireProgress(100)
         return null
     }
 
@@ -149,7 +150,7 @@ class TasselLogging private constructor() : AbstractPlugin() {
     }
 
     override fun icon(): String {
-        return "/net/maizegenetics/analysis/images/log.gif"
+        return "/images/log.gif"
     }
 
     override fun getButtonName(): String {

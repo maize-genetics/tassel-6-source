@@ -19,6 +19,7 @@ import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
@@ -47,6 +48,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
+import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -56,6 +58,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Pattern;
@@ -239,10 +242,12 @@ abstract public class AbstractPlugin implements Plugin {
             } else if (outputClass.isAssignableFrom(String.class)) {
                 return (T) input;
             } else if (outputClass.isAssignableFrom(Integer.class)) {
-                input = input.replace(",", "");
+                char groupingSeparator = DecimalFormatSymbols.getInstance(Locale.getDefault()).getGroupingSeparator();
+                input = input.replace(String.valueOf(groupingSeparator), "");
                 return (T) new Integer(new BigDecimal(input).intValueExact());
             } else if (outputClass.isAssignableFrom(Double.class)) {
-                input = input.replace(",", "");
+                char groupingSeparator = DecimalFormatSymbols.getInstance(Locale.getDefault()).getGroupingSeparator();
+                input = input.replace(String.valueOf(groupingSeparator), "");
                 return (T) new Double(new BigDecimal(input).doubleValue());
             } else if (outputClass.isAssignableFrom(List.class)) {
                 return (T) getListFromString(input);
@@ -722,6 +727,7 @@ abstract public class AbstractPlugin implements Plugin {
         }
 
         final Stage dialog = new Stage();
+        dialog.setTitle(getToolTipText());
         dialog.initModality(Modality.APPLICATION_MODAL);
         dialog.setOnCloseRequest(event -> {
             parametersAreSet = false;
@@ -834,8 +840,11 @@ abstract public class AbstractPlugin implements Plugin {
         });
 
         VBox panel = new VBox(15.0);
-        panel.setPadding(new Insets(20.0));
+        panel.setPadding(new Insets(10.0));
         panel.setAlignment(Pos.CENTER);
+        panel.setStyle("-fx-border-color: #ab4642;\n" +
+                "-fx-border-radius: 10;\n" +
+                "-fx-border-width: 3;");
 
         boolean show_citation = !DEFAULT_CITATION.equals(getCitation());
         TextArea citationText = null;
@@ -1118,8 +1127,9 @@ abstract public class AbstractPlugin implements Plugin {
         }
 
         TabPane tabbedPane = new TabPane();
+        tabbedPane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
+        tabbedPane.setPadding(new Insets(10.0));
         ScrollPane scroll = new ScrollPane(panel);
-        scroll.setMinSize(500.0, 200.0);
         scroll.setFitToWidth(true);
         scroll.setFitToHeight(true);
         scroll.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
@@ -1139,6 +1149,8 @@ abstract public class AbstractPlugin implements Plugin {
         main.setPadding(new Insets(15.0));
         main.setCenter(tabbedPane);
         main.setBottom(pnlButtons);
+        main.setStyle("-fx-border-color: lightgrey;\n" +
+                "-fx-border-width: 5;");
         BorderPane.setMargin(pnlButtons, new Insets(20.0, 0.0, 10.0, 0.0));
 
         WebView browser = new WebView();
@@ -1146,7 +1158,12 @@ abstract public class AbstractPlugin implements Plugin {
         browser.prefWidthProperty().bind(dialog.widthProperty());
         WebEngine webEngine = browser.getEngine();
         webEngine.loadContent(getUsageHTML());
-        tabbedPane.getTabs().add(new Tab("Help", browser));
+        StackPane stack = new StackPane(browser);
+        stack.setPadding(new Insets(10.0));
+        stack.setStyle("-fx-border-color: #ab4642;\n" +
+                "-fx-border-radius: 10;\n" +
+                "-fx-border-width: 3;");
+        tabbedPane.getTabs().add(new Tab("Help", stack));
         if (show_citation) {
             citationText.setText(getCitationHTML((int) (dialog.getWidth() / 9.0)));
             //dialog.setMinimumSize(null);
@@ -1276,7 +1293,7 @@ abstract public class AbstractPlugin implements Plugin {
     public String getUsageHTML() {
 
         StringBuilder builder = new StringBuilder();
-        builder.append("<html><center><strong>");
+        builder.append("<html><body style=\"background-color:#F4F4F4;\"><center><strong>");
         builder.append(Utils.getBasename(getClass().getName()));
         builder.append("</strong>");
         String description = pluginDescription();
@@ -1295,7 +1312,7 @@ abstract public class AbstractPlugin implements Plugin {
 
             builder.append("<th>");
             if (current.required()) {
-                builder.append("<font color='red'>");
+                builder.append("<font color='#ab4642'>");
             }
             builder.append(current.guiName());
             if (current.required()) {
@@ -1359,9 +1376,9 @@ abstract public class AbstractPlugin implements Plugin {
 
         builder.append("</center>");
 
-        builder.append("<br><font color='red'>* parameters in red are required</font>");
+        builder.append("<br><font color='#ab4642'>* parameters in red are required</font>");
 
-        builder.append("</html>");
+        builder.append("</body></html>");
 
         return builder.toString();
     }

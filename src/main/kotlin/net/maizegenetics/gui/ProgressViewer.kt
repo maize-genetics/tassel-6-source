@@ -38,16 +38,21 @@ class ProgressViewer : PluginListener {
     }
 
     override fun dataSetReturned(event: PluginEvent?) {
-        Platform.runLater {
-            view.children.clear()
-            view.children += Label("${plugin.buttonName} Finished")
-        }
+        finished()
     }
 
     override fun progress(event: PluginEvent?) {
         val dataSet = event?.getSource() as DataSet
         val value = DataSet.data(dataSet, Int::class.javaObjectType).y
         progress.progress = value.toDouble() / 100.0
+        if (progress.progress >= 1.0) finished()
+    }
+
+    private fun finished() {
+        Platform.runLater {
+            view.children.clear()
+            view.children += Label("${plugin.buttonName} Finished")
+        }
     }
 
 }
