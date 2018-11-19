@@ -1,5 +1,7 @@
 package net.maizegenetics.tassel
 
+import javafx.scene.control.ScrollPane
+import javafx.scene.control.SelectionMode
 import javafx.scene.control.TreeItem
 import javafx.scene.control.TreeView
 import net.maizegenetics.analysis.data.GenotypeSummaryPlugin
@@ -55,50 +57,41 @@ private val myLogger = Logger.getLogger(DataTree::class.java)
 class DataTree : PluginListener {
 
     private val treeRoot = TreeItem<Any>()
-    val dataTree = TreeView<Any>(treeRoot)
+    private val dataTree = TreeView<Any>(treeRoot)
+    val view = ScrollPane(dataTree)
     private val treeItems = HashMap<Any, TreeItem<Any>>()
 
     init {
 
         dataTree.isShowRoot = false
+        dataTree.selectionModel.selectionMode = SelectionMode.MULTIPLE
         treeRoot.isExpanded = true
 
         dataTree.selectionModel.selectedItemProperty().addListener { observable, oldValue, newValue ->
-            val value = newValue.value
-            if (value is Datum) TASSELGUI.instance.changeViewer(value)
+            val value = newValue?.value
+            if (value is Datum) {
+                TASSELGUI.instance.changeView(value)
+            }
         }
+
+        view.isFitToHeight = true;
+        view.isFitToWidth = true;
 
     }
 
     fun add(data: DataSet) {
 
-        val creater = data.creator
+        val creator = data.creator
         for (i in 0 until data.size) {
 
             val d = data.getData(i)
-//            if (theCreator is MLMPlugin
-//                    || theCreator is FixedEffectLMPlugin
-//                    || theCreator is EqtlAssociationPlugin) {
-//                addDatum(NODE_TYPE_ASSOCIATIONS, d)
-//                continue
-//            }
-//
-//            if (theCreator is SequenceDiversityPlugin) {
-//                addDatum(NODE_TYPE_DIVERSITY, d)
-//                continue
-//            }
-//
-//            if (theCreator is LinkageDisequilibriumPlugin) {
-//                addDatum(NODE_TYPE_LD, d)
-//                continue
-//            }
-            //            if (d.data is GenotypeTableMask) {
-//                addDatum(d)
-//                continue
-//            }
 
-            when (creater) {
+            val child = when (creator) {
                 is GenotypeSummaryPlugin -> addDatum(NODE_TYPE_GENO_SUMMARY, d)
+                // is MLMPlugin, is FixedEffectLMPlugin, is EqtlAssociationPlugin -> addDatum(NODE_TYPE_ASSOCIATIONS, d)
+                // is SequenceDiversityPlugin -> addDatum(NODE_TYPE_DIVERSITY, d)
+                // is LinkageDisequilibriumPlugin -> addDatum(NODE_TYPE_LD, d)
+                // is GenotypeTableMask -> addDatum(d)
 
                 else -> when (d.data) {
                     is GenotypeTable -> addDatum(NODE_TYPE_SEQUENCE, d)
@@ -120,16 +113,21 @@ class DataTree : PluginListener {
 
             }
 
+            if (i == 0) {
+                dataTree.selectionModel.clearSelection()
+                dataTree.selectionModel.select(child)
+            }
+
         }
 
     }
 
-    fun addDatum(parent: String, datum: Datum) {
+    private fun addDatum(parent: String, datum: Datum): TreeItem<Any> {
         val node = treeItem(parent)
         val child = TreeItem<Any>(datum)
         child.isExpanded = true
         node.children += child
-        dataTree.selectionModel.select(child)
+        return child
     }
 
     fun treeItem(parent: String): TreeItem<Any> {
@@ -158,7 +156,6 @@ class DataTree : PluginListener {
     }
 
     override fun dataSetReturned(event: PluginEvent?) {
-        println(event?.source)
         val tds = event?.source as DataSet
         add(tds)
     }

@@ -12,12 +12,19 @@ import com.google.common.collect.ImmutableSortedSet
 
 class GenomicFactorList private constructor(val factors: ImmutableList<GenomicFactor>, val weights: ImmutableList<Double>? = null) : List<GenomicFactor> by factors {
 
+    // TODO("Sort")
+    // TODO("Validate Order")
+
     class Builder() {
 
         val builder = ImmutableList.builder<GenomicFactor>()
 
         fun add(factor: GenomicFactor) {
             builder.add(factor)
+        }
+
+        fun addAll(factors: List<GenomicFactor>) {
+            factors.forEach { add(it) }
         }
 
         fun build(): GenomicFactorList {

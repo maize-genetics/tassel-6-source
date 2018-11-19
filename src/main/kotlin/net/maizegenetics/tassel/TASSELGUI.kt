@@ -15,9 +15,8 @@ import javafx.stage.Stage
 import javafx.stage.WindowEvent
 import net.maizegenetics.analysis.data.FileLoadPlugin
 import net.maizegenetics.analysis.data.GenotypeSummaryPlugin
-import net.maizegenetics.gui.ProgressViewer
-import net.maizegenetics.gui.TableReportViewer
-import net.maizegenetics.gui.TasselLogging
+import net.maizegenetics.dna.factor.FactorTable
+import net.maizegenetics.gui.*
 import net.maizegenetics.plugindef.AbstractPlugin
 import net.maizegenetics.plugindef.Datum
 import net.maizegenetics.plugindef.Plugin
@@ -42,6 +41,7 @@ class TASSELGUI : Application() {
 
     lateinit var primaryStage: Stage
     private val myDataTree = DataTree()
+    private val myInfo = InfoViewer()
     private val myMenuItemHash = HashMap<MenuItem, Plugin>()
     private val myMainPane = BorderPane()
     private val myProgressViewer = ProgressViewer()
@@ -54,20 +54,11 @@ class TASSELGUI : Application() {
 
         stage.onCloseRequest = EventHandler<WindowEvent> { stop() }
 
-        val info = TextArea()
-        info.isEditable = false
-        HBox.setHgrow(info, Priority.ALWAYS)
-        VBox.setVgrow(info, Priority.ALWAYS)
-
-
         val left = SplitPane()
         left.orientation = Orientation.VERTICAL
         left.setDividerPositions(0.6)
-        val dataTree = ScrollPane(myDataTree.dataTree)
-        dataTree.setFitToHeight(true);
-        dataTree.setFitToWidth(true);
-        left.items += dataTree
-        left.items += info
+        left.items += myDataTree.view
+        left.items += myInfo.view
         left.prefWidth = 300.0
 
         val spacer = Region()
@@ -183,12 +174,18 @@ class TASSELGUI : Application() {
         myMenuItemHash.values.forEach { (it as AbstractPlugin).setConfigParameters() }
     }
 
-    fun changeViewer(datum: Datum) = Platform.runLater {
-        val data = datum.data
-        when (data) {
-            is TableReport -> myMainPane.center = TableReportViewer(data).view
+    fun changeView(datum: Datum) = Platform.runLater {
+
+        myProgressViewer.showSelected(datum)
+
+        myInfo.show(datum)
+
+        when (val data = datum.data) {
+            is TableReport -> myMainPane.center = TableReportViewer.instance(data).view
+            is FactorTable -> myMainPane.center = FactorTableViewer.instance(data).view
             else -> myMainPane.center = EMPTY_NODE
         }
+
     }
 
     override fun stop() {
@@ -196,6 +193,7 @@ class TASSELGUI : Application() {
     }
 
     companion object {
+        @JvmStatic
         lateinit var instance: TASSELGUI
     }
 }

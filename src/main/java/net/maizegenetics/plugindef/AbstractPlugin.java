@@ -1044,7 +1044,6 @@ abstract public class AbstractPlugin implements Plugin {
                 FlowPane temp = new FlowPane(Orientation.HORIZONTAL);
                 Label label = new Label(current.guiName());
                 label.setFont(new javafx.scene.text.Font("Dialog", 14.0));
-                //label.setFont(new Font("Dialog", Font.BOLD, 14));
                 temp.getChildren().add(label);
                 panel.getChildren().add(temp);
             } else {
@@ -1092,7 +1091,7 @@ abstract public class AbstractPlugin implements Plugin {
                     }
                 });
 
-                String label = null;
+                String label;
                 if (current.required()) {
                     label = current.guiName() + "*";
                 } else {
@@ -1154,12 +1153,15 @@ abstract public class AbstractPlugin implements Plugin {
         BorderPane.setMargin(pnlButtons, new Insets(20.0, 0.0, 10.0, 0.0));
 
         WebView browser = new WebView();
+        VBox.setVgrow(browser, Priority.ALWAYS);
+        HBox.setHgrow(browser, Priority.ALWAYS);
         browser.prefHeightProperty().bind(dialog.heightProperty());
         browser.prefWidthProperty().bind(dialog.widthProperty());
         WebEngine webEngine = browser.getEngine();
         webEngine.loadContent(getUsageHTML());
         StackPane stack = new StackPane(browser);
-        stack.setPadding(new Insets(10.0));
+        stack.setPadding(new Insets(3.0));
+        stack.setAlignment(Pos.CENTER);
         stack.setStyle("-fx-border-color: #ab4642;\n" +
                 "-fx-border-radius: 10;\n" +
                 "-fx-border-width: 3;");
@@ -1293,7 +1295,7 @@ abstract public class AbstractPlugin implements Plugin {
     public String getUsageHTML() {
 
         StringBuilder builder = new StringBuilder();
-        builder.append("<html><body style=\"background-color:#F4F4F4;\"><center><strong>");
+        builder.append("<html><body style=\"background-color:#F4F4F4;margin-right: 25px;\"><center><strong>");
         builder.append(Utils.getBasename(getClass().getName()));
         builder.append("</strong>");
         String description = pluginDescription();

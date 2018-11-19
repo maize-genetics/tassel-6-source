@@ -5,11 +5,10 @@ import javafx.geometry.Insets
 import javafx.geometry.Pos
 import javafx.scene.control.Label
 import javafx.scene.control.ProgressBar
+import javafx.scene.image.ImageView
 import javafx.scene.layout.HBox
-import net.maizegenetics.plugindef.DataSet
-import net.maizegenetics.plugindef.Plugin
-import net.maizegenetics.plugindef.PluginEvent
-import net.maizegenetics.plugindef.PluginListener
+import net.maizegenetics.plugindef.*
+import net.maizegenetics.util.Utils
 
 /**
  * @author Terry Casstevens
@@ -26,6 +25,7 @@ class ProgressViewer : PluginListener {
         view.alignment = Pos.CENTER_LEFT
         view.padding = Insets(10.0)
         progress.prefWidth = 400.0
+        view.children.add(Label("   TASSEL 6", ImageView("/images/Tassel_Logo16.png")))
     }
 
     fun showProgress(plugin: Plugin) {
@@ -35,6 +35,12 @@ class ProgressViewer : PluginListener {
         progress.progress = 0.0
         view.children += Label(plugin.buttonName)
         view.children += progress
+    }
+
+    fun showSelected(data: Datum) {
+        view.children.clear()
+        val type = Utils.getBasename(data.data.javaClass.name)
+        view.children += Label("$type Selected")
     }
 
     override fun dataSetReturned(event: PluginEvent?) {

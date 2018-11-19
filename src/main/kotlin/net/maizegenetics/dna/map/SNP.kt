@@ -5,7 +5,10 @@ package net.maizegenetics.dna.map
  * Created November 12, 2018
  */
 
-class SNP(val chr: Chromosome, val position: Int, val snpName: String) : GenomicFactor(Factor.SNP, startChr = chr, startPos = position) {
+class SNP(val chr: Chromosome, val position: Int, val snpName: String) : GenomicFactor(startChr = chr, startPos = position) {
+
+    // TODO("Variants")
+    // TODO("Builder?")
 
     override fun compareTo(other: GenomicFactor): Int {
 
