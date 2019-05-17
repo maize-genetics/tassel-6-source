@@ -62,7 +62,7 @@ public class DynamicBitStorage implements BitStorage {
         public BitSet load(Long key) {
             if (getDirectionFromKey(key) == SB.TAXA) {
                 int taxon = getSiteOrTaxonFromKey(key);
-                if ((myPrefAllele.length == 1) && (myPrefAllele[0] == GenotypeTable.UNKNOWN_DIPLOID_ALLELE)) {
+                if ((myPrefAllele.length == 1) && (myPrefAllele[0] == GenotypeTable.UNKNOWN_GENOTYPE)) {
                     return UnmodifiableBitSet.getInstance(GenotypeTableUtils.calcBitUnknownPresenceFromGenotype(myGenotype.genotypeAllSites(taxon)));
                 } else {
                     return UnmodifiableBitSet.getInstance(GenotypeTableUtils.calcBitPresenceFromGenotype(myGenotype.genotypeAllSites(taxon), myPrefAllele)); //allele comp
@@ -95,7 +95,7 @@ public class DynamicBitStorage implements BitStorage {
                 }
             }
 
-            if ((myPrefAllele.length == 1) && (myPrefAllele[0] == GenotypeTable.UNKNOWN_DIPLOID_ALLELE)) {
+            if ((myPrefAllele.length == 1) && (myPrefAllele[0] == GenotypeTable.UNKNOWN_GENOTYPE)) {
                 for (int i = 0; i < length; i++) {
                     BitSet bs = UnmodifiableBitSet.getInstance(GenotypeTableUtils.calcBitUnknownPresenceFromGenotype(genotypeTBlock[i]));
                     result.put(getKey(SB.SITE, site + i), bs);
@@ -183,7 +183,7 @@ public class DynamicBitStorage implements BitStorage {
     }
 
     public static DynamicBitStorage getUnknownInstance(GenotypeCallTable genotype) {
-        return new DynamicBitStorage(genotype, WHICH_ALLELE.Unknown, new byte[]{GenotypeTable.UNKNOWN_DIPLOID_ALLELE});
+        return new DynamicBitStorage(genotype, WHICH_ALLELE.Unknown, new byte[]{GenotypeTable.UNKNOWN_GENOTYPE});
     }
 
 }

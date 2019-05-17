@@ -180,7 +180,7 @@ public class GenotypeTableBuilder {
         setupGenotypeTaxaInHDF5(writer);
         posListBuilder = new PositionListBuilder(numberOfSites);
         byte[] missingGenotypes = new byte[numberOfSites];
-        Arrays.fill(missingGenotypes, GenotypeTable.UNKNOWN_DIPLOID_ALLELE);
+        Arrays.fill(missingGenotypes, GenotypeTable.UNKNOWN_GENOTYPE);
         for (Taxon taxon : taxaList) {
             HDF5Utils.addTaxon(writer, taxon);
             HDF5Utils.writeHDF5GenotypesCalls(writer, taxon.getName(), missingGenotypes);
@@ -830,7 +830,7 @@ public class GenotypeTableBuilder {
                 if (GenotypeTableUtils.isHeterozygous(genotype[s])) {
                     hetSum++;
                 }
-                if (genotype[s] != GenotypeTable.UNKNOWN_DIPLOID_ALLELE) {
+                if (genotype[s] != GenotypeTable.UNKNOWN_GENOTYPE) {
                     covSum++;
                 }
             }

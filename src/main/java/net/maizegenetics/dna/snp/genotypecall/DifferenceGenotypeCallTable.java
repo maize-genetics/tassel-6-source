@@ -28,18 +28,18 @@ public class DifferenceGenotypeCallTable extends AbstractGenotypeCallTable {
 //        if (GenotypeTableUtils.isHomozygous(first) && GenotypeTableUtils.isHomozygous(second)) {
 //            return (byte) ((first & 0xF0) | (second & 0xF));
 //        } else {
-//            return GenotypeTable.UNKNOWN_DIPLOID_ALLELE;
+//            return GenotypeTable.UNKNOWN_GENOTYPE;
 //        }
         if (GenotypeTableUtils.isHomozygous(hybrid)) {
         	if (hybrid == parent) return hybrid;
-        	else return GenotypeTable.UNKNOWN_DIPLOID_ALLELE;
+        	else return GenotypeTable.UNKNOWN_GENOTYPE;
         } else {
         	if (GenotypeTableUtils.isHomozygous(parent)) {
         		byte[] hybridAlleles = GenotypeTableUtils.getDiploidValues(hybrid);
         		byte parentAllele = GenotypeTableUtils.getDiploidValues(parent)[0];
         		if (parentAllele == hybridAlleles[0]) return GenotypeTableUtils.getDiploidValue(hybridAlleles[1], hybridAlleles[1]);
         		else return GenotypeTableUtils.getDiploidValue(hybridAlleles[0], hybridAlleles[0]);
-        	} else return GenotypeTable.UNKNOWN_DIPLOID_ALLELE;
+        	} else return GenotypeTable.UNKNOWN_GENOTYPE;
         }
         
     }

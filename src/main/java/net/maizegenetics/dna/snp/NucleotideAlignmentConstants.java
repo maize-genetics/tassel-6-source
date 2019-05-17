@@ -24,13 +24,13 @@ public final class NucleotideAlignmentConstants {
     public static final byte UNDEFINED_ALLELE = (byte) 0x6;
 
     // Diploid Byte Values for Nucleotide Alleles
-    public static final byte A_DIPLOID_ALLELE = (byte) 0x00;
-    public static final byte C_DIPLOID_ALLELE = (byte) 0x11;
-    public static final byte G_DIPLOID_ALLELE = (byte) 0x22;
-    public static final byte T_DIPLOID_ALLELE = (byte) 0x33;
-    public static final byte INSERT_DIPLOID_ALLELE = (byte) 0x44;
-    public static final byte GAP_DIPLOID_ALLELE = (byte) 0x55;
-    public static final byte UNDEFINED_DIPLOID_ALLELE = (byte) 0x66;
+    public static final byte A_HOMOZYGOUS = (byte) 0x00;
+    public static final byte C_HOMOZYGOUS = (byte) 0x11;
+    public static final byte G_HOMOZYGOUS = (byte) 0x22;
+    public static final byte T_HOMOZYGOUS = (byte) 0x33;
+    public static final byte INSERT_HOMOZYGOUS = (byte) 0x44;
+    public static final byte GAP_HOMOZYGOUS = (byte) 0x55;
+    public static final byte UNDEFINED_HOMOZYGOUS = (byte) 0x66;
 
     // String Values for Nucleotide Alleles
     public static final String INSERT_ALLELE_STR = "+";
@@ -45,7 +45,7 @@ public final class NucleotideAlignmentConstants {
      * Number of nucleotide states excluding rare and unknown.
      */
     public static final int NUMBER_NUCLEOTIDE_ALLELES = 6;
-    private static final Map<String, Byte> NUCLEOTIDE_DIPLOID_HASH = new HashMap<String, Byte>();
+    private static final Map<String, Byte> NUCLEOTIDE_DIPLOID_HASH = new HashMap<>();
 
     static {
         NUCLEOTIDE_DIPLOID_HASH.put("AA", (byte) 0x00);
@@ -159,7 +159,7 @@ public final class NucleotideAlignmentConstants {
     private static final byte[] NUCLEOTIDE_DIPLOID_ARRAY = new byte[256];
 
     static {
-        Arrays.fill(NUCLEOTIDE_DIPLOID_ARRAY, UNDEFINED_DIPLOID_ALLELE);
+        Arrays.fill(NUCLEOTIDE_DIPLOID_ARRAY, UNDEFINED_HOMOZYGOUS);
         for (String temp : NUCLEOTIDE_DIPLOID_HASH.keySet()) {
             NUCLEOTIDE_DIPLOID_ARRAY[getNucleotideDiploidArrayIndex(temp)] = NUCLEOTIDE_DIPLOID_HASH.get(temp);
         }

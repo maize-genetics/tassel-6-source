@@ -41,7 +41,7 @@ public class HybridGenotypeCallTable extends AbstractGenotypeCallTable {
         if (GenotypeTableUtils.isHomozygous(first) && GenotypeTableUtils.isHomozygous(second)) {
             return (byte) ((first & 0xF0) | (second & 0xF));
         } else {
-            return GenotypeTable.UNKNOWN_DIPLOID_ALLELE;
+            return GenotypeTable.UNKNOWN_GENOTYPE;
         }
     }
 

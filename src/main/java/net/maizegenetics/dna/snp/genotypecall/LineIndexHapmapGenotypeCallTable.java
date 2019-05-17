@@ -174,7 +174,7 @@ public class LineIndexHapmapGenotypeCallTable extends AbstractGenotypeCallTable 
                     throw new IllegalStateException("LineIndexHapmapGenotypeCallTable: Site: " + site + " has too many values.");
                 }
                 byte value = NucleotideAlignmentConstants.getNucleotideDiploidByte(input.charAt(i));
-                if (value == NucleotideAlignmentConstants.UNDEFINED_DIPLOID_ALLELE) {
+                if (value == NucleotideAlignmentConstants.UNDEFINED_HOMOZYGOUS) {
                     throw new IllegalStateException("LineIndexHapmapGenotypeCallTable: Site: " + site + " has illegal value: " + input.charAt(i));
                 }
                 data[taxon++] = value;
@@ -187,7 +187,7 @@ public class LineIndexHapmapGenotypeCallTable extends AbstractGenotypeCallTable 
                 // there is a phasing conflict with the existing import approach
                 byte value = GenotypeTableUtils.getDiploidValue(NucleotideAlignmentConstants.getNucleotideDiploidByte(input.charAt(i + 1)),
                         NucleotideAlignmentConstants.getNucleotideDiploidByte(input.charAt(i)));
-                if (value == NucleotideAlignmentConstants.UNDEFINED_DIPLOID_ALLELE) {
+                if (value == NucleotideAlignmentConstants.UNDEFINED_HOMOZYGOUS) {
                     throw new IllegalStateException("LineIndexHapmapGenotypeCallTable: Site: " + site + " has illegal value: " + input.charAt(i) + input.charAt(i + 1));
                 }
                 data[taxon++] = value;

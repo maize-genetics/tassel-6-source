@@ -128,7 +128,7 @@ public class AlleleFreqCache {
     static {
         for (int i = 0; i < 256; i++) {
 
-            if (((byte) i) == GenotypeTable.UNKNOWN_DIPLOID_ALLELE) {
+            if (((byte) i) == GenotypeTable.UNKNOWN_GENOTYPE) {
                 OTHER_COUNTS[i] = UNKNOWN_COUNT_BIT;
                 continue;
             }
@@ -275,7 +275,7 @@ public class AlleleFreqCache {
         int numNotMissing = 0;
         int numHeterozygous = 0;
         for (byte current : data) {
-            if (current != GenotypeTable.UNKNOWN_DIPLOID_ALLELE) {
+            if (current != GenotypeTable.UNKNOWN_GENOTYPE) {
                 numNotMissing++;
                 if (GenotypeTableUtils.isHeterozygous(current)) {
                     numHeterozygous++;

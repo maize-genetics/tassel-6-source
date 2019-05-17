@@ -49,7 +49,7 @@ class HaplotypeTable private constructor(taxa: TaxaList, factors: GenomicFactorL
             @JvmStatic
             fun instance(taxa: TaxaList, factors: GenomicFactorList): HaplotypeTableBuilder {
                 val matrix = SuperByteMatrixBuilder.getInstance(taxa.numberOfTaxa(), factors.size)
-                matrix.setAll(GenotypeTable.UNKNOWN_DIPLOID_ALLELE)
+                matrix.setAll(GenotypeTable.UNKNOWN_GENOTYPE)
                 return HaplotypeTableBuilder(taxa, factors, matrix)
             }
         }

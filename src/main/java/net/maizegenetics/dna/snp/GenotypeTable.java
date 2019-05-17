@@ -38,14 +38,14 @@ public interface GenotypeTable {
      * This encoding is used to lump together allele values with frequencies too
      * low to be retained as one of the maximum number of alleles.
      */
-    public static byte RARE_ALLELE = 0xE;
-    public static byte RARE_DIPLOID_ALLELE = (byte) 0xEE;
-    public static String RARE_ALLELE_STR = "Z";
-    public static byte UNKNOWN_ALLELE = 0xF;
-    public static byte UNKNOWN_DIPLOID_ALLELE = (byte) 0xFF;
-    public static String UNKNOWN_ALLELE_STR = "N";
-    public static String UNKNOWN_DIPLOID_ALLELE_STR = "N:N";
-    public static char UNKNOWN_ALLELE_CHAR = 'N';
+    byte RARE_ALLELE = 0xE;
+    byte RARE_GENOTYPE = (byte) 0xEE;
+    String RARE_ALLELE_STR = "Z";
+    byte UNKNOWN_ALLELE = 0xF;
+    byte UNKNOWN_GENOTYPE = (byte) 0xFF;
+    String UNKNOWN_ALLELE_STR = "N";
+    String UNKNOWN_GENOTYPE_STR = "N:N";
+    char UNKNOWN_ALLELE_CHAR = 'N';
 
     /**
      * Annotations

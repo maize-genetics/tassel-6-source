@@ -187,7 +187,7 @@ public class TagLocus {
     
     public byte getRefGeno(int site) {
         if (refCallsBySite == null || site > refCallsBySite.length-1) {
-            return GenotypeTable.UNKNOWN_DIPLOID_ALLELE;
+            return GenotypeTable.UNKNOWN_GENOTYPE;
         } else {
             return refCallsBySite[site];
         }
@@ -323,7 +323,7 @@ public class TagLocus {
                     count += alleleDepthsInTaxa[a][tx];
                 }
                 if (count == 0) {
-                    callsBySite[s][tx] = GenotypeTable.UNKNOWN_DIPLOID_ALLELE;
+                    callsBySite[s][tx] = GenotypeTable.UNKNOWN_GENOTYPE;
                     continue;
                 }
                 // check for each possible homozygote
@@ -377,8 +377,8 @@ public class TagLocus {
                 for (int tg = 0; tg < nAlignedTags; tg++) {
                     int tagIndex = tagIndices[tg];
                     byte baseToAdd = allelesAtVariableSitesByTag[s][tagIndex];
-                    if (baseToAdd == GenotypeTable.UNKNOWN_DIPLOID_ALLELE && callBiallelicSNPsWithGap && maxStartPosition == minStartPosition) {
-                        baseToAdd = NucleotideAlignmentConstants.GAP_DIPLOID_ALLELE;
+                    if (baseToAdd == GenotypeTable.UNKNOWN_GENOTYPE && callBiallelicSNPsWithGap && maxStartPosition == minStartPosition) {
+                        baseToAdd = NucleotideAlignmentConstants.GAP_HOMOZYGOUS;
                     }
                     alleleCounts[baseToAdd] += theTags.get(tagIndex).tagDist[tx];
                 }
@@ -803,7 +803,7 @@ public class TagLocus {
         int[][] sortedAlleleCounts = sortAllelesByCount(alleleCounts);
         int a1Count = sortedAlleleCounts[1][0];
         if (a1Count == 0) {
-            return GenotypeTable.UNKNOWN_DIPLOID_ALLELE;
+            return GenotypeTable.UNKNOWN_GENOTYPE;
         }
         int a2Count = sortedAlleleCounts[1][1];  // What if a3Count = a2Count? -- this situation is not dealt with
         byte a1 = (byte) sortedAlleleCounts[0][0];

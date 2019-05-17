@@ -230,7 +230,7 @@ class BuilderFromHapMap private constructor(private val myHapmapFile: String, pr
                                 throw IllegalStateException("BuilderFromHapMap: SNP Named: " + myPositionList[myPositionList.size - 1].snpName + " has too many values.")
                             }
                             val value = NucleotideAlignmentConstants.getNucleotideDiploidByte(input[i])
-                            if (value == NucleotideAlignmentConstants.UNDEFINED_DIPLOID_ALLELE) {
+                            if (value == NucleotideAlignmentConstants.UNDEFINED_HOMOZYGOUS) {
                                 throw IllegalStateException("BuilderFromHapMap: SNP Named: " + myPositionList[myPositionList.size - 1].snpName + " has illegal value: " + input[i])
                             }
                             genotypes!!.set(taxon++, site, value)
@@ -245,7 +245,7 @@ class BuilderFromHapMap private constructor(private val myHapmapFile: String, pr
                             // there is a phasing conflict with the existing import approach
                             val value = GenotypeTableUtils.getDiploidValue(NucleotideAlignmentConstants.getNucleotideDiploidByte(input[i + 1]),
                                     NucleotideAlignmentConstants.getNucleotideDiploidByte(input[i]))
-                            if (value == NucleotideAlignmentConstants.UNDEFINED_DIPLOID_ALLELE) {
+                            if (value == NucleotideAlignmentConstants.UNDEFINED_HOMOZYGOUS) {
                                 throw IllegalStateException("BuilderFromHapMap: SNP Named: " + myPositionList[myPositionList.size - 1].snpName + " has illegal value: " + input[i] + input[i + 1])
                             }
                             genotypes!!.set(taxon++, site, value)

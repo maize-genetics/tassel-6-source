@@ -264,7 +264,7 @@ public class BuilderFromHapMap {
                                 throw new IllegalStateException("BuilderFromHapMap: SNP Named: " + myPositionList.get(myPositionList.size() - 1).getSNPID() + " has too many values.");
                             }
                             byte value = NucleotideAlignmentConstants.getNucleotideDiploidByte(input.charAt(i));
-                            if (value == NucleotideAlignmentConstants.UNDEFINED_DIPLOID_ALLELE) {
+                            if (value == NucleotideAlignmentConstants.UNDEFINED_HOMOZYGOUS) {
                                 throw new IllegalStateException("BuilderFromHapMap: SNP Named: " + myPositionList.get(myPositionList.size() - 1).getSNPID() + " has illegal value: " + input.charAt(i));
                             }
                             myGenotypes.set(taxon++, site, value);
@@ -277,7 +277,7 @@ public class BuilderFromHapMap {
                             // there is a phasing conflict with the existing import approach
                             byte value = GenotypeTableUtils.getDiploidValue(NucleotideAlignmentConstants.getNucleotideDiploidByte(input.charAt(i + 1)),
                                     NucleotideAlignmentConstants.getNucleotideDiploidByte(input.charAt(i)));
-                            if (value == NucleotideAlignmentConstants.UNDEFINED_DIPLOID_ALLELE) {
+                            if (value == NucleotideAlignmentConstants.UNDEFINED_HOMOZYGOUS) {
                                 throw new IllegalStateException("BuilderFromHapMap: SNP Named: " + myPositionList.get(myPositionList.size() - 1).getSNPID() + " has illegal value: " + input.charAt(i) + input.charAt(i + 1));
                             }
                             myGenotypes.set(taxon++, site, value);

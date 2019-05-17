@@ -26,7 +26,7 @@ public class MaskGenotypeCallTable extends AbstractGenotypeCallTable {
     @Override
     public byte genotype(int taxon, int site) {
         if (myMask.get(taxon, site)) {
-            return GenotypeTable.UNKNOWN_DIPLOID_ALLELE;
+            return GenotypeTable.UNKNOWN_GENOTYPE;
         } else {
             return myBase.genotype(taxon, site);
         }
@@ -38,7 +38,7 @@ public class MaskGenotypeCallTable extends AbstractGenotypeCallTable {
         byte[] result = myBase.genotypeForAllTaxa(site);
         for (int t = 0; t < numberOfTaxa(); t++) {
             if (mask.fastGet(t)) {
-                result[t] = GenotypeTable.UNKNOWN_DIPLOID_ALLELE;
+                result[t] = GenotypeTable.UNKNOWN_GENOTYPE;
             }
         }
         return result;
@@ -50,7 +50,7 @@ public class MaskGenotypeCallTable extends AbstractGenotypeCallTable {
         byte[] result = myBase.genotypeForAllSites(taxon);
         for (int s = 0; s < numberOfSites(); s++) {
             if (mask.fastGet(s)) {
-                result[s] = GenotypeTable.UNKNOWN_DIPLOID_ALLELE;
+                result[s] = GenotypeTable.UNKNOWN_GENOTYPE;
             }
         }
         return result;

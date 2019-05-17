@@ -68,7 +68,7 @@ public class GenotypeCallTableBuilder {
      */
     public static GenotypeCallTableBuilder getInstanceTranspose(int numTaxa, int numSites) {
         SuperByteMatrix matrix = SuperByteMatrixBuilder.getInstanceTranspose(numTaxa, numSites);
-        matrix.setAll(GenotypeTable.UNKNOWN_DIPLOID_ALLELE);
+        matrix.setAll(GenotypeTable.UNKNOWN_GENOTYPE);
         return new GenotypeCallTableBuilder(matrix);
     }
 
@@ -84,7 +84,7 @@ public class GenotypeCallTableBuilder {
      */
     public static GenotypeCallTableBuilder getUnphasedNucleotideGenotypeBuilder(int numTaxa, int numSites) {
         SuperByteMatrix matrix = SuperByteMatrixBuilder.getInstance(numTaxa, numSites);
-        matrix.setAll(GenotypeTable.UNKNOWN_DIPLOID_ALLELE);
+        matrix.setAll(GenotypeTable.UNKNOWN_GENOTYPE);
         return new GenotypeCallTableBuilder(matrix);
     }
 
@@ -197,10 +197,10 @@ public class GenotypeCallTableBuilder {
             if (data[0][0].contains(":")) {
                 Pattern colon = Pattern.compile(":");
                 for (int taxon = 0; taxon < numTaxa; taxon++) {
-                    if (data[taxon][site].equalsIgnoreCase(GenotypeTable.UNKNOWN_DIPLOID_ALLELE_STR)) {
-                        setBase(taxon, site, GenotypeTable.UNKNOWN_DIPLOID_ALLELE);
+                    if (data[taxon][site].equalsIgnoreCase(GenotypeTable.UNKNOWN_GENOTYPE_STR)) {
+                        setBase(taxon, site, GenotypeTable.UNKNOWN_GENOTYPE);
                     } else if (data[taxon][site].equals("?") || data[taxon][site].equals("?:?")) {
-                        setBase(taxon, site, GenotypeTable.UNKNOWN_DIPLOID_ALLELE);
+                        setBase(taxon, site, GenotypeTable.UNKNOWN_GENOTYPE);
                     } else {
                         String[] siteval = colon.split(data[taxon][site]);
                         byte first = NucleotideAlignmentConstants.getNucleotideAlleleByte(siteval[0]);
@@ -211,9 +211,9 @@ public class GenotypeCallTableBuilder {
             } else {
                 for (int taxon = 0; taxon < numTaxa; taxon++) {
                     if (data[taxon][site].equalsIgnoreCase(GenotypeTable.UNKNOWN_ALLELE_STR)) {
-                        setBase(taxon, site, GenotypeTable.UNKNOWN_DIPLOID_ALLELE);
+                        setBase(taxon, site, GenotypeTable.UNKNOWN_GENOTYPE);
                     } else if (data[taxon][site].equals("?")) {
-                        setBase(taxon, site, GenotypeTable.UNKNOWN_DIPLOID_ALLELE);
+                        setBase(taxon, site, GenotypeTable.UNKNOWN_GENOTYPE);
                     } else {
                         setBase(taxon, site, NucleotideAlignmentConstants.getNucleotideAlleleByte(data[taxon][site]));
                     }

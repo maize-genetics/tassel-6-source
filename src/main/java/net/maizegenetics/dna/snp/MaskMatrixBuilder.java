@@ -90,7 +90,7 @@ public class MaskMatrixBuilder {
         return getInstance(genotype, new BiPredicate<Byte, Stats>() {
             @Override
             public boolean test(Byte aByte, Stats stats) {
-                if (aByte != GenotypeTable.UNKNOWN_DIPLOID_ALLELE && stats.numAllMinorAlleles() <= minCountOfMinors) {
+                if (aByte != GenotypeTable.UNKNOWN_GENOTYPE && stats.numAllMinorAlleles() <= minCountOfMinors) {
                     byte major = stats.majorAllele();
                     if ((aByte & 0xF) != major || (aByte >>> 4) != major) {
                         return true;

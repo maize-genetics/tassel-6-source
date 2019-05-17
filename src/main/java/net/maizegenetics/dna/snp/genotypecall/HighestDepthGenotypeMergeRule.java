@@ -3,7 +3,7 @@ package net.maizegenetics.dna.snp.genotypecall;
 import net.maizegenetics.dna.snp.GenotypeTable;
 import net.maizegenetics.dna.snp.score.AlleleDepthUtil;
 
-import static net.maizegenetics.dna.snp.GenotypeTable.UNKNOWN_DIPLOID_ALLELE;
+import static net.maizegenetics.dna.snp.GenotypeTable.UNKNOWN_GENOTYPE;
 
 public class HighestDepthGenotypeMergeRule implements GenotypeMergeRule{
 
@@ -15,9 +15,9 @@ public class HighestDepthGenotypeMergeRule implements GenotypeMergeRule{
     @Override
     public byte mergeCalls(byte geno1, byte geno2) {
         if(geno1==geno2) return geno1;
-        if(geno1==UNKNOWN_DIPLOID_ALLELE) return geno2;
-        if(geno2==UNKNOWN_DIPLOID_ALLELE) return geno1;
-        return UNKNOWN_DIPLOID_ALLELE;
+        if(geno1== UNKNOWN_GENOTYPE) return geno2;
+        if(geno2== UNKNOWN_GENOTYPE) return geno1;
+        return UNKNOWN_GENOTYPE;
     }
 
     @Override

@@ -5,10 +5,6 @@ package net.maizegenetics.dna.snp.genotypecall;
 
 import java.util.Arrays;
 import java.util.Spliterator;
-import static java.util.Spliterator.IMMUTABLE;
-import static java.util.Spliterator.ORDERED;
-import static java.util.Spliterator.SIZED;
-import static java.util.Spliterator.SUBSIZED;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -37,7 +33,7 @@ class FilterGenotypeCallTable extends AbstractGenotypeCallTable {
     public byte genotype(int taxon, int site) {
         long taxonSite = myTranslate.taxonSite(taxon, site);
         if (taxonSite == -1) {
-            return GenotypeTable.UNKNOWN_DIPLOID_ALLELE;
+            return GenotypeTable.UNKNOWN_GENOTYPE;
         } else {
             return myBaseGenotype.genotype((int) (taxonSite >>> 32), (int) (taxonSite & 0xFFFFFFFF));
         }
@@ -62,7 +58,7 @@ class FilterGenotypeCallTable extends AbstractGenotypeCallTable {
     public byte[] genotypeForAllTaxa(int site) {
         if (myTranslate.site(site) == -1) {
             byte[] result = new byte[numberOfTaxa()];
-            Arrays.fill(result, GenotypeTable.UNKNOWN_DIPLOID_ALLELE);
+            Arrays.fill(result, GenotypeTable.UNKNOWN_GENOTYPE);
             return result;
         } else if (!myTranslate.hasTaxaTranslations()) {
             return myBaseGenotype.genotypeForAllTaxa(myTranslate.site(site));
@@ -73,7 +69,7 @@ class FilterGenotypeCallTable extends AbstractGenotypeCallTable {
             byte[] result = new byte[numTaxa];
             for (int i = 0; i < numTaxa; i++) {
                 if (translations[i] == -1) {
-                    result[i] = GenotypeTable.UNKNOWN_DIPLOID_ALLELE;
+                    result[i] = GenotypeTable.UNKNOWN_GENOTYPE;
                 } else {
                     result[i] = orig[translations[i]];
                 }
@@ -86,7 +82,7 @@ class FilterGenotypeCallTable extends AbstractGenotypeCallTable {
     public byte[] genotypeForAllSites(int taxon) {
         if (myTranslate.taxon(taxon) == -1) {
             byte[] result = new byte[numberOfSites()];
-            Arrays.fill(result, GenotypeTable.UNKNOWN_DIPLOID_ALLELE);
+            Arrays.fill(result, GenotypeTable.UNKNOWN_GENOTYPE);
             return result;
         } else if (!myTranslate.hasSiteTranslations()) {
             return myBaseGenotype.genotypeForAllSites(myTranslate.taxon(taxon));
@@ -181,7 +177,7 @@ class FilterGenotypeCallTable extends AbstractGenotypeCallTable {
                     int taxaIndex = myTranslate.taxon(myTaxaOrigin);
                     if (taxaIndex == -1) {
                         for (; mySiteOrigin < myNumSites; mySiteOrigin++) {
-                            action.accept(GenotypeTable.UNKNOWN_DIPLOID_ALLELE);
+                            action.accept(GenotypeTable.UNKNOWN_GENOTYPE);
                         }
                     } else {
                         for (; mySiteOrigin < myNumSites; mySiteOrigin++) {
@@ -193,7 +189,7 @@ class FilterGenotypeCallTable extends AbstractGenotypeCallTable {
                 int taxaIndex = myTranslate.taxon(myTaxaOrigin);
                 if (taxaIndex == -1) {
                     for (; mySiteOrigin < mySiteFence; mySiteOrigin++) {
-                        action.accept(GenotypeTable.UNKNOWN_DIPLOID_ALLELE);
+                        action.accept(GenotypeTable.UNKNOWN_GENOTYPE);
                     }
                 } else {
                     for (; mySiteOrigin < mySiteFence; mySiteOrigin++) {
@@ -205,7 +201,7 @@ class FilterGenotypeCallTable extends AbstractGenotypeCallTable {
                     int taxaIndex = myTranslate.taxon(myTaxaOrigin);
                     if (taxaIndex == -1) {
                         for (; mySiteOrigin < myNumSites; mySiteOrigin++) {
-                            action.accept(GenotypeTable.UNKNOWN_DIPLOID_ALLELE);
+                            action.accept(GenotypeTable.UNKNOWN_GENOTYPE);
                         }
                     } else {
                         for (; mySiteOrigin < myNumSites; mySiteOrigin++) {
@@ -217,7 +213,7 @@ class FilterGenotypeCallTable extends AbstractGenotypeCallTable {
                 int taxaIndex = myTranslate.taxon(myTaxaOrigin);
                 if (taxaIndex == -1) {
                     for (; mySiteOrigin < mySiteFence; mySiteOrigin++) {
-                        action.accept(GenotypeTable.UNKNOWN_DIPLOID_ALLELE);
+                        action.accept(GenotypeTable.UNKNOWN_GENOTYPE);
                     }
                 } else {
                     for (; mySiteOrigin < mySiteFence; mySiteOrigin++) {

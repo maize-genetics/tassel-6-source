@@ -115,7 +115,7 @@ public class ProjectionGenotypeCallTable extends AbstractGenotypeCallTable {
     private byte getBaseGeneral(int taxon, int site) {
         DonorSiteHaps currentDSH = breakMaps.get(taxon).get(site);
         if (currentDSH == null) {
-            return GenotypeTable.UNKNOWN_DIPLOID_ALLELE;
+            return GenotypeTable.UNKNOWN_GENOTYPE;
         }
         byte p1 = myBaseGenoTable.genotype(currentDSH.getParent1index(), site);
         byte p2 = myBaseGenoTable.genotype(currentDSH.getParent2index(), site);
@@ -126,11 +126,11 @@ public class ProjectionGenotypeCallTable extends AbstractGenotypeCallTable {
     private byte getBaseTaxon(int taxon, int site) {
         if (taxon != cachedTaxon) {
             projForCachedTaxon = new byte[mySiteCount];
-            Arrays.fill(projForCachedTaxon, GenotypeTable.RARE_DIPLOID_ALLELE);
+            Arrays.fill(projForCachedTaxon, GenotypeTable.RARE_GENOTYPE);
             cachedTaxon = taxon;
         }
         byte result = projForCachedTaxon[site];
-        if (result == GenotypeTable.RARE_DIPLOID_ALLELE) {
+        if (result == GenotypeTable.RARE_GENOTYPE) {
             DonorSiteHaps currentDSH = breakMaps.get(taxon).get(site);
             byte[] r = myBaseGenoTable.genotypeRange(currentDSH.getParent1index(), currentDSH.getStartSite(), currentDSH.getEndSite() + 1);
             System.arraycopy(r, 0, projForCachedTaxon, currentDSH.getStartSite(), r.length);

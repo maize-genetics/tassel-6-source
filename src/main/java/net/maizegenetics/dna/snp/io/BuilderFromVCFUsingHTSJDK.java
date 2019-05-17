@@ -337,7 +337,7 @@ public class BuilderFromVCFUsingHTSJDK {
         public ProcessVariantContext call() {
 
             myGenotypes = SuperByteMatrixBuilder.getInstance(myNumTaxa, myNumSitesToProcess);
-            myGenotypes.setAll(GenotypeTable.UNKNOWN_DIPLOID_ALLELE);
+            myGenotypes.setAll(GenotypeTable.UNKNOWN_GENOTYPE);
 
             if (myKeepDepth) {
                 myDepths = new byte[myNumTaxa][6][myNumSitesToProcess];

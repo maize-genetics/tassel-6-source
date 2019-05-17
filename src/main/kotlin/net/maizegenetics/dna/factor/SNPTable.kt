@@ -86,7 +86,7 @@ class SNPTable private constructor(taxa: TaxaList, factors: GenomicFactorList, p
             @JvmStatic
             fun instance(numTaxa: Int, numFactors: Int): SNPTableBuilder {
                 val matrix = SuperByteMatrixBuilder.getInstance(numTaxa, numFactors)
-                matrix.setAll(GenotypeTable.UNKNOWN_DIPLOID_ALLELE)
+                matrix.setAll(GenotypeTable.UNKNOWN_GENOTYPE)
                 return SNPTableBuilder(numTaxa, numFactors, matrix)
             }
 

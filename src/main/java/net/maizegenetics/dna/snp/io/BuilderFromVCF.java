@@ -604,7 +604,7 @@ class ProcessVCFBlock implements Callable<ProcessVCFBlock> {
                     int f=0;
                     //if(taxaAllG.equals(".")) {
                     if(taxaAllG.startsWith(".")) {
-                        gTS[t][s] = GenotypeTable.UNKNOWN_DIPLOID_ALLELE;
+                        gTS[t][s] = GenotypeTable.UNKNOWN_GENOTYPE;
                         //need to still move up the taxa counter by one as we have covered this now.
                         t++;
                         continue;
@@ -634,7 +634,7 @@ class ProcessVCFBlock implements Callable<ProcessVCFBlock> {
                                     throw new IllegalStateException("\nError Processing VCF block: Mismatch of alleles.\n  At Chromosome "+ pos.getChromosome().getName() + ", Position "+pos.getPosition() +".\nAllele ID larger than number of alleles" );
                                 }
                                 if (a1 < 0 || a2 < 0) {
-                                    gTS[t][s] = GenotypeTable.UNKNOWN_DIPLOID_ALLELE;
+                                    gTS[t][s] = GenotypeTable.UNKNOWN_GENOTYPE;
                                 }
                                 else {
                                     gTS[t][s] =
@@ -647,12 +647,12 @@ class ProcessVCFBlock implements Callable<ProcessVCFBlock> {
                             }
                         } else if((f==iAD)&&keepDepth) {
                            // System.out.println("GTS: "+gTS[t][s] + " "+fieldS);
-                            if(gTS[t][s]!=GenotypeTable.UNKNOWN_DIPLOID_ALLELE) {
+                            if(gTS[t][s]!=GenotypeTable.UNKNOWN_GENOTYPE) {
                                 int i=0;
                                 for(String ad: Splitter.on(",").split(fieldS)){
                                     if(i>=alleles.length) continue;
                                     if(alleles[i]==GenotypeTable.UNKNOWN_ALLELE || ad.equals(".") || alleles[i]==NucleotideAlignmentConstants.UNDEFINED_ALLELE ||
-                                            alleles[i]==NucleotideAlignmentConstants.UNDEFINED_DIPLOID_ALLELE) {  //no position for depth of unknown alleles or depth is set to missing, so skip
+                                            alleles[i]==NucleotideAlignmentConstants.UNDEFINED_HOMOZYGOUS) {  //no position for depth of unknown alleles or depth is set to missing, so skip
                                         //Uncomment when converted
                                         //dTS[t][alleles[i++]][s] = AlleleDepthUtil.depthIntToByte(AlleleDepthUtil.DEPTH_MISSING);
                                         //Comment next two lines when converted

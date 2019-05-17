@@ -13,14 +13,9 @@ import java.util.*;
 import net.maizegenetics.dna.map.Chromosome;
 import net.maizegenetics.dna.map.Position;
 import net.maizegenetics.dna.map.PositionList;
-import net.maizegenetics.dna.map.PositionListBuilder;
 
 import static net.maizegenetics.dna.snp.GenotypeTable.*;
 import net.maizegenetics.dna.snp.genotypecall.AlleleFreqCache;
-import net.maizegenetics.taxa.TaxaList;
-import net.maizegenetics.taxa.TaxaListBuilder;
-import net.maizegenetics.taxa.Taxon;
-import net.maizegenetics.util.Tuple;
 import net.maizegenetics.util.Utils;
 
 import org.apache.log4j.Logger;
@@ -758,7 +753,7 @@ public class GenotypeTableUtils {
      * @return true if allele values are the same; false if unknown or not equal
      */
     public static boolean isHomozygous(byte diploidAllele) {
-        if (diploidAllele == GenotypeTable.UNKNOWN_DIPLOID_ALLELE) {
+        if (diploidAllele == GenotypeTable.UNKNOWN_GENOTYPE) {
             return false;
         }
         return ((diploidAllele >>> 4) & 0xf) == (diploidAllele & 0xf);
@@ -836,7 +831,7 @@ public class GenotypeTableUtils {
      */
     public static boolean isEqualOrUnknown(byte diploidAllele1, byte diploidAllele2) {
 
-        if ((diploidAllele1 == UNKNOWN_DIPLOID_ALLELE) || (diploidAllele2 == UNKNOWN_DIPLOID_ALLELE)) {
+        if ((diploidAllele1 == UNKNOWN_GENOTYPE) || (diploidAllele2 == UNKNOWN_GENOTYPE)) {
             return true;
         }
 
@@ -969,17 +964,17 @@ public class GenotypeTableUtils {
         if ((g2 == g1) && (!isHeterozygous(g1))) {
             return g1;
         }
-        if (g1 == UNKNOWN_DIPLOID_ALLELE) {
-            return UNKNOWN_DIPLOID_ALLELE;
+        if (g1 == UNKNOWN_GENOTYPE) {
+            return UNKNOWN_GENOTYPE;
         }
-        if (g2 == UNKNOWN_DIPLOID_ALLELE) {
-            return UNKNOWN_DIPLOID_ALLELE;
+        if (g2 == UNKNOWN_GENOTYPE) {
+            return UNKNOWN_GENOTYPE;
         }
         if (isHeterozygous(g1)) {
-            return UNKNOWN_DIPLOID_ALLELE;
+            return UNKNOWN_GENOTYPE;
         }
         if (isHeterozygous(g2)) {
-            return UNKNOWN_DIPLOID_ALLELE;
+            return UNKNOWN_GENOTYPE;
         }
 
         return getUnphasedDiploidValue(g1, g2);
@@ -1058,7 +1053,7 @@ public class GenotypeTableUtils {
         OpenBitSet result = new OpenBitSet(genotype.length);
         for (int i = 0; i < sites; i++) {
 
-            if (diploidValue == UNKNOWN_DIPLOID_ALLELE) {
+            if (diploidValue == UNKNOWN_GENOTYPE) {
                 // do nothing
             } else if (isEqual(diploidValue, genotype[i])) {
                 result.fastSet(i);
@@ -1093,7 +1088,7 @@ public class GenotypeTableUtils {
         OpenBitSet result = new OpenBitSet(genotype.length);
         for (int i = 0; i < length; i++) {
 
-            if (genotype[i] == UNKNOWN_DIPLOID_ALLELE) {
+            if (genotype[i] == UNKNOWN_GENOTYPE) {
                 result.fastSet(i);
             }
 
@@ -1212,7 +1207,7 @@ public class GenotypeTableUtils {
                 byte major = genotype.majorAllele(s);
                 for (int t = 0; t < ntaxa; t++) {
                     byte geno = genotype.genotype(t, s);
-                    if (geno == GenotypeTable.UNKNOWN_DIPLOID_ALLELE) {
+                    if (geno == GenotypeTable.UNKNOWN_GENOTYPE) {
                         out[s][t] = Float.NaN;
                     }
                     byte[] alleles = GenotypeTableUtils.getDiploidValues(geno);
@@ -1231,7 +1226,7 @@ public class GenotypeTableUtils {
                 byte major = genotype.majorAllele(s);
                 for (int t = 0; t < ntaxa; t++) {
                     byte geno = genotype.genotype(t, s);
-                    if (geno == GenotypeTable.UNKNOWN_DIPLOID_ALLELE) {
+                    if (geno == GenotypeTable.UNKNOWN_GENOTYPE) {
                         out[t][s] = Float.NaN;
                     }
                     byte[] alleles = GenotypeTableUtils.getDiploidValues(geno);
@@ -1258,7 +1253,7 @@ public class GenotypeTableUtils {
                 byte major = genotype.majorAllele(s);
                 for (int t = 0; t < ntaxa; t++) {
                     byte geno = genotype.genotype(t, s);
-                    if (geno == GenotypeTable.UNKNOWN_DIPLOID_ALLELE) {
+                    if (geno == GenotypeTable.UNKNOWN_GENOTYPE) {
                         out[s][t] = Double.NaN;
                     }
                     byte[] alleles = GenotypeTableUtils.getDiploidValues(geno);
@@ -1277,7 +1272,7 @@ public class GenotypeTableUtils {
                 byte major = genotype.majorAllele(s);
                 for (int t = 0; t < ntaxa; t++) {
                     byte geno = genotype.genotype(t, s);
-                    if (geno == GenotypeTable.UNKNOWN_DIPLOID_ALLELE) {
+                    if (geno == GenotypeTable.UNKNOWN_GENOTYPE) {
                         out[t][s] = Double.NaN;
                     }
                     byte[] alleles = GenotypeTableUtils.getDiploidValues(geno);

@@ -1,7 +1,6 @@
 package net.maizegenetics.phenotype;
 
 import net.maizegenetics.dna.snp.GenotypeTable;
-import net.maizegenetics.dna.snp.NucleotideAlignmentConstants;
 import net.maizegenetics.dna.snp.score.SiteScore;
 import net.maizegenetics.dna.snp.score.SiteScore.SITE_SCORE_TYPE;
 import net.maizegenetics.taxa.TaxaList;
@@ -95,7 +94,7 @@ public class GenotypePhenotype implements TableReport {
     public byte genotype(int obs, int site) {
         int ndx = observationToGenotypeIndex[obs];
         if (ndx < 0)
-            return GenotypeTable.UNKNOWN_DIPLOID_ALLELE;
+            return GenotypeTable.UNKNOWN_GENOTYPE;
         return myGenotype.genotype(ndx, site);
     }
 
@@ -114,7 +113,7 @@ public class GenotypePhenotype implements TableReport {
         for (int obs = 0; obs < numberOfObs; obs++) {
             int ndx = observationToGenotypeIndex[obs];
             if (ndx < 0)
-                geno[obs] = GenotypeTable.UNKNOWN_DIPLOID_ALLELE;
+                geno[obs] = GenotypeTable.UNKNOWN_GENOTYPE;
             else
                 geno[obs] = myGenotype.genotype(ndx, site);
         }

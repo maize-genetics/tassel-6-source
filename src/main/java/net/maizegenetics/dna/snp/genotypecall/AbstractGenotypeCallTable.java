@@ -13,10 +13,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Spliterator;
-import static java.util.Spliterator.IMMUTABLE;
-import static java.util.Spliterator.ORDERED;
-import static java.util.Spliterator.SIZED;
-import static java.util.Spliterator.SUBSIZED;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -233,7 +229,7 @@ abstract class AbstractGenotypeCallTable implements GenotypeCallTable {
         int result = 0;
         for (int i = 0, n = myTaxaCount; i < n; i++) {
             byte current = genotype(i, site);
-            if (current != GenotypeTable.UNKNOWN_DIPLOID_ALLELE) {
+            if (current != GenotypeTable.UNKNOWN_GENOTYPE) {
                 result++;
             }
         }
@@ -596,7 +592,7 @@ abstract class AbstractGenotypeCallTable implements GenotypeCallTable {
         int result = 0;
         for (int i = 0, n = mySiteCount; i < n; i++) {
             byte current = genotype(taxon, i);
-            if (current != GenotypeTable.UNKNOWN_DIPLOID_ALLELE) {
+            if (current != GenotypeTable.UNKNOWN_GENOTYPE) {
                 result++;
             }
         }

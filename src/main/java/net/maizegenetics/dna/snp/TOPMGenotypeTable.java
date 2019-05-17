@@ -264,7 +264,7 @@ public class TOPMGenotypeTable implements GenotypeTable {
     public byte genotype(int taxon, int site) {
 
         if (myIndicesOfSortByPosition[taxon] == -1) {
-            return NucleotideAlignmentConstants.UNDEFINED_DIPLOID_ALLELE;
+            return NucleotideAlignmentConstants.UNDEFINED_HOMOZYGOUS;
         }
 
         int tagLength = myTOPM.getTagLength(myIndicesOfSortByPosition[taxon]);
@@ -274,7 +274,7 @@ public class TOPMGenotypeTable implements GenotypeTable {
                 String tag = BaseEncoder.getSequenceFromLong(myTOPM.getTag(myIndicesOfSortByPosition[taxon]));
                 return NucleotideAlignmentConstants.getNucleotideDiploidComplement(NucleotideAlignmentConstants.getNucleotideDiploidByte(tag.charAt(index)));
             } else {
-                return NucleotideAlignmentConstants.UNDEFINED_DIPLOID_ALLELE;
+                return NucleotideAlignmentConstants.UNDEFINED_HOMOZYGOUS;
             }
         } else {
             int index = site - mySiteOffsetForEachTag[taxon];
@@ -282,7 +282,7 @@ public class TOPMGenotypeTable implements GenotypeTable {
                 String tag = BaseEncoder.getSequenceFromLong(myTOPM.getTag(myIndicesOfSortByPosition[taxon]));
                 return NucleotideAlignmentConstants.getNucleotideDiploidByte(tag.charAt(index));
             } else {
-                return NucleotideAlignmentConstants.UNDEFINED_DIPLOID_ALLELE;
+                return NucleotideAlignmentConstants.UNDEFINED_HOMOZYGOUS;
             }
         }
 
@@ -342,7 +342,7 @@ public class TOPMGenotypeTable implements GenotypeTable {
     public String genotypeAsString(int taxon, int site) {
 
         byte genotype = genotype(taxon, site);
-        if (genotype == NucleotideAlignmentConstants.UNDEFINED_DIPLOID_ALLELE) {
+        if (genotype == NucleotideAlignmentConstants.UNDEFINED_HOMOZYGOUS) {
             return "";
         } else {
             return NucleotideAlignmentConstants.getNucleotideIUPAC(genotype);
