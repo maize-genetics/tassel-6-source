@@ -2,6 +2,8 @@ package net.maizegenetics.tassel
 
 import javafx.application.Application
 import javafx.application.Platform
+import javafx.beans.property.DoubleProperty
+import javafx.beans.value.ChangeListener
 import javafx.event.ActionEvent
 import javafx.event.EventHandler
 import javafx.geometry.Orientation
@@ -45,6 +47,8 @@ class TASSELGUI : Application() {
     private val myMenuItemHash = HashMap<MenuItem, Plugin>()
     private val myMainPane = BorderPane()
     private val myProgressViewer = ProgressViewer()
+    private val myMainControls = MainControls()
+    private val myMainView = StackPane()
 
     override fun start(stage: Stage) {
 
@@ -67,10 +71,15 @@ class TASSELGUI : Application() {
         myMainPane.top = HBox(leftMenuBar(), spacer, rightMenuBar())
         updatePluginsWithGlobalConfigParameters()
 
-        myMainPane.center = EMPTY_NODE
+        myMainPane.center = myMainView
+        myMainView.children += EMPTY_NODE
 
         myMainPane.left = left
-        myMainPane.bottom = myProgressViewer.view
+
+        val bottomSpacer = Region()
+        HBox.setHgrow(bottomSpacer, Priority.ALWAYS)
+        val bottom = HBox(myProgressViewer.view, bottomSpacer, myMainControls.view)
+        myMainPane.bottom = bottom
 
         stage.title = "TASSEL 6"
         val scene = Scene(myMainPane, 1000.0, 750.0)
@@ -102,7 +111,7 @@ class TASSELGUI : Application() {
         val autoGuessPlugin = FileLoadPlugin(true, true)
         result.items += createMenuItem(autoGuessPlugin, name = "Open", action = EventHandler {
             myProgressViewer.showProgress(autoGuessPlugin)
-            Thread(Runnable { autoGuessPlugin.processData(null) }).start()
+            Thread { autoGuessPlugin.processData(null) }.start()
         })
 
         result.items += createMenuItem(FileLoadPlugin(true))
@@ -180,10 +189,18 @@ class TASSELGUI : Application() {
 
         myInfo.show(datum)
 
+        myMainControls.clear()
+
+        myMainView.children.clear()
+
         when (val data = datum.data) {
-            is TableReport -> myMainPane.center = TableReportViewer.instance(data).view
-            is FactorTable -> myMainPane.center = FactorTableViewer.instance(data).view
-            else -> myMainPane.center = EMPTY_NODE
+            is TableReport -> myMainView.children += TableReportViewer.instance(data).view
+            is FactorTable -> {
+                val viewer = FactorTableViewer.instance(data, myMainView.widthProperty())
+                myMainView.children += viewer.view
+                myMainControls.add(viewer.controls)
+            }
+            else -> myMainView.children += EMPTY_NODE
         }
 
     }

@@ -9,11 +9,68 @@
     <version>6.0.0</version>
     <packaging>jar</packaging>
 
-    <name>net.maizegenetics tassel</name>
+    <name>${project.groupId}:${project.artifactId}</name>
+    <description>TASSEL is a software package to evaluate traits associations, evolutionary patterns, and linkage
+        disequilibrium.
+    </description>
+    <url>http://www.maizegenetics.net/tassel</url>
+    <licenses>
+        <license>
+            <name>GNU Lesser General Public License, version 2.1</name>
+            <url>https://www.gnu.org/licenses/lgpl-2.1.html</url>
+        </license>
+    </licenses>
+    <scm>
+        <connection>scm:git:git://bitbucket.org:tasseladmin/tassel-5-source.git</connection>
+        <developerConnection>scm:git:ssh://bitbucket.org:tasseladmin/tassel-5-source.git</developerConnection>
+        <url>https://bitbucket.org/tasseladmin/tassel-5-source/src</url>
+    </scm>
+    <distributionManagement>
+        <snapshotRepository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+        <repository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+        </repository>
+    </distributionManagement>
+    <developers>
+        <developer>
+            <name>Terry Casstevens</name>
+            <email>tmc46@cornell.edu</email>
+            <organization>Buckler Lab</organization>
+            <organizationUrl>http://www.maizegenetics.net/</organizationUrl>
+        </developer>
+        <developer>
+            <name>Ed Buckler</name>
+            <email>esb33@cornell.edu</email>
+            <organization>Buckler Lab</organization>
+            <organizationUrl>http://www.maizegenetics.net/</organizationUrl>
+        </developer>
+        <developer>
+            <name>Lynn Johnson</name>
+            <email>lcj34@cornell.edu</email>
+            <organization>Buckler Lab</organization>
+            <organizationUrl>http://www.maizegenetics.net/</organizationUrl>
+        </developer>
+        <developer>
+            <name>Zack Miller</name>
+            <email>zrm22@cornell.edu</email>
+            <organization>Buckler Lab</organization>
+            <organizationUrl>http://www.maizegenetics.net/</organizationUrl>
+        </developer>
+        <developer>
+            <name>Peter Bradbury</name>
+            <email>pjb39@cornell.edu</email>
+            <organization>Buckler Lab</organization>
+            <organizationUrl>http://www.maizegenetics.net/</organizationUrl>
+        </developer>
+    </developers>
 
     <properties>
         <maven.build.timestamp.format>yyyy-MM-dd</maven.build.timestamp.format>
-        <kotlin.version>1.3.0</kotlin.version>
+        <kotlin.version>1.3.50</kotlin.version>
         <junit.version>4.12</junit.version>
         <javafx.version>11.0.1</javafx.version>
     </properties>
@@ -64,7 +121,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.0</version>
+                <version>3.8.1</version>
                 <executions>
                     <execution>
                         <id>default-compile</id>
@@ -96,6 +153,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
+                <version>3.1.0</version>
                 <configuration>
                     <archive>
                         <manifest>
@@ -232,7 +290,7 @@
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>1.2.1</version>
                 <configuration>
-                    <mainClass>net.maizegenetics.tassel.TASSELMainApp</mainClass>
+                    <mainClass>net.maizegenetics.terry.ZoomAndScrollApplication</mainClass>
                 </configuration>
             </plugin>
         </plugins>
@@ -260,12 +318,6 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-math3</artifactId>
             <version>3.6.1</version>
-        </dependency>
-        <dependency>
-            <groupId>cisd</groupId>
-            <artifactId>jhdf5</artifactId>
-            <version>14.12.5</version>
-            <type>jar</type>
         </dependency>
         <dependency>
             <groupId>org.biojava</groupId>

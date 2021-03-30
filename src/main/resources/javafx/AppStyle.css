@@ -1,11 +1,91 @@
 
+.base00 { color: #1b1918; }
+.base01 { color: #2c2421; }
+.base02 { color: #68615e; }
+.base03 { color: #766e6b; }
+.base04 { color: #9c9491; }
+.base05 { color: #a8a19f; }
+.base06 { color: #e6e2e0; }
+.base07 { color: #f1efee; }
+.base08 { color: #f22c40; }
+.base09 { color: #df5320; }
+.base0A { color: #c38418; }
+.base0B { color: #7b9726; }
+.base0C { color: #3d97b8; }
+.base0D { color: #407ee7; }
+.base0E { color: #6666ea; }
+.base0F { color: #c33ff3; }
+
+.base00 { color: #3B3228 }
+.base01 { color: #534636 }
+.base02 { color: #645240 }
+.base03 { color: #7e705a }
+.base04 { color: #b8afad }
+.base05 { color: #d0c8c6 }
+.base06 { color: #e9e1dd }
+.base07 { color: #f5eeeb }
+.base08 { color: #cb6077 }
+.base09 { color: #d28b71 }
+.base0A { color: #f4bc87 }
+.base0B { color: #beb55b }
+.base0C { color: #7bbda4 }
+.base0D { color: #8ab3b5 }
+.base0E { color: #a89bb9 }
+.base0F { color: #bb9584 }
+
+.gui00        { color: #181818 }
+.gui01        { color: #282828 }
+.gui02        { color: #383838 }
+.gui03        { color: #585858 }
+.gui04        { color: #b8b8b8 }
+.gui05        { color: #d8d8d8 }
+.gui06        { color: #e8e8e8 }
+.gui07        { color: #f8f8f8 }
+.gui08        { color: #ab4642 }
+.gui09        { color: #dc9656 }
+.gui0A        { color: #f7ca88 }
+.gui0B        { color: #a1b56c }
+.gui0C        { color: #86c1b9 }
+.gui0D        { color: #7cafc2 }
+.gui0E        { color: #ba8baf }
+.gui0F        { color: #a16946 }
+
+
 .tab-pane *.tab-header-background {
     -fx-background-color: #F4F4F4;
-    -fx-padding: 0.416667em 0.166667em 0.0em 0.0em;
-    -fx-border-width: 3
+    -fx-padding: 5;
+    -fx-border-width: 3;
+}
+
+.TERRYtab-pane {
+    -fx-border-color: #ab4642;
+    -fx-border-insets: 5;
+    -fx-border-radius: 20;
+    -fx-border-width: 3;
+}
+
+.tab-pane > .tab-header-area > .headers-region > .tab > .tab-container > .tab-label {
+    -fx-alignment: CENTER;
+    -fx-text-fill: #181818;
+}
+
+.tab-pane .tab:selected {
+    -fx-background-color: #ab4642;
+    -fx-text-fill: black;
+    -fx-font: bold 10pt "Arial";
 }
 
 .button {
+    -fx-font: bold 10pt "Arial";
+    -fx-effect: dropshadow( three-pass-box , rgba(0,0,0,0.6) , 7, 0.0 , 3 , 3 );
+}
+
+.buttonTERRY {
     -fx-font: bold italic 10pt "Arial";
-    -fx-effect: dropshadow(one-pass-box, black, 8, 0.0, 2, 0);
+    -fx-effect: dropshadow( three-pass-box , rgba(0,0,0,0.6) , 5, 0.0 , 0 , 1 );
+}
+
+.dialog-pane{
+    -fx-border-color:black;
+    -fx-border-width:2.0px;
 }

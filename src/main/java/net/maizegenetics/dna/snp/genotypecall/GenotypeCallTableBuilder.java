@@ -3,8 +3,14 @@
  */
 package net.maizegenetics.dna.snp.genotypecall;
 
-import ch.systemsx.cisd.hdf5.HDF5Factory;
-import ch.systemsx.cisd.hdf5.IHDF5Reader;
+import net.maizegenetics.dna.snp.GenotypeTable;
+import net.maizegenetics.dna.snp.NucleotideAlignmentConstants;
+import net.maizegenetics.dna.snp.Translate;
+import net.maizegenetics.dna.snp.TranslateBuilder;
+import net.maizegenetics.util.SuperByteMatrix;
+import net.maizegenetics.util.SuperByteMatrixBuilder;
+import net.maizegenetics.util.Tuple;
+import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,16 +19,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.regex.Pattern;
-
-import net.maizegenetics.dna.snp.GenotypeTable;
-import net.maizegenetics.dna.snp.NucleotideAlignmentConstants;
-import net.maizegenetics.dna.snp.Translate;
-import net.maizegenetics.dna.snp.TranslateBuilder;
-import net.maizegenetics.util.SuperByteMatrix;
-import net.maizegenetics.util.SuperByteMatrixBuilder;
-import net.maizegenetics.util.Tuple;
-
-import org.apache.log4j.Logger;
 
 /**
  * Builder to construct a GenotypeCallTable. This builder is generally only used
@@ -257,13 +253,5 @@ public class GenotypeCallTableBuilder {
         } else {
             return new ByteGenotypeCallTable(temp, myIsPhased, myAlleleEncodings);
         }
-    }
-
-    public static GenotypeCallTable buildHDF5(String filename) {
-        return HDF5ByteGenotypeCallTable.getInstance(HDF5Factory.openForReading(filename));
-    }
-
-    public static GenotypeCallTable buildHDF5(IHDF5Reader reader) {
-        return HDF5ByteGenotypeCallTable.getInstance(reader);
     }
 }

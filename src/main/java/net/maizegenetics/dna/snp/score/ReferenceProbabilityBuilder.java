@@ -3,10 +3,7 @@
  */
 package net.maizegenetics.dna.snp.score;
 
-import ch.systemsx.cisd.hdf5.IHDF5Reader;
-import ch.systemsx.cisd.hdf5.IHDF5Writer;
 import net.maizegenetics.dna.snp.MaskMatrix;
-
 import net.maizegenetics.dna.snp.Translate;
 import net.maizegenetics.dna.snp.TranslateBuilder;
 import net.maizegenetics.dna.snp.byte2d.Byte2D;
@@ -14,7 +11,6 @@ import net.maizegenetics.dna.snp.byte2d.Byte2DBuilder;
 import net.maizegenetics.taxa.TaxaList;
 
 /**
- *
  * @author Terry Casstevens
  */
 public class ReferenceProbabilityBuilder {
@@ -25,15 +21,6 @@ public class ReferenceProbabilityBuilder {
     private ReferenceProbabilityBuilder(int numTaxa, int numSites, TaxaList taxaList) {
         myBuilder = Byte2DBuilder.getInstance(numTaxa, numSites, SiteScore.SITE_SCORE_TYPE.ReferenceProbablity, taxaList);
         myNumSites = numSites;
-    }
-
-    private ReferenceProbabilityBuilder(IHDF5Writer writer, int numTaxa, int numSites, TaxaList taxaList) {
-        myBuilder = Byte2DBuilder.getInstance(writer, numSites, SiteScore.SITE_SCORE_TYPE.ReferenceProbablity, taxaList);
-        myNumSites = numSites;
-    }
-
-    public static ReferenceProbabilityBuilder getInstance(IHDF5Writer writer, int numTaxa, int numSites, TaxaList taxaList) {
-        return new ReferenceProbabilityBuilder(writer, numTaxa, numSites, taxaList);
     }
 
     public static ReferenceProbabilityBuilder getInstance(int numTaxa, int numSites, TaxaList taxaList) {
@@ -51,10 +38,6 @@ public class ReferenceProbabilityBuilder {
 
     public static ReferenceProbability getMaskInstance(ReferenceProbability base, MaskMatrix mask) {
         return new MaskReferenceProbability(base, mask);
-    }
-
-    public static ReferenceProbability getInstance(IHDF5Reader reader) {
-        return new ReferenceProbability(Byte2DBuilder.getInstance(reader, SiteScore.SITE_SCORE_TYPE.ReferenceProbablity));
     }
 
     public ReferenceProbabilityBuilder addTaxon(int taxon, float[] values) {

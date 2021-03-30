@@ -18,7 +18,6 @@ import net.maizegenetics.taxa.IdentifierSynonymizer
 import net.maizegenetics.taxa.TaxaList
 import net.maizegenetics.taxa.distance.DistanceMatrix
 import net.maizegenetics.taxa.tree.Tree
-import net.maizegenetics.util.HDF5TableReport
 import net.maizegenetics.util.TableReport
 import org.apache.log4j.Logger
 import java.util.ArrayList
@@ -34,7 +33,6 @@ const val NODE_TYPE_RESULT = "Result"
 const val NODE_TYPE_SEQUENCE = "Genotype Table"
 const val NODE_TYPE_POLYMORPHISMS = "Polymorphisms"
 const val NODE_TYPE_NUMERICAL = "Numerical"
-const val NODE_TYPE_HDF5_SCHEMA = "HDF5 Schema"
 const val NODE_TYPE_MATRIX = "Matrix"
 const val NODE_TYPE_TREE = "Tree"
 const val NODE_TYPE_LISTS = "Lists"
@@ -98,7 +96,6 @@ class DataTree : PluginListener {
                     is IdentifierSynonymizer -> addDatum(NODE_TYPE_SYNONYMIZER, d)
                     is Phenotype -> addDatum(NODE_TYPE_NUMERICAL, d)
                     is DistanceMatrix -> addDatum(NODE_TYPE_MATRIX, d)
-                    is HDF5TableReport -> addDatum(NODE_TYPE_HDF5_SCHEMA, d)
                     is TableReport -> addDatum(NODE_TYPE_NUMERICAL, d)
                     is FilterList -> addDatum(NODE_TYPE_FILTERS, d)
                     is Tree -> addDatum(NODE_TYPE_TREE, d)

@@ -6,35 +6,19 @@
  */
 package net.maizegenetics.analysis.data;
 
-import ch.systemsx.cisd.hdf5.HDF5Factory;
-import ch.systemsx.cisd.hdf5.IHDF5Reader;
 import javafx.stage.FileChooser;
-import net.maizegenetics.dna.map.TOPMUtils;
+import net.maizegenetics.dna.factor.io.BuilderFromHapMap;
 import net.maizegenetics.dna.snp.GenotypeTable;
 import net.maizegenetics.dna.snp.ImportUtils;
 import net.maizegenetics.dna.snp.ReadSequenceAlignmentUtils;
-import net.maizegenetics.dna.snp.io.BuilderFromHapMapLIX;
-import net.maizegenetics.dna.snp.io.FilterJSONUtils;
-import net.maizegenetics.dna.snp.io.JSONUtils;
-import net.maizegenetics.dna.snp.io.LineIndexBuilder;
-import net.maizegenetics.dna.snp.io.ReadNumericMarkerUtils;
-import net.maizegenetics.gui.AlertUtils;
+import net.maizegenetics.dna.snp.io.*;
 import net.maizegenetics.gui.FileChooserUtils;
 import net.maizegenetics.phenotype.Phenotype;
 import net.maizegenetics.phenotype.PhenotypeBuilder;
-import net.maizegenetics.plugindef.AbstractPlugin;
-import net.maizegenetics.plugindef.DataSet;
-import net.maizegenetics.plugindef.Datum;
-import net.maizegenetics.plugindef.PluginEvent;
-import net.maizegenetics.plugindef.PluginListener;
-import net.maizegenetics.plugindef.PluginParameter;
+import net.maizegenetics.plugindef.*;
 import net.maizegenetics.prefs.TasselPrefs;
-import net.maizegenetics.tassel.TASSELGUI;
 import net.maizegenetics.taxa.distance.DistanceMatrixBuilder;
-import net.maizegenetics.taxa.distance.DistanceMatrixUtils;
 import net.maizegenetics.taxa.distance.ReadDistanceMatrix;
-import net.maizegenetics.util.HDF5TableReport;
-import net.maizegenetics.util.HDF5Utils;
 import net.maizegenetics.util.TableReportUtils;
 import net.maizegenetics.util.Utils;
 import org.apache.log4j.Logger;
@@ -91,7 +75,7 @@ public class FileLoadPlugin extends AbstractPlugin {
         ProjectPCsandRunModelSelection("Project PCs"),
         Phylip_Seq("Phylip (Sequential)"), Phylip_Inter("Phylip (Interleaved)"), Table("Table"),
         Serial("Serial"), HapmapDiploid("Hapmap Diploid"), Text("Text"), VCF("VCF"),
-        HDF5("HDF5"), TOPM("TOPM"), HDF5Schema("HDF5 Schema"), Filter("Filter"),
+        Filter("Filter"),
         NumericGenotype("Numeric Genotype"), TaxaList("Taxa List"), PositionList("Position List"),
         SqrMatrixRaw("Raw MultiBLUP Matrix"), SqrMatrixBin("Binary MultiBLUP Matrix"),
         GOBII("GOBII"), Depth("Depth"), ReferenceProbability("Numeric Genotype"), Report("Report"),
@@ -115,12 +99,7 @@ public class FileLoadPlugin extends AbstractPlugin {
     public static final String FILE_EXT_PLINK_MAP = ".plk.map";
     public static final String FILE_EXT_PLINK_PED = ".plk.ped";
     public static final String FILE_EXT_SERIAL_GZ = ".serial.gz";
-    public static final String FILE_EXT_HDF5 = ".h5";
     public static final String FILE_EXT_VCF = ".vcf";
-    public static final String FILE_EXT_TOPM = ".topm";
-    public static final String FILE_EXT_TOPM_H5 = ".topm.h5";
-    public static final String FILE_EXT_TOPM_BIN = ".topm.bin";
-    public static final String FILE_EXT_TOPM_TEXT = ".topm.txt";
     public static final String FILE_EXT_FASTA = ".fasta";
     public static final String FILE_EXT_PHYLIP = ".phy";
 
@@ -171,10 +150,7 @@ public class FileLoadPlugin extends AbstractPlugin {
                 TasselFileType.Sequence,
                 TasselFileType.Fasta,
                 TasselFileType.SqrMatrix,
-                TasselFileType.Table,
-                TasselFileType.TOPM,
-                TasselFileType.HDF5,
-                TasselFileType.HDF5Schema}));
+                TasselFileType.Table}));
         myFileType = new PluginParameter<>(myFileType, temp);
 
         if (!isInteractive() && myFileType.isEmpty() && myFileType.hasPossibleValues()) {
@@ -282,26 +258,6 @@ public class FileLoadPlugin extends AbstractPlugin {
                     myLogger.info("guessAtUnknowns: type: " + TasselFileType.Hapmap);
                     alreadyLoaded.add(myOpenFiles[i]);
                     tds = processDatum(myOpenFiles[i], TasselFileType.Hapmap);
-                } else if ((myOpenFiles[i].endsWith(FILE_EXT_TOPM_H5)) || (myOpenFiles[i].endsWith(FILE_EXT_TOPM))
-                        || (myOpenFiles[i].endsWith(FILE_EXT_TOPM_BIN)) || (myOpenFiles[i].endsWith(FILE_EXT_TOPM_TEXT))) {
-                    myLogger.info("guessAtUnknowns: type: " + TasselFileType.TOPM);
-                    alreadyLoaded.add(myOpenFiles[i]);
-                    tds = processDatum(myOpenFiles[i], TasselFileType.TOPM);
-                } else if ((myOpenFiles[i].endsWith(".grm.N.bin")) || (myOpenFiles[i].endsWith(".grm.bin"))
-                        || (myOpenFiles[i].endsWith(".grm.id"))) {
-                    String[] grmFiles = DistanceMatrixUtils.getGRMFilenames(myOpenFiles[i]);
-                    if (new File(grmFiles[0]).isFile() && new File(grmFiles[1]).isFile() && new File(grmFiles[2]).isFile()) {
-                        myLogger.info("guessAtUnknowns: type: " + TasselFileType.SqrMatrixBin);
-                        alreadyLoaded.add(grmFiles[0]);
-                        alreadyLoaded.add(grmFiles[1]);
-                        alreadyLoaded.add(grmFiles[2]);
-                        tds = processDatum(myOpenFiles[i], TasselFileType.SqrMatrixBin);
-                    } else if (myOpenFiles[i].endsWith(".grm.N.bin") && new File(grmFiles[4]).isFile() && new File(myOpenFiles[i]).isFile()) {
-                        myLogger.info("guessAtUnknowns: type: " + TasselFileType.SqrMatrix);
-                        alreadyLoaded.add(myOpenFiles[i]);
-                        alreadyLoaded.add(grmFiles[4]);
-                        tds = processDatum(grmFiles[4], TasselFileType.SqrMatrix);
-                    }
                 } else if (myOpenFiles[i].endsWith(FILE_EXT_PLINK_PED) || myOpenFiles[i].endsWith(FILE_EXT_PLINK_PED + ".gz")) {
                     myLogger.info("guessAtUnknowns: type: " + TasselFileType.Plink);
                     String theMapFile = myOpenFiles[i].replaceFirst(FILE_EXT_PLINK_PED, FILE_EXT_PLINK_MAP);
@@ -320,10 +276,6 @@ public class FileLoadPlugin extends AbstractPlugin {
                     myLogger.info("guessAtUnknowns: type: " + TasselFileType.Serial);
                     alreadyLoaded.add(myOpenFiles[i]);
                     tds = processDatum(myOpenFiles[i], TasselFileType.Serial);
-                } else if (myOpenFiles[i].endsWith(FILE_EXT_HDF5)) {
-                    myLogger.info("guessAtUnknowns: type: " + TasselFileType.HDF5);
-                    alreadyLoaded.add(myOpenFiles[i]);
-                    tds = processDatum(myOpenFiles[i], TasselFileType.HDF5);
                 } else if (myOpenFiles[i].endsWith(FILE_EXT_VCF) || myOpenFiles[i].endsWith(FILE_EXT_VCF + ".gz")) {
                     myLogger.info("guessAtUnknowns: type: " + TasselFileType.VCF);
                     alreadyLoaded.add(myOpenFiles[i]);
@@ -485,7 +437,7 @@ public class FileLoadPlugin extends AbstractPlugin {
 
     private DataSet processDatum(String inFile, TasselFileType theFT) {
 
-        Object result = null;
+        Object result;
         String suffix = null;
         try {
             switch (theFT) {
@@ -494,42 +446,8 @@ public class FileLoadPlugin extends AbstractPlugin {
                     if (inFile.endsWith(".gz")) {
                         suffix = FILE_EXT_HAPMAP_GZ;
                     }
-                    result = ImportUtils.readFromHapmap(inFile, this, sortPositions());
-                    break;
-                }
-                case HDF5: {
-                    IHDF5Reader reader = HDF5Factory.openForReading(inFile);
-                    boolean t4HDF5 = HDF5Utils.isTASSEL4HDF5Format(HDF5Factory.openForReading(inFile));
-                    reader.close();
-                    if (t4HDF5) {
-                        String newInfile = inFile.replace(".h5", ".t5.h5");
-                        if (new File(newInfile).exists()) {
-                            String message = "This file is TASSEL 4 HDF5 format. It looks like it has already been converted to TASSEL 5. Using file: " + newInfile;
-                            if (isInteractive()) {
-                                AlertUtils.showWarn(message);
-                            } else {
-                                myLogger.warn(message);
-                            }
-                        } else {
-                            String message = "This file is TASSEL 4 HDF5 format. It will be converted to TASSEL 5 "
-                                    + "HDF5 format with name: " + newInfile + ".  This may take a few minutes.";
-                            if (isInteractive()) {
-                                AlertUtils.showWarn(message);
-                            } else {
-                                myLogger.warn(message);
-                            }
-                            MigrateHDF5FromT4T5.copyGenotypes(inFile, newInfile);
-                        }
-
-                        inFile = newInfile;
-                    }
-                    suffix = FILE_EXT_HDF5;
-                    result = ImportUtils.readGuessFormat(inFile);
-                    break;
-                }
-                case HDF5Schema: {
-                    suffix = "";
-                    result = new HDF5TableReport(inFile);
+                    result = BuilderFromHapMap.getBuilder(inFile, this).build();
+                    //result = ImportUtils.readFromHapmap(inFile, this, sortPositions());
                     break;
                 }
                 case VCF: {
@@ -578,10 +496,6 @@ public class FileLoadPlugin extends AbstractPlugin {
                 }
                 case Table: {
                     result = TableReportUtils.readDelimitedTableReport(inFile, "\t");
-                    break;
-                }
-                case TOPM: {
-                    result = TOPMUtils.readTOPM(inFile);
                     break;
                 }
                 case Filter: {

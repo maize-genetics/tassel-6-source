@@ -3,23 +3,18 @@ package net.maizegenetics.dna.map;
 import cern.colt.GenericSorting;
 import cern.colt.Swapper;
 import cern.colt.function.IntComparator;
-import ch.systemsx.cisd.hdf5.HDF5Factory;
-import ch.systemsx.cisd.hdf5.IHDF5Reader;
-import ch.systemsx.cisd.hdf5.IHDF5Writer;
 import com.google.common.base.Preconditions;
 import net.maizegenetics.dna.snp.genotypecall.GenotypeCallTableBuilder;
-import net.maizegenetics.util.HDF5Utils;
-import net.maizegenetics.util.Tassel5HDF5Constants;
-
-import java.util.*;
+import net.maizegenetics.util.Tuple;
 import org.apache.log4j.Logger;
 
-import static net.maizegenetics.dna.WHICH_ALLELE.*;
-import net.maizegenetics.util.Tuple;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 /**
- * A builder for creating immutable PositionList. Can be used for either an in
- * memory or HDF5 list.
+ * A builder for creating immutable PositionList.
  *
  * <p>
  * Example:
@@ -37,12 +32,6 @@ import net.maizegenetics.util.Tuple;
  * multiple times to build multiple lists in series. Each new list
  * contains the one created before it.
  *
- * HDF5 Example
- * <p>Example:
- * <pre>   {@code
- *   PositionList instance=new PositionHDF5List.Builder("fileName").build();
- *   }
- *
  * <p>Builder instances can be reused - it is safe to call {@link #build()}
  */
 public class PositionListBuilder {
@@ -50,9 +39,7 @@ public class PositionListBuilder {
     private static final Logger myLogger = Logger.getLogger(PositionListBuilder.class);
 
     private ArrayList<Position> myPositions = new ArrayList<>();
-    private boolean isHDF5 = false;
     private String genomeVersion = null;
-    private IHDF5Reader reader;
 
     /**
      * Creates a new builder. The returned builder is equivalent to the builder
@@ -81,13 +68,11 @@ public class PositionListBuilder {
      * Adds {@code element} to the {@code PositionList}.
      *
      * @param element the element to add
+     *
      * @return this {@code Builder} object
      * @throws NullPointerException if {@code element} is null
      */
     public PositionListBuilder add(Position element) {
-        if (isHDF5) {
-            throw new UnsupportedOperationException("Positions cannot be added to existing HDF5 alignments");
-        }
         Preconditions.checkNotNull(element, "element cannot be null");
         myPositions.add(element);
         return this;
@@ -98,13 +83,11 @@ public class PositionListBuilder {
      *
      * @param collection collection containing positions to be added to this
      * list
+     *
      * @return this {@code Builder} object
      * @throws NullPointerException if {@code elements} is or contains null
      */
     public PositionListBuilder addAll(Collection<? extends Position> collection) {
-        if (isHDF5) {
-            throw new UnsupportedOperationException("Positions cannot be added to existing HDF5 alignments");
-        }
         myPositions.ensureCapacity(myPositions.size() + collection.size());
         for (Position elem : collection) {
             Preconditions.checkNotNull(elem, "elements contains a null");
@@ -114,9 +97,6 @@ public class PositionListBuilder {
     }
 
     public PositionListBuilder addAll(PositionListBuilder builder) {
-        if (isHDF5) {
-            throw new UnsupportedOperationException("Positions cannot be added to existing HDF5 alignments");
-        }
         myPositions.ensureCapacity(myPositions.size() + builder.size());
         for (Position elem : builder.myPositions) {
             Preconditions.checkNotNull(elem, "elements contains a null");
@@ -131,13 +111,11 @@ public class PositionListBuilder {
      *
      * @param index index of the element to replace
      * @param element element to be stored at the specified position
+     *
      * @return this {@code Builder} object
      * @throws IndexOutOfBoundsException {@inheritDoc}
      */
     public PositionListBuilder set(int index, Position element) {
-        if (isHDF5) {
-            throw new UnsupportedOperationException("Positions cannot be edited to existing HDF5 alignments");
-        }
         myPositions.set(index, element);
         return this;
     }
@@ -175,20 +153,6 @@ public class PositionListBuilder {
     }
 
     /**
-     * Creates a new position list based on an existing HDF5 file.
-     */
-    public static PositionList getInstance(String hdf5Filename) {
-        return new PositionHDF5List(HDF5Factory.openForReading(hdf5Filename));
-    }
-
-    /**
-     * Creates a new builder based on an existing HDF5 file reader.
-     */
-    public static PositionList getInstance(IHDF5Reader reader) {
-        return new PositionHDF5List(reader);
-    }
-
-    /**
      * Generates a generic position list when no position information known
      *
      * @param numSites number of sites
@@ -213,71 +177,12 @@ public class PositionListBuilder {
     }
 
     /**
-     * Creates a positionList in a new HDF5 file.
-     */
-    public PositionListBuilder(IHDF5Writer h5w, PositionList a) {
-        HDF5Utils.createHDF5PositionModule(h5w);
-        h5w.int32().setAttr(Tassel5HDF5Constants.POSITION_ATTRIBUTES_PATH, Tassel5HDF5Constants.POSITION_NUM_SITES, a.size());
-        if (a.hasReference()) {
-            h5w.string().setAttr(Tassel5HDF5Constants.POSITION_ATTRIBUTES_PATH, Tassel5HDF5Constants.POSITION_GENOME_VERSION, a.genomeVersion());
-            h5w.bool().setAttr(Tassel5HDF5Constants.POSITION_ATTRIBUTES_PATH, Tassel5HDF5Constants.POSITION_HAS_REFEFERENCE, true);
-        }
-        String[] lociNames = new String[a.numChromosomes()];
-        Map<Chromosome, Integer> locusToIndex = new HashMap<>(10);
-        Chromosome[] loci = a.chromosomes();
-        for (int i = 0; i < a.numChromosomes(); i++) {
-            lociNames[i] = loci[i].getName();
-            locusToIndex.put(loci[i], i);
-        }
-        h5w.string().createArrayVL(Tassel5HDF5Constants.CHROMOSOMES, a.numChromosomes());
-        h5w.string().writeArrayVL(Tassel5HDF5Constants.CHROMOSOMES, lociNames);
-
-        int blockSize = 1 << 16;
-        h5w.string().createArray(Tassel5HDF5Constants.SNP_IDS, 15, a.numberOfSites(), blockSize, Tassel5HDF5Constants.genDeflation);
-        h5w.int32().createArray(Tassel5HDF5Constants.CHROMOSOME_INDICES, a.numberOfSites(), Tassel5HDF5Constants.intDeflation);
-        h5w.int32().createArray(Tassel5HDF5Constants.POSITIONS, a.numberOfSites(), Tassel5HDF5Constants.intDeflation);
-        h5w.int32().createArray(Tassel5HDF5Constants.REF_ALLELES, a.numberOfSites(), Tassel5HDF5Constants.intDeflation);
-        h5w.int32().createArray(Tassel5HDF5Constants.ANC_ALLELES, a.numberOfSites(), Tassel5HDF5Constants.intDeflation);
-
-        //This is written in blocks to deal with datasets in the scale for 50M positions
-        int blocks = ((a.numberOfSites() - 1) / blockSize) + 1;
-        for (int block = 0; block < blocks; block++) {
-            int startPos = block * blockSize;
-            int length = ((a.numberOfSites() - startPos) > blockSize) ? blockSize : a.numberOfSites() - startPos;
-            String[] snpIDs = new String[length];
-            int[] locusIndicesArray = new int[length];
-            int[] positions = new int[length];
-            byte[] refAlleles = new byte[length];
-            byte[] ancAlleles = new byte[length];
-            for (int i = 0; i < length; i++) {
-                Position gp = a.get(i + startPos);
-                snpIDs[i] = gp.getSNPID();
-                locusIndicesArray[i] = locusToIndex.get(gp.getChromosome());
-                positions[i] = gp.getPosition();
-                refAlleles[i] = gp.getAllele(Reference);
-                ancAlleles[i] = gp.getAllele(Ancestral);
-            }
-            HDF5Utils.writeHDF5Block(Tassel5HDF5Constants.SNP_IDS, h5w, blockSize, block, snpIDs);
-            HDF5Utils.writeHDF5Block(Tassel5HDF5Constants.CHROMOSOME_INDICES, h5w, blockSize, block, locusIndicesArray);
-            HDF5Utils.writeHDF5Block(Tassel5HDF5Constants.POSITIONS, h5w, blockSize, block, positions);
-            HDF5Utils.writeHDF5Block(Tassel5HDF5Constants.REF_ALLELES, h5w, blockSize, block, refAlleles);
-            HDF5Utils.writeHDF5Block(Tassel5HDF5Constants.ANC_ALLELES, h5w, blockSize, block, ancAlleles);
-        }
-        this.reader = h5w;
-        isHDF5 = true;
-    }
-
-    /**
      * Returns a newly-created {@code ImmutableList} based on the myPositions of
      * the {@code Builder}.
      */
     public PositionList build() {
-        if (isHDF5) {
-            return new PositionHDF5List(reader);
-        } else {
-            Collections.sort(myPositions);
-            return new PositionArrayList(myPositions, genomeVersion);
-        }
+        Collections.sort(myPositions);
+        return new PositionArrayList(myPositions, genomeVersion);
     }
 
     public Tuple<PositionList, int[]> buildWithSiteRedirect() {

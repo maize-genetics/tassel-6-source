@@ -3,7 +3,14 @@
  */
 package net.maizegenetics.dna.snp;
 
+import net.maizegenetics.dna.map.PositionListBuilder;
+import net.maizegenetics.dna.snp.genotypecall.GenotypeCallTable;
+import net.maizegenetics.dna.snp.genotypecall.GenotypeCallTableBuilder;
+import net.maizegenetics.dna.snp.io.BuilderFromHapMap;
+import net.maizegenetics.dna.snp.io.BuilderFromPLINK;
 import net.maizegenetics.dna.snp.io.BuilderFromVCF;
+import net.maizegenetics.taxa.TaxaList;
+import net.maizegenetics.taxa.TaxaListBuilder;
 import net.maizegenetics.util.ProgressListener;
 import net.maizegenetics.util.Utils;
 import org.apache.log4j.Logger;
@@ -14,15 +21,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
-import java.util.regex.Pattern;
-import net.maizegenetics.dna.map.PositionListBuilder;
-import net.maizegenetics.dna.snp.genotypecall.GenotypeCallTable;
-import net.maizegenetics.dna.snp.genotypecall.GenotypeCallTableBuilder;
-import net.maizegenetics.dna.snp.io.BuilderFromHapMap;
-import net.maizegenetics.dna.snp.io.BuilderFromPLINK;
-import net.maizegenetics.plugindef.DataSet;
-import net.maizegenetics.taxa.TaxaList;
-import net.maizegenetics.taxa.TaxaListBuilder;
 
 /**
  * Methods for importing GenotypeTables from various file formats.
@@ -33,8 +31,6 @@ import net.maizegenetics.taxa.TaxaListBuilder;
 public class ImportUtils {
 
     private static final Logger myLogger = Logger.getLogger(ImportUtils.class);
-    private static final Pattern WHITESPACE_PATTERN = Pattern.compile("\\s");
-    public static final int NUM_HAPMAP_NON_TAXA_HEADERS = 11;
 
     private ImportUtils() {
         // Utility Class - do not instantiate.
@@ -45,9 +41,7 @@ public class ImportUtils {
      */
     public static GenotypeTable readGuessFormat(String fileName) {
 
-        if (fileName.endsWith(".h5")) {
-            return GenotypeTableBuilder.getInstance(fileName);
-        } else if (fileName.endsWith("hmp.txt.gz") || fileName.endsWith("hmp.txt")) {
+        if (fileName.endsWith("hmp.txt.gz") || fileName.endsWith("hmp.txt")) {
             return readFromHapmap(fileName, null);
         } else if (fileName.endsWith(".vcf") || fileName.endsWith(".vcf.gz")) {
             return readFromVCF(fileName, null);
@@ -55,7 +49,7 @@ public class ImportUtils {
         return null;
 
     }
-    
+
     public static GenotypeTable readFromVCF(final String filename, ProgressListener listener, boolean keepDepth, boolean sortPositions) {
         BuilderFromVCF builder = BuilderFromVCF.getBuilder(filename, listener);
         if (keepDepth) {
@@ -84,6 +78,7 @@ public class ImportUtils {
      * Read GenotypeTable from HapMap file
      *
      * @param filename input HapMap file name
+     *
      * @return a genotype table
      */
     public static GenotypeTable readFromHapmap(final String filename) {
@@ -95,19 +90,21 @@ public class ImportUtils {
      *
      * @param filename input HapMap file name
      * @param listener progress listener to track reading rate
+     *
      * @return a genotype table
      */
     public static GenotypeTable readFromHapmap(final String filename, ProgressListener listener) {
         return readFromHapmap(filename, listener, false);
     }
-    
+
     /**
      * Read GenotypeTable from HapMap file
      *
      * @param filename input HapMap file name
      * @param listener progress listener to track reading rate
      * @param sortPositions whether to sort positions
-     * @return 
+     *
+     * @return
      */
     public static GenotypeTable readFromHapmap(final String filename, ProgressListener listener, boolean sortPositions) {
         BuilderFromHapMap builder = BuilderFromHapMap.getBuilder(filename, listener);

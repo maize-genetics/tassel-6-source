@@ -3,9 +3,6 @@
  */
 package net.maizegenetics.dna.snp.score;
 
-import ch.systemsx.cisd.hdf5.IHDF5Reader;
-import ch.systemsx.cisd.hdf5.IHDF5Writer;
-
 import net.maizegenetics.dna.snp.MaskMatrix;
 import net.maizegenetics.dna.snp.Translate;
 import net.maizegenetics.dna.snp.TranslateBuilder;
@@ -14,7 +11,6 @@ import net.maizegenetics.dna.snp.byte2d.Byte2DBuilder;
 import net.maizegenetics.taxa.TaxaList;
 
 /**
- *
  * @author Terry Casstevens
  */
 public class AlleleDepthBuilder {
@@ -28,25 +24,6 @@ public class AlleleDepthBuilder {
             myBuilders[i] = Byte2DBuilder.getInstance(numTaxa, numSites, AlleleDepth.ALLELE_DEPTH_TYPES[i], taxaList);
         }
         myNumSites = numSites;
-    }
-
-    // For HDF5AlleleDepthBuilder
-    protected AlleleDepthBuilder(int numSites) {
-        myNumSites = numSites;
-        myBuilders = null;
-    }
-
-    /**
-     * AlleleDepthBuilder is created and depths are stored in a HDF5 file.
-     * setDepth methods are used to set the depths. Finish the building with
-     * build()
-     *
-     * @param writer
-     * @param numSites
-     * @return
-     */
-    public static AlleleDepthBuilder getInstance(IHDF5Writer writer, int numSites) {
-        return HDF5AlleleDepthBuilder.getHDF5NucleotideInstance(writer, numSites);
     }
 
     /**
@@ -81,17 +58,6 @@ public class AlleleDepthBuilder {
 
     public static AlleleDepth getMaskInstance(AlleleDepth base, MaskMatrix mask) {
         return new MaskAlleleDepth(base, mask);
-    }
-
-    /**
-     * This creates an AlleleDepth instance from an existing HDF5 file.
-     *
-     * @param reader reader
-     *
-     * @return AlleleDepth
-     */
-    public static AlleleDepth getInstance(IHDF5Reader reader) {
-        return HDF5AlleleDepthBuilder.getExistingHDF5Instance(reader);
     }
 
     public AlleleDepthBuilder addTaxon(int taxon, int[] values, SiteScore.SITE_SCORE_TYPE type) {

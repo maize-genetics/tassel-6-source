@@ -3,21 +3,17 @@
  */
 package net.maizegenetics.dna.snp.score;
 
-import ch.systemsx.cisd.hdf5.IHDF5Reader;
-import ch.systemsx.cisd.hdf5.IHDF5Writer;
-
-import java.util.LinkedHashMap;
-import java.util.Map;
 import net.maizegenetics.dna.snp.MaskMatrix;
-
 import net.maizegenetics.dna.snp.Translate;
 import net.maizegenetics.dna.snp.TranslateBuilder;
 import net.maizegenetics.dna.snp.byte2d.Byte2D;
 import net.maizegenetics.dna.snp.byte2d.Byte2DBuilder;
 import net.maizegenetics.taxa.TaxaList;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 /**
- *
  * @author Terry Casstevens
  */
 public class AlleleProbabilityBuilder {
@@ -30,17 +26,6 @@ public class AlleleProbabilityBuilder {
             myBuilders.put(AlleleProbability.ALLELE_PROBABILITY_TYPES[i], Byte2DBuilder.getInstance(numTaxa, numSites, AlleleProbability.ALLELE_PROBABILITY_TYPES[i], taxaList));
         }
         myNumSites = numSites;
-    }
-
-    private AlleleProbabilityBuilder(IHDF5Writer writer, int numTaxa, int numSites, TaxaList taxaList) {
-        for (int i = 0; i < AlleleProbability.ALLELE_PROBABILITY_TYPES.length; i++) {
-            myBuilders.put(AlleleProbability.ALLELE_PROBABILITY_TYPES[i], Byte2DBuilder.getInstance(writer, numSites, AlleleProbability.ALLELE_PROBABILITY_TYPES[i], taxaList));
-        }
-        myNumSites = numSites;
-    }
-
-    public static AlleleProbabilityBuilder getInstance(IHDF5Writer writer, int numTaxa, int numSites, TaxaList taxaList) {
-        return new AlleleProbabilityBuilder(writer, numTaxa, numSites, taxaList);
     }
 
     public static AlleleProbabilityBuilder getAlleleProbabilityInstance(int numTaxa, int numSites, TaxaList taxaList) {
@@ -58,16 +43,6 @@ public class AlleleProbabilityBuilder {
 
     public static AlleleProbability getMaskInstance(AlleleProbability base, MaskMatrix mask) {
         return new MaskAlleleProbability(base, mask);
-    }
-
-    public static AlleleProbability getInstance(IHDF5Reader reader) {
-        int numAlleles = AlleleProbability.ALLELE_PROBABILITY_TYPES.length;
-        Byte2D[] input = new Byte2D[numAlleles];
-        int count = 0;
-        for (SiteScore.SITE_SCORE_TYPE current : AlleleProbability.ALLELE_PROBABILITY_TYPES) {
-            input[count++] = Byte2DBuilder.getInstance(reader, current);
-        }
-        return new AlleleProbability(input);
     }
 
     public AlleleProbabilityBuilder addTaxon(int taxon, byte[] values, SiteScore.SITE_SCORE_TYPE type) {

@@ -3,18 +3,10 @@ package net.maizegenetics.taxa;
 import cern.colt.GenericSorting;
 import cern.colt.Swapper;
 import cern.colt.function.IntComparator;
-import ch.systemsx.cisd.hdf5.IHDF5Reader;
-import ch.systemsx.cisd.hdf5.IHDF5Writer;
 import net.maizegenetics.dna.snp.GenotypeTable;
 import net.maizegenetics.dna.snp.genotypecall.GenotypeCallTableBuilder;
-import net.maizegenetics.util.HDF5Utils;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * A builder for creating immutable {@link TaxaList} instances.
@@ -30,10 +22,6 @@ import java.util.Map;
  *       }
  *   TaxaList tl=tlb.build();}</pre>
  * <p></p>
- * If building from HDF5:<pre>
- *   {@code
- *   TaxaList tl=new TaxaListBuilder().buildFromHDF5Genotypes(testMutFile);
- *   }</pre>
  *
  * @author Ed Buckler
  */
@@ -136,50 +124,6 @@ public class TaxaListBuilder {
 
     public TaxaList build() {
         return new TaxaArrayList(this);
-    }
-
-    /**
-     * Builds TaxaList with annotations from an HDF5 file.  The list of Taxa come from the those taxa that have been genotyped
-     * (in /Genotypes/ path), while the annotations come from the /Taxa/ path.  Frequently these two lists are
-     * identical, but sometimes this can Genotypes can have a subset of the taxa in /Taxa/
-     *
-     * @param reader
-     *
-     * @return
-     */
-    public TaxaList buildFromHDF5Genotypes(IHDF5Reader reader) {
-        if (!HDF5Utils.isTaxaLocked(reader)) {
-            throw new IllegalStateException("The Taxa module of this HDF5 file hasn't been locked, and therefore can't be opened for reading. This could occur if the file was created using the -ko (keep open) option when running the plugin ProductionSNPCallerPluginV2. Please check your file, close if appropriate, and try again.");
-        }
-        myTaxaList.clear();
-        for (String taxonName : HDF5Utils.getAllTaxaNames(reader)) {
-            if (!HDF5Utils.doTaxonCallsExist(reader, taxonName)) continue;  //if no calls exist skip it
-            myTaxaList.add(HDF5Utils.getTaxon(reader, taxonName));
-        }
-        return build();
-    }
-
-    /**
-     * Builds TaxaList with annotations from an HDF5 file.  The list of Taxa and annotations come from the /Taxa/ path.
-     * This maybe a super set of what is present in the /Genotypes/ or /TBT/ paths.
-     *
-     * @param reader
-     *
-     * @return
-     */
-    public TaxaList buildFromHDF5(IHDF5Reader reader) {
-        myTaxaList.clear();
-        for (String taxonName : HDF5Utils.getAllTaxaNames(reader)) {
-            myTaxaList.add(HDF5Utils.getTaxon(reader, taxonName));
-        }
-        return build();
-    }
-
-    public static void createHDF5TaxaList(IHDF5Writer writer, TaxaList exportList) {
-        HDF5Utils.createHDF5TaxaModule(writer);
-        for (Taxon taxon : exportList) {
-            HDF5Utils.addTaxon(writer, taxon);
-        }
     }
 
     //Default package private method to hand the list to the instance
