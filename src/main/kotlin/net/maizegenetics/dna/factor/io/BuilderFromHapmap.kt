@@ -2,11 +2,10 @@ package net.maizegenetics.dna.factor.io
 
 import com.google.common.collect.SetMultimap
 import net.maizegenetics.dna.factor.FactorTable
-import net.maizegenetics.dna.factor.SNPTable
+import net.maizegenetics.dna.factor.site.SNPSiteBuilder
 import net.maizegenetics.dna.map.Chromosome
 import net.maizegenetics.dna.map.GenomicFactor
 import net.maizegenetics.dna.map.GenomicFactorList
-import net.maizegenetics.dna.map.SNP
 import net.maizegenetics.dna.snp.GenotypeTableUtils
 import net.maizegenetics.dna.snp.NucleotideAlignmentConstants
 import net.maizegenetics.taxa.TaxaListBuilder
@@ -23,8 +22,6 @@ import java.util.regex.Pattern
 
 /*
  *  BuilderFromHapMap
- *
- *  Created on Aug 1, 2014
  */
 
 /**
@@ -114,7 +111,7 @@ class BuilderFromHapMap private constructor(private val myHapmapFile: String, pr
 
                 var currentSite = 0
                 val positions = GenomicFactorList.Builder()
-                val genotypes = SNPTable.SNPTableBuilder.instance(numTaxa, numLines)
+                val genotypes = SNPSiteBuilder.instance(numTaxa, numLines)
 
                 val numFutures = futures.size
                 var count = 0
@@ -159,7 +156,7 @@ class BuilderFromHapMap private constructor(private val myHapmapFile: String, pr
     }
 
     private inner class ProcessHapmapBlock(private var myInputLines: List<String>?, private val myNumTaxa: Int, private val myChromosomeLookup: MutableMap<String, Chromosome>, private val myIsOneLetter: Boolean) : Callable<ProcessHapmapBlock> {
-        private val myPositionList: MutableList<SNP>
+        private val myPositionList: MutableList<GenomicFactor>
         val numberSitesProcessed: Int
         var genotypes: SuperByteMatrix? = null
             private set
@@ -209,7 +206,7 @@ class BuilderFromHapMap private constructor(private val myHapmapFile: String, pr
                         throw IllegalArgumentException("BuilderFromHapMap: Position must be an integer: " + input.substring(tabPos[POSITION_INDEX - 1] + 1, tabPos[POSITION_INDEX]).trim { it <= ' ' })
                     }
 
-                    val apb = SNP(currChr, physicalPos, input.substring(0, tabPos[SNPID_INDEX]))
+                    val apb = GenomicFactor(input.substring(0, tabPos[SNPID_INDEX]), currChr, physicalPos)
                     // TODO("knownVariants(variants) //TODO   strand, variants,")
 
                     //val glbMajor = NucleotideAlignmentConstants.getNucleotideDiploidByte(variants[0])
@@ -227,11 +224,11 @@ class BuilderFromHapMap private constructor(private val myHapmapFile: String, pr
                         var i = offset
                         while (i < len) {
                             if (taxon >= myNumTaxa) {
-                                throw IllegalStateException("BuilderFromHapMap: SNP Named: " + myPositionList[myPositionList.size - 1].snpName + " has too many values.")
+                                throw IllegalStateException("BuilderFromHapMap: SNP Named: " + myPositionList[myPositionList.size - 1].factorName + " has too many values.")
                             }
                             val value = NucleotideAlignmentConstants.getNucleotideDiploidByte(input[i])
                             if (value == NucleotideAlignmentConstants.UNDEFINED_HOMOZYGOUS) {
-                                throw IllegalStateException("BuilderFromHapMap: SNP Named: " + myPositionList[myPositionList.size - 1].snpName + " has illegal value: " + input[i])
+                                throw IllegalStateException("BuilderFromHapMap: SNP Named: " + myPositionList[myPositionList.size - 1].factorName + " has illegal value: " + input[i])
                             }
                             genotypes!!.set(taxon++, site, value)
                             i += 2
@@ -240,20 +237,20 @@ class BuilderFromHapMap private constructor(private val myHapmapFile: String, pr
                         var i = offset
                         while (i < len) {
                             if (taxon >= myNumTaxa) {
-                                throw IllegalStateException("BuilderFromHapMap: SNP Named: " + myPositionList[myPositionList.size - 1].snpName + " has too many values.")
+                                throw IllegalStateException("BuilderFromHapMap: SNP Named: " + myPositionList[myPositionList.size - 1].factorName + " has too many values.")
                             }
                             // there is a phasing conflict with the existing import approach
                             val value = GenotypeTableUtils.getDiploidValue(NucleotideAlignmentConstants.getNucleotideDiploidByte(input[i + 1]),
                                     NucleotideAlignmentConstants.getNucleotideDiploidByte(input[i]))
                             if (value == NucleotideAlignmentConstants.UNDEFINED_HOMOZYGOUS) {
-                                throw IllegalStateException("BuilderFromHapMap: SNP Named: " + myPositionList[myPositionList.size - 1].snpName + " has illegal value: " + input[i] + input[i + 1])
+                                throw IllegalStateException("BuilderFromHapMap: SNP Named: " + myPositionList[myPositionList.size - 1].factorName + " has illegal value: " + input[i] + input[i + 1])
                             }
                             genotypes!!.set(taxon++, site, value)
                             i += 3
                         }
                     }
                     if (taxon != myNumTaxa) {
-                        throw IllegalStateException("BuilderFromHapMap: SNP Named: " + myPositionList[myPositionList.size - 1].snpName + " has too few values.")
+                        throw IllegalStateException("BuilderFromHapMap: SNP Named: " + myPositionList[myPositionList.size - 1].factorName + " has too few values.")
                     }
 
                     swapSitesIfOutOfOrder(site)

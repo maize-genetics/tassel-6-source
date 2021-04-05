@@ -219,9 +219,9 @@ class FactorTableViewer private constructor(val table: FactorTable) {
         factors.isGridLinesVisible = true
 
         var count = 0
-        for (i in currentSite until Math.min(table.factors.size, currentSite + maxColumns)) {
-            val factor = table.factors[i]
-            val text = "${factor.startChr}:${factor.startPos}"
+        for (i in currentSite until Math.min(table.numFactors(), currentSite + maxColumns)) {
+            val site = table[i]
+            val text = "${site.factor.startChr}:${site.factor.startPos}"
             val result = getVerticalText(text, width)
             factors.add(result, i - currentSite, 0)
             count++
@@ -232,7 +232,7 @@ class FactorTableViewer private constructor(val table: FactorTable) {
 
     private fun addValues(squareSize: Double, maxColumns: Int) {
 
-        table.sites().limit(maxColumns.toLong()).forEach {
+        table.take(maxColumns).forEach {
             val site = it.index
             when (it) {
                 is SNPSite -> {

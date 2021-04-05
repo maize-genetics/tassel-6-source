@@ -17,7 +17,7 @@ enum class Factor {
     Dosage
 }
 
-open class GenomicFactor(val startChr: Chromosome, val startPos: Int, val endChr: Chromosome = startChr, val endPos: Int = startPos) : Comparable<GenomicFactor> {
+open class GenomicFactor(val factorName: String, val startChr: Chromosome, val startPos: Int, val endChr: Chromosome = startChr, val endPos: Int = startPos) : Comparable<GenomicFactor> {
 
     override fun compareTo(other: GenomicFactor): Int {
         val result = startChr.compareTo(other.startChr)

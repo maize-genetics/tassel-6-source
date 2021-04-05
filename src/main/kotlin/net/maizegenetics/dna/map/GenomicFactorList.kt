@@ -10,7 +10,7 @@ import com.google.common.collect.ImmutableSortedSet
  * This is a list of genomic factors paired with it's weight
  */
 
-class GenomicFactorList private constructor(val factors: ImmutableList<GenomicFactor>, val weights: ImmutableList<Double>? = null) : List<GenomicFactor> by factors {
+class GenomicFactorList private constructor(private val factors: ImmutableList<GenomicFactor>, val weights: ImmutableList<Double>? = null) : List<GenomicFactor> by factors {
 
     // TODO("Sort")
     // TODO("Validate Order")
