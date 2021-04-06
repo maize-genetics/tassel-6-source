@@ -2,6 +2,7 @@ package net.maizegenetics.dna.factor.io
 
 import com.google.common.collect.SetMultimap
 import net.maizegenetics.dna.factor.FactorTable
+import net.maizegenetics.dna.factor.FactorTableBuilder
 import net.maizegenetics.dna.factor.site.SNPSiteBuilder
 import net.maizegenetics.dna.map.Chromosome
 import net.maizegenetics.dna.map.GenomicFactor
@@ -111,7 +112,8 @@ class BuilderFromHapMap private constructor(private val myHapmapFile: String, pr
 
                 var currentSite = 0
                 val positions = GenomicFactorList.Builder()
-                val genotypes = SNPSiteBuilder.instance(numTaxa, numLines)
+                val factorTableBuilder = FactorTableBuilder(taxa)
+                //val genotypes = SNPSiteBuilder.instance(numTaxa, numLines)
 
                 val numFutures = futures.size
                 var count = 0
@@ -119,11 +121,19 @@ class BuilderFromHapMap private constructor(private val myHapmapFile: String, pr
                     val pb = future.get()
                     positions.addAll(pb.positions)
                     val bgTS = pb.genotypes
-                    for (t in 0 until bgTS!!.numRows) {
-                        for (s in 0 until bgTS.numColumns) {
-                            genotypes.set(t, currentSite + s, bgTS.get(t, s))
+                    for (s in 0 until bgTS!!.numColumns) {
+                        val snpSite = SNPSiteBuilder(pb.positions[s], taxa)
+                        for (t in 0 until bgTS.numRows) {
+                            snpSite.set(t, bgTS.get(t, s))
                         }
+                        factorTableBuilder.add(snpSite.build())
                     }
+//                    for (t in 0 until bgTS!!.numRows) {
+//                        val snpSite = SNPSiteBuilder(pb.positions[])
+//                        for (s in 0 until bgTS.numColumns) {
+//                            genotypes.set(t, currentSite + s, bgTS.get(t, s))
+//                        }
+//                    }
                     currentSite += pb.numberSitesProcessed
                     if (myProgressListener != null) {
                         count++
@@ -140,9 +150,9 @@ class BuilderFromHapMap private constructor(private val myHapmapFile: String, pr
                 //    throw IllegalStateException("BuilderFromHapMap: Ordering incorrect. HapMap must be ordered by position. Please first use SortGenotypeFilePlugin to correctly order the file.")
                 //}
 
-                genotypes.taxa = taxa
-                genotypes.factors = positions.build()
-                return genotypes.build()
+                //genotypes.taxa = taxa
+                //genotypes.factors = positions.build()
+                return factorTableBuilder.build()
 
             }
         } catch (e: Exception) {

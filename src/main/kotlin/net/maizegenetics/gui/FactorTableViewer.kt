@@ -232,12 +232,12 @@ class FactorTableViewer private constructor(val table: FactorTable) {
 
     private fun addValues(squareSize: Double, maxColumns: Int) {
 
-        table.take(maxColumns).forEach {
-            val site = it.index
-            when (it) {
+        table.take(maxColumns).forEachIndexed { index, factorSite ->
+            val site = index
+            when (factorSite) {
                 is SNPSite -> {
-                    for (taxon in 0 until it.taxa.numberOfTaxa()) {
-                        val nucleotide = it.genotypeAsString(taxon)
+                    for (taxon in 0 until factorSite.taxa.numberOfTaxa()) {
+                        val nucleotide = factorSite.genotypeAsString(taxon)
                         when (nucleotide) {
                             "A" -> grid.add(NUCLEOTIDE_A_RECTANGLE(squareSize), site, taxon)
                             "C" -> grid.add(NUCLEOTIDE_C_RECTANGLE(squareSize), site, taxon)

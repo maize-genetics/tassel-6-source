@@ -9,9 +9,9 @@ import net.maizegenetics.taxa.TaxaList
  * Created November 14, 2018
  */
 
-abstract class FactorSite(val factor: GenomicFactor, val index: Int, val taxa: TaxaList, val weight: Double? = null, val isPhased: Boolean = false) : Comparable<FactorSite> {
+abstract class FactorSite(val factor: GenomicFactor, val taxa: TaxaList, val weight: Double? = null, val isPhased: Boolean = false) : Comparable<FactorSite> {
 
-    val stats = lazy { AlleleFreqCache.allelesSortedByFrequencyAndCountsNucleotide(index, TODO()) }
+    val stats = lazy { AlleleFreqCache.allelesSortedByFrequencyAndCountsNucleotide(0, TODO()) }
 
     abstract fun ploidy(): Int
 

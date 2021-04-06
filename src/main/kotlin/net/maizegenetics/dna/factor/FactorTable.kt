@@ -14,6 +14,8 @@ class FactorTable(val taxa: TaxaList, private var sites: List<FactorSite>) : Lis
         sites = sites.sorted()
     }
 
+    fun numTaxa() = taxa.size
+
     fun numFactors() = sites.size
 
     fun site(index: Int): FactorSite = sites[index]
