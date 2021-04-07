@@ -6,7 +6,6 @@ import javafx.scene.control.TreeItem
 import javafx.scene.control.TreeView
 import net.maizegenetics.analysis.data.GenotypeSummaryPlugin
 import net.maizegenetics.dna.map.PositionList
-import net.maizegenetics.dna.map.TOPMInterface
 import net.maizegenetics.dna.snp.FilterList
 import net.maizegenetics.dna.snp.GenotypeTable
 import net.maizegenetics.phenotype.Phenotype
@@ -46,7 +45,6 @@ const val NODE_TYPE_ASSOCIATIONS = "Association"
 const val NODE_TYPE_VARIANCES = "Variances"
 const val NODE_TYPE_SYNONYMIZER = "Synonymizer"
 const val NODE_TYPE_STEPWISE = "Stepwise"
-const val NODE_TYPE_TOPM = "TOPM"
 const val NODE_TYPE_GENO_SUMMARY = "Genotype Summary"
 const val NODE_TYPE_DEFAULT = NODE_TYPE_DATA
 
@@ -101,10 +99,6 @@ class DataTree : PluginListener {
                     is Tree -> addDatum(NODE_TYPE_TREE, d)
                     is TaxaList -> addDatum(NODE_TYPE_LISTS, d)
                     is PositionList -> addDatum(NODE_TYPE_LISTS, d)
-                    is TOPMInterface -> {
-                        addDatum(NODE_TYPE_TOPM, Datum(d.name + " (Text)", d.data, null))
-                        addDatum(NODE_TYPE_TOPM, Datum(d.name + " (Graphical)", d.data, null))
-                    }
                     else -> addDatum(NODE_TYPE_DEFAULT, d)
                 }
 

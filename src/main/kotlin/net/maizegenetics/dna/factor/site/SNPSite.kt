@@ -12,6 +12,10 @@ import net.maizegenetics.taxa.TaxaList
 
 class SNPSite(factor: GenomicFactor, taxa: TaxaList, private val values: ByteArray, weight: Double? = null, isPhased: Boolean = false) : FactorSite(factor, taxa, weight, isPhased) {
 
+    init {
+        require(taxa.size == values.size) { "Number of taxa: ${taxa.size} should match number of genotypes: ${values.size}." }
+    }
+
     override fun ploidy() = 2
 
     override fun genotype(taxon: Int): ByteArray = GenotypeTableUtils.getDiploidValues(values[taxon])
