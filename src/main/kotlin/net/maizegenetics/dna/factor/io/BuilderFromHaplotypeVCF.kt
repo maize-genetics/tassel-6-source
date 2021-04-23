@@ -17,7 +17,7 @@ import java.io.File
 
 class BuilderFromHaplotypeVCF {
 
-    private val processingChannel = Channel<Deferred<HaplotypeSite>>(1)
+    private val processingChannel = Channel<HaplotypeSite>(5)
     private lateinit var taxa: TaxaList
 
     fun read(filename: String): FactorTable {
@@ -46,9 +46,7 @@ class BuilderFromHaplotypeVCF {
 
         var index = 0
         reader.forEach { context ->
-            //processingChannel.send(async {
-                contextToSite(context, index++)
-            //})
+            processingChannel.send(contextToSite(context, index++))
         }
 
         processingChannel.close()
@@ -78,9 +76,7 @@ class BuilderFromHaplotypeVCF {
 
     private suspend fun addSitesToTable(): FactorTable {
         val builder = FactorTableBuilder(taxa)
-        for (deferred in processingChannel) {
-            val site = deferred.await()
-            println(site.factor.startPos)
+        for (site in processingChannel) {
             builder.add(site)
         }
         return builder.build()

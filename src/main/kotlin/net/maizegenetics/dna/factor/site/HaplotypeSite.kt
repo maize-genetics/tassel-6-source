@@ -18,7 +18,7 @@ class HaplotypeSite(factor: GenomicFactor, taxa: TaxaList, private val strStates
     override fun ploidy() = ploidy
 
     override fun genotype(taxon: Int): ByteArray {
-        return genotypes.getAllRows(taxon)
+        return genotypes.getAllColumns(taxon)
     }
 
     override fun genotypeAsString(taxon: Int): String {

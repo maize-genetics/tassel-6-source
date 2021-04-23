@@ -8,6 +8,10 @@ class HaplotypeSiteBuilder constructor(val factor: GenomicFactor, val taxa: Taxa
 
     private val genotypes = SuperByteMatrixBuilder.getInstance(taxa.size, ploidy)
 
+    init {
+        genotypes.setAll(0xFF.toByte())
+    }
+
     private val stateMap = strStates
             .mapIndexed { index, str -> Pair(str, index.toByte()) }
             .toMap()
@@ -26,12 +30,24 @@ class HaplotypeSiteBuilder constructor(val factor: GenomicFactor, val taxa: Taxa
     }
 
     fun set(taxon: String, values: List<String>): HaplotypeSiteBuilder {
-        values.forEachIndexed { index, str ->
-            genotypes.set(taxaMap[taxon] ?: throw IllegalArgumentException("$taxon not in taxa list"),
-                    index,
-                    stateMap[str] ?: throw IllegalArgumentException("$str not on allele list: ${strStates.joinToString(",")}"))
-        }
+
+        values
+                .map { str ->
+                    when (str) {
+                        "" -> 0xFF.toByte()
+                        "." -> 0xFF.toByte()
+                        else -> stateMap[str]
+                                ?: throw IllegalArgumentException("$str not on allele list: ${strStates.joinToString(",")}")
+                    }
+                }
+                .forEachIndexed { index, str ->
+                    genotypes.set(taxaMap[taxon] ?: throw IllegalArgumentException("$taxon not in taxa list"),
+                            index,
+                            str)
+                }
+
         return this
+
     }
 
     fun build() = HaplotypeSite(factor, taxa, strStates, genotypes, ploidy, isPhased = isPhased)
