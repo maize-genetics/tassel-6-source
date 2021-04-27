@@ -3,22 +3,21 @@
  */
 package net.maizegenetics.dna.snp;
 
-import java.io.BufferedReader;
-
-import net.maizegenetics.util.BitSet;
-import net.maizegenetics.util.OpenBitSet;
-
-import java.nio.ByteBuffer;
-import java.util.*;
+import net.maizegenetics.dna.factor.FactorTableKt;
 import net.maizegenetics.dna.map.Chromosome;
 import net.maizegenetics.dna.map.Position;
 import net.maizegenetics.dna.map.PositionList;
+import net.maizegenetics.dna.snp.genotypecall.AlleleFreqCache;
+import net.maizegenetics.util.BitSet;
+import net.maizegenetics.util.OpenBitSet;
+import net.maizegenetics.util.Utils;
+import org.apache.log4j.Logger;
+
+import java.io.BufferedReader;
+import java.nio.ByteBuffer;
+import java.util.*;
 
 import static net.maizegenetics.dna.snp.GenotypeTable.*;
-import net.maizegenetics.dna.snp.genotypecall.AlleleFreqCache;
-import net.maizegenetics.util.Utils;
-
-import org.apache.log4j.Logger;
 
 /**
  * Utility methods for comparing, sorting, and counting genotypes.
@@ -260,6 +259,7 @@ public class GenotypeTableUtils {
      * Converts the byte representation of genotypes to string list of genotypes
      *
      * @param data
+     *
      * @return list of the genotypes.
      */
     public static List<String> convertNucleotideGenotypesToStringList(byte[] data) {
@@ -750,6 +750,7 @@ public class GenotypeTableUtils {
      * return false.
      *
      * @param diploidAllele
+     *
      * @return true if allele values are the same; false if unknown or not equal
      */
     public static boolean isHomozygous(byte diploidAllele) {
@@ -851,6 +852,7 @@ public class GenotypeTableUtils {
      *
      * @param genotype1
      * @param genotype2
+     *
      * @return true if at least one allele is equal
      */
     public static boolean isPartiallyEqual(byte genotype1, byte genotype2) {
@@ -958,6 +960,7 @@ public class GenotypeTableUtils {
      *
      * @param g1 genotype 1
      * @param g2 genotype 2
+     *
      * @return diploid value
      */
     public static byte getUnphasedDiploidValueNoHets(byte g1, byte g2) {
@@ -991,6 +994,8 @@ public class GenotypeTableUtils {
         byte[] result = new byte[2];
         result[0] = (byte) ((genotype >>> 4) & 0xf);
         result[1] = (byte) (genotype & 0xf);
+        if (result[0] == 0xF) result[0] = FactorTableKt.UNKNOWN_ALLELE;
+        if (result[1] == 0xF) result[1] = FactorTableKt.UNKNOWN_ALLELE;
         return result;
     }
 
@@ -1000,6 +1005,7 @@ public class GenotypeTableUtils {
      * @param genotype
      * @param mjA
      * @param mnA
+     *
      * @return
      */
     public static BitSet[] calcBitPresenceFromGenotype(byte[] genotype, byte[] mjA, byte[] mnA) {
@@ -1102,6 +1108,7 @@ public class GenotypeTableUtils {
      * @param genotype
      * @param mjA
      * @param mnA
+     *
      * @return
      */
     public static BitSet[] calcBitPresenceFromGenotype15(byte[] genotype, byte[] mjA, byte[] mnA) {
@@ -1148,6 +1155,7 @@ public class GenotypeTableUtils {
      * @param genotype
      * @param mj
      * @param mn
+     *
      * @return
      */
     public static BitSet[] calcBitPresenceFromGenotype(byte[] genotype, byte mj, byte mn) {

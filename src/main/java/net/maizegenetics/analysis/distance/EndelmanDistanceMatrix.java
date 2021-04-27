@@ -6,6 +6,7 @@
 package net.maizegenetics.analysis.distance;
 
 import net.maizegenetics.dna.factor.FactorTable;
+import net.maizegenetics.dna.factor.FactorTableKt;
 import net.maizegenetics.dna.factor.site.AlleleFreq;
 import net.maizegenetics.dna.factor.site.FactorSite;
 import net.maizegenetics.prefs.TasselPrefs;
@@ -329,7 +330,8 @@ public class EndelmanDistanceMatrix {
     }
 
     private static final byte calculateCount(byte allele, byte value1, byte value2) {
-        if (allele == (byte) 0xFF || (value1 == (byte) 0xFF && value2 == (byte) 0xFF)) return 7;
+        if (allele == FactorTableKt.UNKNOWN_ALLELE || (value1 == FactorTableKt.UNKNOWN_ALLELE && value2 == FactorTableKt.UNKNOWN_ALLELE))
+            return 7;
         byte result = 0;
         if (value1 == allele) {
             result = 2;
@@ -579,7 +581,7 @@ public class EndelmanDistanceMatrix {
                 // If allele is Unknown, the entire
                 // site is skipped.
                 //
-                if (allele != (byte) 0xFF) {
+                if (allele != FactorTableKt.UNKNOWN_ALLELE) {
 
                     term[0] = 0.0f - alleleFreqTimes2;
                     term[1] = 1.0f - alleleFreqTimes2;

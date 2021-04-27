@@ -9,9 +9,9 @@ import net.maizegenetics.taxa.TaxaList
  * Created November 14, 2018
  */
 
-abstract class FactorSite(val factor: GenomicFactor, val taxa: TaxaList, val weight: Double? = null, val isPhased: Boolean = false) : Comparable<FactorSite> {
+abstract class FactorSite(val factor: GenomicFactor, val taxa: TaxaList, val weight: Double? = null, val isPhased: Boolean = false) : Comparable<FactorSite>, Sequence<ByteArray> {
 
-    val stats = lazy { AlleleFreqCache.allelesSortedByFrequencyAndCountsNucleotide(0, TODO()) }
+    val alleleStats by lazy { AlleleStats(this) }
 
     /**
      * Ploidy of this site. Value of 2 for example is diploid.
@@ -28,6 +28,24 @@ abstract class FactorSite(val factor: GenomicFactor, val taxa: TaxaList, val wei
 
     override fun compareTo(other: FactorSite): Int {
         return factor.compareTo(other.factor)
+    }
+
+    override fun iterator(): Iterator<ByteArray> {
+        return GenotypeIterator(this)
+    }
+
+}
+
+private class GenotypeIterator(val site: FactorSite) : Iterator<ByteArray> {
+
+    private var currentTaxon = 0
+
+    override fun hasNext(): Boolean {
+        return currentTaxon < site.taxa.numberOfTaxa()
+    }
+
+    override fun next(): ByteArray {
+        return site.genotype(currentTaxon++)
     }
 
 }

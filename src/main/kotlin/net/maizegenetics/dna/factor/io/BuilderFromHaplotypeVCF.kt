@@ -54,23 +54,18 @@ class BuilderFromHaplotypeVCF {
     }
 
     private fun contextToSite(context: VariantContext, index: Int): HaplotypeSite {
-        println("${index}_1 $context")
         val factor = GenomicFactor(Chromosome.instance(context.contig), context.start, endPos = context.end)
         val strStates = context.alleles
                 .map { it.displayString }
                 .toTypedArray()
         val builder = HaplotypeSiteBuilder(factor, taxa, context.getMaxPloidy(2), strStates)
-        println("${index}_2 $context")
         try {
             context.genotypes.forEach { genotype ->
                 builder.set(genotype.sampleName, genotype.alleles.map { it.displayString })
-                println(genotype.alleles)
             }
         } catch (e: Exception) {
-            println("${index}_3 $context")
             throw e
         }
-        println("${index}_4 $context")
         return builder.build()
     }
 

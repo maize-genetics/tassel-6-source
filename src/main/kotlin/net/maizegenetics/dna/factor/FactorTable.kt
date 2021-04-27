@@ -8,6 +8,8 @@ import net.maizegenetics.taxa.TaxaList
  * Created November 13, 2018
  */
 
+const val UNKNOWN_ALLELE = 0xFF.toByte()
+
 class FactorTable(val taxa: TaxaList, private var sites: List<FactorSite>) : List<FactorSite> by sites {
 
     init {
@@ -17,6 +19,8 @@ class FactorTable(val taxa: TaxaList, private var sites: List<FactorSite>) : Lis
     fun numTaxa() = taxa.size
 
     fun numFactors() = sites.size
+
+    fun taxa() = taxa
 
     fun site(index: Int): FactorSite = sites[index]
 
