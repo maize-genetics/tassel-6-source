@@ -9,7 +9,6 @@ import net.maizegenetics.plugindef.PluginParameter;
 import net.maizegenetics.taxa.distance.DistanceMatrix;
 import org.apache.log4j.Logger;
 
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -47,7 +46,7 @@ public class KinshipPlugin extends AbstractPlugin {
 
     private PluginParameter<Integer> myMaxAlleles = new PluginParameter.Builder<>("maxAlleles", 255, Integer.class)
             .description("")
-            .range(Range.closed(2, 6))
+            .range(Range.closed(2, 255))
             .dependentOnParameter(myMethod, new Object[]{KINSHIP_METHOD.Centered_IBS, KINSHIP_METHOD.Dominance_Centered_IBS})
             .build();
 
@@ -57,7 +56,7 @@ public class KinshipPlugin extends AbstractPlugin {
             .dependentOnParameter(myMethod, new Object[]{KINSHIP_METHOD.Dominance_Centered_IBS})
             .build();
 
-    public KinshipPlugin(Frame parentFrame, boolean isInteractive) {
+    public KinshipPlugin(boolean isInteractive) {
         super(isInteractive);
     }
 
@@ -110,8 +109,7 @@ public class KinshipPlugin extends AbstractPlugin {
             if (current.getData() instanceof FactorTable) {
                 FactorTable myGenotype = (FactorTable) current.getData();
                 if (kinshipMethod() == KINSHIP_METHOD.Centered_IBS) {
-                    System.out.println("KinshipPlugin: maxAlleles: " + maxAlleles());
-                    kin = EndelmanDistanceMatrix.getInstance(myGenotype, maxAlleles(), this);
+                    kin = new EndelmanDistanceMatrixBuilder(myGenotype, 255, this).build();
                 } else if (kinshipMethod() == KINSHIP_METHOD.Normalized_IBS) {
                     //kin = GCTADistanceMatrix.getInstance(myGenotype, this);
                 } else if (kinshipMethod() == KINSHIP_METHOD.Dominance_Centered_IBS) {

@@ -9,46 +9,58 @@ import net.maizegenetics.taxa.distance.DistanceMatrix
 import net.maizegenetics.taxa.distance.DistanceMatrixBuilder
 import net.maizegenetics.util.GeneralAnnotationStorage
 import net.maizegenetics.util.ProgressListener
+import org.apache.log4j.Logger
 import java.util.*
+import kotlin.math.roundToLong
+import kotlin.system.measureNanoTime
 
 class EndelmanDistanceMatrixBuilder(val table: FactorTable, val maxAlleles: Int = 255, private val listener: ProgressListener? = null) {
 
-    //private val psuedoSiteChannel = Channel<List<PsuedoSite>>(100)
+    private val logger = Logger.getLogger(EndelmanDistanceMatrixBuilder::class.java)
 
-    private val resultsChannel = Channel<CountersDistances>(10)
+    private val psuedoSiteChannel = Channel<List<List<PsuedoSite>>>(1000)
+
+    private val resultsChannel = Channel<CountersDistances>(30)
+
+    private var numProcessingThreads: Int = 1
 
     data class PsuedoSite(val site: FactorSite, val allele: Byte, val alleleFreq: Float)
 
     fun build(): DistanceMatrix {
 
-        val numProcessingThreads = (Runtime.getRuntime().availableProcessors() - 2).coerceAtLeast(1)
-        println("numProcessingThreads: $numProcessingThreads")
+        val time = measureNanoTime {
 
-        val psuedoSiteChannels = List(numProcessingThreads) { Channel<List<PsuedoSite>>(1000) }
+            logger.debug("EndelmanDistanceMatrixBuilder: factor table num taxa: ${table.numTaxa()}  num factors: ${table.numFactors()}")
+            numProcessingThreads = (Runtime.getRuntime().availableProcessors() - 2).coerceAtLeast(1)
+            logger.debug("EndelmanDistanceMatrixBuilder: numProcessingThreads: $numProcessingThreads")
 
-        CoroutineScope(Dispatchers.IO).launch { createPsuedoSites(psuedoSiteChannels) }
+            CoroutineScope(Dispatchers.IO).launch { createPsuedoSites() }
 
-        val accumulateJob = CoroutineScope(Dispatchers.IO).async { accumulateResults() }
-
-        runBlocking {
-            val jobs = List(numProcessingThreads) {
-                async(Dispatchers.Default) {
-                    processPsuedoSites(psuedoSiteChannels[it])
+            runBlocking {
+                val jobs = List(numProcessingThreads) {
+                    launch(Dispatchers.Default) {
+                        processPsuedoSites()
+                    }
                 }
-            }
-            jobs.forEach { it.join() }
+                jobs.forEach { it.join() }
 
-            resultsChannel.close()
+                resultsChannel.close()
+            }
+
         }
 
-        return runBlocking { accumulateJob.await() }
+        val estimatedNumMinutesToRun = (time.toDouble() / 1e9 / 60.0).roundToLong()
+        if (estimatedNumMinutesToRun < 60L) {
+            logger.info("EndelmanDistanceMatrixBuilder: actual time to complete: $estimatedNumMinutesToRun minutes")
+        } else {
+            logger.info("EndelmanDistanceMatrixBuilder: actual time to complete: ${estimatedNumMinutesToRun / 60} hours ${estimatedNumMinutesToRun % 60} minutes")
+        }
+
+        return runBlocking { accumulateResults() }
 
     }
 
-    private suspend fun createPsuedoSites(psuedoSiteChannels: List<Channel<List<PsuedoSite>>>) = withContext(Dispatchers.IO) {
-
-        val numChannels = psuedoSiteChannels.size
-        var currentChannelIndex = 0
+    private suspend fun createPsuedoSites() = withContext(Dispatchers.IO) {
 
         var numSitesProcessed = 0
         var numChunksSent = 0
@@ -69,20 +81,30 @@ class EndelmanDistanceMatrixBuilder(val table: FactorTable, val maxAlleles: Int 
                 }
                 .flatten()
                 .chunked(15)
+                .chunked(200)
                 .forEach { psuedoSites ->
-                    psuedoSiteChannels[currentChannelIndex++].send(psuedoSites)
-                    if (currentChannelIndex >= numChannels) currentChannelIndex = 0
+                    psuedoSiteChannel.send(psuedoSites)
                     numChunksSent++
                     val percent = (numChunksSent.toDouble() * 15.0 / aveAllelesPerSite / table.numFactors().toDouble() * 100.0).toInt()
                     fireProgress(percent, listener)
                 }
 
-        psuedoSiteChannels.forEach { it.close() }
-        //psuedoSiteChannel.close()
+        logger.debug("Number Factors Processed: $numSitesProcessed")
+        logger.debug("Total Number of Psuedo Sites: $totalNumAllelesToEvaluate")
+        logger.debug("Average Alleles Evaluation Per Site: $aveAllelesPerSite")
+
+        psuedoSiteChannel.close()
+
+        val estimatedNumMinutesToRun: Long = (table.numTaxa() * (table.numTaxa() + 1.0) / 2.0 * totalNumAllelesToEvaluate.toDouble() / numProcessingThreads.toDouble() / 1.02e11).roundToLong()
+        if (estimatedNumMinutesToRun < 60L) {
+            logger.info("EndelmanDistanceMatrixBuilder: estimated time to complete: $estimatedNumMinutesToRun minutes")
+        } else {
+            logger.info("EndelmanDistanceMatrixBuilder: estimated time to complete: ${estimatedNumMinutesToRun / 60} hours ${estimatedNumMinutesToRun % 60} minutes")
+        }
 
     }
 
-    private suspend fun processPsuedoSites(psuedoSiteChannel: Channel<List<PsuedoSite>>) {
+    private suspend fun processPsuedoSites() {
 
         val result = CountersDistances(table.numTaxa())
         val distances: FloatArray = result.distances
@@ -92,55 +114,58 @@ class EndelmanDistanceMatrixBuilder(val table: FactorTable, val maxAlleles: Int 
         val answer2 = FloatArray(32768)
         val answer3 = FloatArray(32768)
 
-        for (psuedoSites in psuedoSiteChannel) {
+        for (psuedoSitesBlock in psuedoSiteChannel) {
 
-            //
-            // Pre-calculates possible terms and gets counts for
-            // three blocks for five (pseudo-)sites.
-            //
-            val blocksOfSites = getBlocksOfSites(psuedoSites, sumpi, table.numTaxa())
+            for (psuedoSites in psuedoSitesBlock) {
 
-            val possibleTerms = blocksOfSites.second[0]
-            val alleleCount1 = blocksOfSites.first[0]
-
-            val possibleTerms2 = blocksOfSites.second[1]
-            val alleleCount2 = blocksOfSites.first[1]
-
-            val possibleTerms3 = blocksOfSites.second[2]
-            val alleleCount3 = blocksOfSites.first[2]
-
-            //
-            // Using possible terms, calculates all possible answers
-            // for each site block.
-            //
-            for (i in 0..32767) {
-                answer1[i] = possibleTerms[i and 0x7000 ushr 12] + possibleTerms[i and 0xE00 ushr 9 or 0x8] + possibleTerms[i and 0x1C0 ushr 6 or 0x10] + possibleTerms[i and 0x38 ushr 3 or 0x18] + possibleTerms[i and 0x7 or 0x20]
-                answer2[i] = possibleTerms2[i and 0x7000 ushr 12] + possibleTerms2[i and 0xE00 ushr 9 or 0x8] + possibleTerms2[i and 0x1C0 ushr 6 or 0x10] + possibleTerms2[i and 0x38 ushr 3 or 0x18] + possibleTerms2[i and 0x7 or 0x20]
-                answer3[i] = possibleTerms3[i and 0x7000 ushr 12] + possibleTerms3[i and 0xE00 ushr 9 or 0x8] + possibleTerms3[i and 0x1C0 ushr 6 or 0x10] + possibleTerms3[i and 0x38 ushr 3 or 0x18] + possibleTerms3[i and 0x7 or 0x20]
-            }
-
-            //
-            // Iterates through all pair-wise combinations of taxa adding
-            // distance comparisons and site counts.
-            //
-            var index = 0
-            for (firstTaxa in 0 until table.numTaxa()) {
                 //
-                // Can skip inter-loop if all fifteen sites for first
-                // taxon is Unknown diploid allele values
+                // Pre-calculates possible terms and gets counts for
+                // three blocks for five (pseudo-)sites.
                 //
-                if (alleleCount1[firstTaxa] != 0x7FFF.toShort() || alleleCount2[firstTaxa] != 0x7FFF.toShort() || alleleCount3[firstTaxa] != 0x7FFF.toShort()) {
-                    for (secondTaxa in firstTaxa until table.numTaxa()) {
-                        //
-                        // Combine first taxon's allele counts with
-                        // second taxon's major allele counts to
-                        // create index into pre-calculated answers
-                        //
-                        distances[index] += answer1[(alleleCount1[firstTaxa].toInt() or alleleCount1[secondTaxa].toInt()) and 0xFFFF] + answer2[(alleleCount2[firstTaxa].toInt() or alleleCount2[secondTaxa].toInt()) and 0xFFFF] + answer3[(alleleCount3[firstTaxa].toInt() or alleleCount3[secondTaxa].toInt()) and 0xFFFF]
-                        index++
+                val blocksOfSites = getBlocksOfSites(psuedoSites, sumpi, table.numTaxa())
+
+                val possibleTerms = blocksOfSites.second[0]
+                val alleleCount1 = blocksOfSites.first[0]
+
+                val possibleTerms2 = blocksOfSites.second[1]
+                val alleleCount2 = blocksOfSites.first[1]
+
+                val possibleTerms3 = blocksOfSites.second[2]
+                val alleleCount3 = blocksOfSites.first[2]
+
+                //
+                // Using possible terms, calculates all possible answers
+                // for each site block.
+                //
+                for (i in 0..32767) {
+                    answer1[i] = possibleTerms[i and 0x7000 ushr 12] + possibleTerms[i and 0xE00 ushr 9 or 0x8] + possibleTerms[i and 0x1C0 ushr 6 or 0x10] + possibleTerms[i and 0x38 ushr 3 or 0x18] + possibleTerms[i and 0x7 or 0x20]
+                    answer2[i] = possibleTerms2[i and 0x7000 ushr 12] + possibleTerms2[i and 0xE00 ushr 9 or 0x8] + possibleTerms2[i and 0x1C0 ushr 6 or 0x10] + possibleTerms2[i and 0x38 ushr 3 or 0x18] + possibleTerms2[i and 0x7 or 0x20]
+                    answer3[i] = possibleTerms3[i and 0x7000 ushr 12] + possibleTerms3[i and 0xE00 ushr 9 or 0x8] + possibleTerms3[i and 0x1C0 ushr 6 or 0x10] + possibleTerms3[i and 0x38 ushr 3 or 0x18] + possibleTerms3[i and 0x7 or 0x20]
+                }
+
+                //
+                // Iterates through all pair-wise combinations of taxa adding
+                // distance comparisons and site counts.
+                //
+                var index = 0
+                for (firstTaxa in 0 until table.numTaxa()) {
+                    //
+                    // Can skip inter-loop if all fifteen sites for first
+                    // taxon is Unknown diploid allele values
+                    //
+                    if (alleleCount1[firstTaxa] != 0x7FFF.toShort() || alleleCount2[firstTaxa] != 0x7FFF.toShort() || alleleCount3[firstTaxa] != 0x7FFF.toShort()) {
+                        for (secondTaxa in firstTaxa until table.numTaxa()) {
+                            //
+                            // Combine first taxon's allele counts with
+                            // second taxon's major allele counts to
+                            // create index into pre-calculated answers
+                            //
+                            distances[index] += answer1[(alleleCount1[firstTaxa].toInt() or alleleCount1[secondTaxa].toInt()) and 0xFFFF] + answer2[(alleleCount2[firstTaxa].toInt() or alleleCount2[secondTaxa].toInt()) and 0xFFFF] + answer3[(alleleCount3[firstTaxa].toInt() or alleleCount3[secondTaxa].toInt()) and 0xFFFF]
+                            index++
+                        }
+                    } else {
+                        index += table.numTaxa() - firstTaxa
                     }
-                } else {
-                    index += table.numTaxa() - firstTaxa
                 }
             }
 
@@ -250,21 +275,11 @@ class EndelmanDistanceMatrixBuilder(val table: FactorTable, val maxAlleles: Int 
                     // Records allele counts for current site in
                     // three bits.
                     //
-                    //int temp = (allele & 0x7) << 6;
                     val shift = (numSitesPerBlock - currentSiteNum - 1) * 3
-                    //int mask = ~(0x7 << shift) & 0x7FFF;
                     val mask = (0x7 shl shift).inv() and 0x7FFF
                     for (i in 0 until numTaxa) {
-                        /*
-                        byte[] taxonAlleles = factorSite.genotype(i);
-                        alleleCount[i] = (short) (alleleCount[i] & (mask | calculateCount(allele, taxonAlleles[0], taxonAlleles[1]) << shift));
-                         */
                         val taxonAlleles = psuedoSite.site.genotype(i)
-                        //println("alleleCountCurrentBlockI: ${Integer.toHexString(alleleCount[currentBlock][i].toInt())}")
-                        //println("mask: ${Integer.toHexString(mask)}")
-                        //println("shift: ${Integer.toHexString(calculateCount(allele, taxonAlleles[0], taxonAlleles[1]) shl shift)}")
                         alleleCount[currentBlock][i] = (alleleCount[currentBlock][i].toInt() and (mask or (calculateCount(allele, taxonAlleles[0], taxonAlleles[1]) shl shift))).toShort()
-                        //println("alleleCountCurrentBlockI2: ${Integer.toHexString(alleleCount[currentBlock][i].toInt())}")
                     }
 
                     currentSiteNum++
