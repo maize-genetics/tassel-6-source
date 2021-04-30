@@ -98,6 +98,7 @@ public class ExportPlugin extends AbstractPlugin {
             GenotypeTable genotype = (GenotypeTable) data;
             List<FileLoadPlugin.TasselFileType> temp = new ArrayList<>();
             if (genotype.hasGenotype()) {
+                temp.add(FileLoadPlugin.TasselFileType.HaplotypeVCF);
                 temp.add(FileLoadPlugin.TasselFileType.Hapmap);
                 temp.add(FileLoadPlugin.TasselFileType.HapmapDiploid);
                 temp.add(FileLoadPlugin.TasselFileType.VCF);

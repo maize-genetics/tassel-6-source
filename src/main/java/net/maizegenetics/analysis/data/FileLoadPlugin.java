@@ -8,6 +8,7 @@ package net.maizegenetics.analysis.data;
 
 import javafx.stage.FileChooser;
 import net.maizegenetics.dna.factor.io.BuilderFromHapMap;
+import net.maizegenetics.dna.factor.io.BuilderFromHaplotypeVCF;
 import net.maizegenetics.dna.snp.GenotypeTable;
 import net.maizegenetics.dna.snp.ImportUtils;
 import net.maizegenetics.dna.snp.ReadSequenceAlignmentUtils;
@@ -75,7 +76,7 @@ public class FileLoadPlugin extends AbstractPlugin {
         ProjectPCsandRunModelSelection("Project PCs"),
         Phylip_Seq("Phylip (Sequential)"), Phylip_Inter("Phylip (Interleaved)"), Table("Table"),
         Serial("Serial"), HapmapDiploid("Hapmap Diploid"), Text("Text"), VCF("VCF"),
-        Filter("Filter"), Newick("Newick"),
+        HaplotypeVCF("Haplotype VCF"), Filter("Filter"), Newick("Newick"),
         NumericGenotype("Numeric Genotype"), TaxaList("Taxa List"), PositionList("Position List"),
         SqrMatrixRaw("Raw MultiBLUP Matrix"), SqrMatrixBin("Binary MultiBLUP Matrix"),
         GOBII("GOBII"), Depth("Depth"), ReferenceProbability("Numeric Genotype"), Report("Report"),
@@ -276,6 +277,10 @@ public class FileLoadPlugin extends AbstractPlugin {
                     myLogger.info("guessAtUnknowns: type: " + TasselFileType.Serial);
                     alreadyLoaded.add(myOpenFiles[i]);
                     tds = processDatum(myOpenFiles[i], TasselFileType.Serial);
+                } else if ((myOpenFiles[i].endsWith(FILE_EXT_VCF) || myOpenFiles[i].endsWith(FILE_EXT_VCF + ".gz")) && myOpenFiles[i].toUpperCase().contains("HAPLOTYPE")) {
+                    myLogger.info("guessAtUnknowns: type: " + TasselFileType.HaplotypeVCF);
+                    alreadyLoaded.add(myOpenFiles[i]);
+                    tds = processDatum(myOpenFiles[i], TasselFileType.HaplotypeVCF);
                 } else if (myOpenFiles[i].endsWith(FILE_EXT_VCF) || myOpenFiles[i].endsWith(FILE_EXT_VCF + ".gz")) {
                     myLogger.info("guessAtUnknowns: type: " + TasselFileType.VCF);
                     alreadyLoaded.add(myOpenFiles[i]);
@@ -447,7 +452,14 @@ public class FileLoadPlugin extends AbstractPlugin {
                         suffix = FILE_EXT_HAPMAP_GZ;
                     }
                     result = BuilderFromHapMap.getBuilder(inFile, this).build();
-                    //result = ImportUtils.readFromHapmap(inFile, this, sortPositions());
+                    break;
+                }
+                case HaplotypeVCF: {
+                    suffix = FILE_EXT_VCF;
+                    if (inFile.endsWith(".gz")) {
+                        suffix = FILE_EXT_VCF + ".gz";
+                    }
+                    result = new BuilderFromHaplotypeVCF().read(inFile);
                     break;
                 }
                 case VCF: {

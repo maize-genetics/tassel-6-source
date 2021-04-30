@@ -44,16 +44,15 @@ class BuilderFromHaplotypeVCF {
 
     private suspend fun processPositions(reader: VCFFileReader) = withContext(Dispatchers.IO) {
 
-        var index = 0
         reader.forEach { context ->
-            processingChannel.send(contextToSite(context, index++))
+            processingChannel.send(contextToSite(context))
         }
 
         processingChannel.close()
 
     }
 
-    private fun contextToSite(context: VariantContext, index: Int): HaplotypeSite {
+    private fun contextToSite(context: VariantContext): HaplotypeSite {
         val factor = GenomicFactor(Chromosome.instance(context.contig), context.start, endPos = context.end)
         val strStates = context.alleles
                 .map { it.displayString }

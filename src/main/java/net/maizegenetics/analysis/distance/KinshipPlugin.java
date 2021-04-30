@@ -60,6 +60,10 @@ public class KinshipPlugin extends AbstractPlugin {
         super(isInteractive);
     }
 
+    public KinshipPlugin() {
+        super(false);
+    }
+
     @Override
     protected void preProcessParameters(DataSet input) {
         List<Datum> alignInList = input.getDataOfType(FactorTable.class);
