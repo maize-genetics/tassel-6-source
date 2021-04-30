@@ -60,12 +60,14 @@ class EndelmanDistanceMatrixBuilder(val table: FactorTable, val maxAlleles: Int 
 
     }
 
+    private val numPsuedoSitesPerBlock = 15
+    private val numBlocksPerChunk = 200
+    private var aveAllelesPerSite = 0.0
+
     private suspend fun createPsuedoSites() = withContext(Dispatchers.IO) {
 
         var numSitesProcessed = 0
-        var numChunksSent = 0
         var totalNumAllelesToEvaluate = 0
-        var aveAllelesPerSite = 0.0
 
         table
                 .map { site ->
@@ -80,13 +82,10 @@ class EndelmanDistanceMatrixBuilder(val table: FactorTable, val maxAlleles: Int 
                             }
                 }
                 .flatten()
-                .chunked(15)
-                .chunked(200)
+                .chunked(numPsuedoSitesPerBlock)
+                .chunked(numBlocksPerChunk)
                 .forEach { psuedoSites ->
                     psuedoSiteChannel.send(psuedoSites)
-                    numChunksSent++
-                    val percent = (numChunksSent.toDouble() * 15.0 / aveAllelesPerSite / table.numFactors().toDouble() * 100.0).toInt()
-                    fireProgress(percent, listener)
                 }
 
         logger.debug("Number Factors Processed: $numSitesProcessed")
@@ -103,6 +102,8 @@ class EndelmanDistanceMatrixBuilder(val table: FactorTable, val maxAlleles: Int 
         }
 
     }
+
+    private var numPsuedoSitesProcessed = 0
 
     private suspend fun processPsuedoSites() {
 
@@ -168,6 +169,10 @@ class EndelmanDistanceMatrixBuilder(val table: FactorTable, val maxAlleles: Int 
                     }
                 }
             }
+
+            numPsuedoSitesProcessed += numPsuedoSitesPerBlock * numBlocksPerChunk
+            val percent = (numPsuedoSitesProcessed.toDouble() / aveAllelesPerSite / table.numFactors().toDouble() * 100.0).toInt()
+            fireProgress(percent, listener)
 
         }
 

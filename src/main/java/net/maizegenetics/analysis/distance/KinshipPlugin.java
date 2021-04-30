@@ -109,7 +109,7 @@ public class KinshipPlugin extends AbstractPlugin {
             if (current.getData() instanceof FactorTable) {
                 FactorTable myGenotype = (FactorTable) current.getData();
                 if (kinshipMethod() == KINSHIP_METHOD.Centered_IBS) {
-                    kin = new EndelmanDistanceMatrixBuilder(myGenotype, 255, this).build();
+                    kin = new EndelmanDistanceMatrixBuilder(myGenotype, maxAlleles(), this).build();
                 } else if (kinshipMethod() == KINSHIP_METHOD.Normalized_IBS) {
                     //kin = GCTADistanceMatrix.getInstance(myGenotype, this);
                 } else if (kinshipMethod() == KINSHIP_METHOD.Dominance_Centered_IBS) {

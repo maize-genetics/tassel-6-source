@@ -179,7 +179,7 @@ public interface Plugin extends PluginListener, ProgressListener, Runnable {
 
     public boolean wasCancelled();
 
-    static final Logger myLogger = Logger.getLogger(Plugin.class);
+    Logger myLogger = Logger.getLogger(Plugin.class);
 
     public static Plugin getPluginInstance(String className) {
         return getPluginInstance(className, false);
@@ -227,9 +227,7 @@ public interface Plugin extends PluginListener, ProgressListener, Runnable {
         try {
             Class currentMatch = Class.forName(className);
             return !currentMatch.isInterface() && Plugin.class.isAssignableFrom(currentMatch);
-        } catch (Exception ex) {
-            return false;
-        } catch (Error err) {
+        } catch (Exception | Error ex) {
             return false;
         }
     }

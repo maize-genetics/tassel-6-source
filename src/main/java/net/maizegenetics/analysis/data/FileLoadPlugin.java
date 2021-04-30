@@ -75,7 +75,7 @@ public class FileLoadPlugin extends AbstractPlugin {
         ProjectPCsandRunModelSelection("Project PCs"),
         Phylip_Seq("Phylip (Sequential)"), Phylip_Inter("Phylip (Interleaved)"), Table("Table"),
         Serial("Serial"), HapmapDiploid("Hapmap Diploid"), Text("Text"), VCF("VCF"),
-        Filter("Filter"),
+        Filter("Filter"), Newick("Newick"),
         NumericGenotype("Numeric Genotype"), TaxaList("Taxa List"), PositionList("Position List"),
         SqrMatrixRaw("Raw MultiBLUP Matrix"), SqrMatrixBin("Binary MultiBLUP Matrix"),
         GOBII("GOBII"), Depth("Depth"), ReferenceProbability("Numeric Genotype"), Report("Report"),

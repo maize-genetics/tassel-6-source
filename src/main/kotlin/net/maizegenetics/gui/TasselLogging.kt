@@ -164,20 +164,18 @@ class TasselLogging private constructor() : AbstractPlugin() {
     companion object {
         val instance = TasselLogging()
 
-        fun basicLoggingInfo() {
-            myLogger.info("Tassel Version: " + TASSELMainApp.version + "  Date: " + TASSELMainApp.versionDate)
-            myLogger.info("Max Available Memory Reported by JVM: " + Utils.getMaxHeapSizeMB() + " MB")
-            myLogger.info("Java Version: " + System.getProperty("java.version"))
-            myLogger.info("OS: " + System.getProperty("os.name"))
-            myLogger.info("Number of Processors: " + Runtime.getRuntime().availableProcessors())
-        }
-
         fun updateLoggingLocation() {
-            if (instance != null) {
-                instance.updateLogging()
-            }
+            instance.updateLogging()
         }
     }
+}
+
+fun basicLoggingInfo() {
+    myLogger.info("Tassel Version: " + TASSELMainApp.version + "  Date: " + TASSELMainApp.versionDate)
+    myLogger.info("Max Available Memory Reported by JVM: " + Utils.getMaxHeapSizeMB() + " MB")
+    myLogger.info("Java Version: " + System.getProperty("java.version"))
+    myLogger.info("OS: " + System.getProperty("os.name"))
+    myLogger.info("Number of Processors: " + Runtime.getRuntime().availableProcessors())
 }
 
 class TextAreaStream(private val textArea: TextArea) : OutputStream() {
