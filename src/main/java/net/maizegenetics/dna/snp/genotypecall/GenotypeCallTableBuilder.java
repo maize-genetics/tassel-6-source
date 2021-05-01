@@ -5,11 +5,8 @@ package net.maizegenetics.dna.snp.genotypecall;
 
 import net.maizegenetics.dna.snp.GenotypeTable;
 import net.maizegenetics.dna.snp.NucleotideAlignmentConstants;
-import net.maizegenetics.dna.snp.Translate;
-import net.maizegenetics.dna.snp.TranslateBuilder;
 import net.maizegenetics.util.SuperByteMatrix;
 import net.maizegenetics.util.SuperByteMatrixBuilder;
-import net.maizegenetics.util.Tuple;
 import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
@@ -54,22 +51,6 @@ public class GenotypeCallTableBuilder {
 
     /**
      * Get Genotype Builder given number of taxa and sites. Performance
-     * optimized for taxon loop inside site loop. Default is unphased and
-     * NucleotideAlignmentConstants.NUCLEOTIDE_ALLELES encoding.
-     *
-     * @param numTaxa number of taxa
-     * @param numSites number of sites.
-     *
-     * @return Genotype Builder
-     */
-    public static GenotypeCallTableBuilder getInstanceTranspose(int numTaxa, int numSites) {
-        SuperByteMatrix matrix = SuperByteMatrixBuilder.getInstanceTranspose(numTaxa, numSites);
-        matrix.setAll(GenotypeTable.UNKNOWN_GENOTYPE);
-        return new GenotypeCallTableBuilder(matrix);
-    }
-
-    /**
-     * Get Genotype Builder given number of taxa and sites. Performance
      * optimized for site loop inside taxon loop. Default is unphased and
      * NucleotideAlignmentConstants.NUCLEOTIDE_ALLELES encoding.
      *
@@ -82,18 +63,6 @@ public class GenotypeCallTableBuilder {
         SuperByteMatrix matrix = SuperByteMatrixBuilder.getInstance(numTaxa, numSites);
         matrix.setAll(GenotypeTable.UNKNOWN_GENOTYPE);
         return new GenotypeCallTableBuilder(matrix);
-    }
-
-    public static Tuple<GenotypeCallTable, Translate> getFilteredInstance(GenotypeCallTable genotype, Translate translate) {
-        if (genotype == null) {
-            return null;
-        }
-        if (genotype instanceof FilterGenotypeCallTable) {
-            FilterGenotypeCallTable filter = (FilterGenotypeCallTable) genotype;
-            Translate mergedTranslate = TranslateBuilder.getInstance(filter.myTranslate, translate);
-            return new Tuple<>(new FilterGenotypeCallTable(filter.myBaseGenotype, mergedTranslate), mergedTranslate);
-        }
-        return new Tuple<>(new FilterGenotypeCallTable(genotype, translate), translate);
     }
 
     public static GenotypeCallTableBuilder getInstanceCopy(GenotypeCallTable genotype) {
