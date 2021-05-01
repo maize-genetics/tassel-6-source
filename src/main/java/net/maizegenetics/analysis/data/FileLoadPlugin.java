@@ -34,8 +34,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
 
-//import net.maizegenetics.analysis.gobii.GOBIIPlugin;
-
 /**
  * @author Ed Buckler
  * @author Terry Casstevens

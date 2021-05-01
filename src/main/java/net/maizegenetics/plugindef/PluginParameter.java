@@ -61,7 +61,7 @@ public final class PluginParameter<T> {
         }
 
         if ((hasRange()) && (myValue != null)) {
-            if (!acceptsValue((Comparable<T>) myValue)) {
+            if (!acceptsValue(myValue)) {
                 StringBuilder builder = new StringBuilder();
                 builder.append("PluginParameter: init: " + myCmdLineName + " value: " + myValue.toString() + " outside range: ");
                 builder.append(rangeToString());
