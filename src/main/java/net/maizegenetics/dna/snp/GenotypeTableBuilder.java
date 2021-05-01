@@ -9,7 +9,6 @@ import net.maizegenetics.dna.map.PositionListBuilder;
 import net.maizegenetics.dna.snp.genotypecall.GenotypeCallTable;
 import net.maizegenetics.dna.snp.genotypecall.GenotypeCallTableBuilder;
 import net.maizegenetics.dna.snp.genotypecall.GenotypeMergeRule;
-import net.maizegenetics.dna.snp.genotypecall.MaskGenotypeCallTable;
 import net.maizegenetics.dna.snp.score.*;
 import net.maizegenetics.taxa.TaxaList;
 import net.maizegenetics.taxa.TaxaListBuilder;
@@ -249,44 +248,6 @@ public class GenotypeTableBuilder {
 
     public static GenotypeTable getInstance(GenotypeCallTable genotype, PositionList positionList, TaxaList taxaList) {
         return getInstance(genotype, positionList, taxaList, null, null, null, null, null);
-    }
-
-    public static GenotypeTable getInstance(GenotypeTable base, MaskMatrix mask) {
-
-        AlleleDepth depth = base.depth();
-        if (depth != null) {
-            depth = AlleleDepthBuilder.getMaskInstance(depth, mask);
-        }
-
-        AlleleProbability alleleProbability = base.alleleProbability();
-        if (alleleProbability != null) {
-            alleleProbability = AlleleProbabilityBuilder.getMaskInstance(alleleProbability, mask);
-        }
-
-        Dosage dosage = base.dosage();
-        if (dosage != null) {
-            dosage = DosageBuilder.getMaskInstance(dosage, mask);
-        }
-
-        ReferenceProbability referenceProbability = base.referenceProbability();
-        if (referenceProbability != null) {
-            referenceProbability = ReferenceProbabilityBuilder.getMaskInstance(referenceProbability, mask);
-        }
-
-        return new CoreGenotypeTable(new MaskGenotypeCallTable(base.genotypeMatrix(), mask), base.positions(), base.taxa(), depth, alleleProbability, referenceProbability, dosage, base.annotations());
-
-    }
-
-    public static GenotypeTable getInstanceOnlyMajorMinor(GenotypeTable genotype) {
-        return getInstance(genotype, MaskMatrixBuilder.getInstanceRemoveMinorSNPs(genotype.genotypeMatrix()));
-    }
-
-    public static GenotypeTable getHomozygousInstance(GenotypeTable genotype) {
-        return getInstance(genotype, MaskMatrixBuilder.getInstanceRemoveHeterozygous(genotype.genotypeMatrix()));
-    }
-
-    public static GenotypeTable getInstanceMaskIndels(GenotypeTable genotype) {
-        return getInstance(genotype, MaskMatrixBuilder.getInstanceRemoveIndels(genotype.genotypeMatrix()));
     }
 
     /**

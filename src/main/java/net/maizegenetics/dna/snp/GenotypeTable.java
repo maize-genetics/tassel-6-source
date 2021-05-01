@@ -1,13 +1,9 @@
 package net.maizegenetics.dna.snp;
 
-import java.util.Set;
-import java.util.stream.Stream;
-
 import net.maizegenetics.dna.WHICH_ALLELE;
-import net.maizegenetics.dna.snp.genotypecall.GenotypeCallTable;
 import net.maizegenetics.dna.map.Chromosome;
 import net.maizegenetics.dna.map.PositionList;
-import net.maizegenetics.dna.snp.bit.BitStorage;
+import net.maizegenetics.dna.snp.genotypecall.GenotypeCallTable;
 import net.maizegenetics.dna.snp.score.AlleleDepth;
 import net.maizegenetics.dna.snp.score.AlleleProbability;
 import net.maizegenetics.dna.snp.score.Dosage;
@@ -16,6 +12,9 @@ import net.maizegenetics.dna.snp.score.SiteScore.SITE_SCORE_TYPE;
 import net.maizegenetics.taxa.TaxaList;
 import net.maizegenetics.util.BitSet;
 import net.maizegenetics.util.GeneralAnnotationStorage;
+
+import java.util.Set;
+import java.util.stream.Stream;
 
 /**
  * A representation of the SNP and indel variation for a set of taxa and genomic
@@ -175,79 +174,6 @@ public interface GenotypeTable {
      * @return sequence of diploid allele values.
      */
     public byte[] genotypeAllTaxa(int site);
-
-    /**
-     * Returns sequence of true/false values indicating whether taxon at each
-     * site matches a specific allele (based on frequency). Allele number of
-     * value 0 would be the major allele. Allele number of value 1 would be the
-     * minor allele. Allele number of value 2 would be the third most frequent
-     * allele value and so on.
-     *
-     * @param taxon taxon
-     * @param allele allele
-     *
-     * @return sequence of true/false values.
-     */
-    public BitSet allelePresenceForAllSites(int taxon, WHICH_ALLELE allele);
-
-    /**
-     * Returns sequence of true/false values indicating whether taxon at sites
-     * (in given blocks, 64 sites per block including start block but excluding
-     * end block) matches a specific allele.
-     *
-     * @param taxon taxon
-     * @param allele allele
-     * @param startBlock starting block
-     * @param endBlock end block
-     *
-     * @return sequence of true/false values.
-     */
-    public long[] allelePresenceForSitesBlock(int taxon, WHICH_ALLELE allele, int startBlock, int endBlock);
-
-    /**
-     * Returns sequence of true/false values indicating whether taxon at each
-     * site for given parent matches a specific allele.
-     *
-     * @param taxon taxon
-     * @param firstParent true for first parent (false for second parent)
-     * @param allele allele
-     *
-     * @return sequence of true/false values.
-     */
-    public BitSet haplotypeAllelePresenceForAllSites(int taxon, boolean firstParent, WHICH_ALLELE allele);
-
-    /**
-     * Returns sequence of true/false values indicating whether site at each
-     * taxon for given parent matches a specific allele (based on frequency).
-     * Allele number of value 0 would be the major allele. Allele number of
-     * value 1 would be the minor allele. Allele number of value 2 would be the
-     * third most frequent allele value and so on.
-     *
-     * @param site site
-     * @param firstParent true for first parent (false for second parent)
-     * @param allele allele
-     *
-     * @return sequence of true/false values.
-     */
-    public BitSet haplotypeAllelePresenceForAllTaxa(int site, boolean firstParent, WHICH_ALLELE allele);
-
-    /**
-     * Returns sequence of true/false values indicating whether taxon at sites
-     * (in given blocks, 64 sites per block including start block but excluding
-     * end block) for given parent matches a specific allele (based on
-     * frequency). Allele number of value 0 would be the major allele. Allele
-     * number of value 1 would be the minor allele. Allele number of value 2
-     * would be the third most frequent allele value and so on.
-     *
-     * @param taxon taxon
-     * @param firstParent true for first parent (false for second parent)
-     * @param allele allele
-     * @param startBlock starting block
-     * @param endBlock end block
-     *
-     * @return sequence of true/false values.
-     */
-    public long[] haplotypeAllelePresenceForSitesBlock(int taxon, boolean firstParent, WHICH_ALLELE allele, int startBlock, int endBlock);
 
     /**
      * Returns string representation of diploid values returned by genotype()
@@ -919,26 +845,6 @@ public interface GenotypeTable {
      * @return alleles
      */
     public byte[] allelesBySortType(GenotypeTable.ALLELE_SORT_TYPE scope, int site);
-
-    /**
-     * Returns sequence of true/false values indicating whether site at each
-     * taxon matches a specific allele.
-     *
-     * @param site site
-     * @param allele allele
-     *
-     * @return sequence of true/false values.
-     */
-    public BitSet allelePresenceForAllTaxa(int site, WHICH_ALLELE allele);
-
-    /**
-     * Returns BitStorage for this Genotype
-     *
-     * @param allele allele
-     *
-     * @return BitStorage
-     */
-    public BitStorage bitStorage(WHICH_ALLELE allele);
 
     /**
      * Annotations of this Genotype Table. Null if there are none.

@@ -6,8 +6,6 @@ package net.maizegenetics.dna.snp;
 import net.maizegenetics.dna.WHICH_ALLELE;
 import net.maizegenetics.dna.map.Chromosome;
 import net.maizegenetics.dna.map.PositionList;
-import net.maizegenetics.dna.snp.bit.BitStorage;
-import net.maizegenetics.dna.snp.bit.DynamicBitStorage;
 import net.maizegenetics.dna.snp.genotypecall.GenotypeCallTable;
 import net.maizegenetics.dna.snp.score.AlleleDepth;
 import net.maizegenetics.dna.snp.score.AlleleProbability;
@@ -39,7 +37,6 @@ public class CoreGenotypeTable implements GenotypeTable {
 
     private static final Logger myLogger = Logger.getLogger(CoreGenotypeTable.class);
     private final GenotypeCallTable myGenotype;
-    private final Map<WHICH_ALLELE, BitStorage> myBitStorage = new HashMap<>();
     private final PositionList myPositionList;
     private final TaxaList myTaxaList;
     private final AlleleProbability myAlleleProbability;
@@ -114,31 +111,6 @@ public class CoreGenotypeTable implements GenotypeTable {
     @Override
     public byte[] genotypeAllSites(int taxon) {
         return myGenotype.genotypeAllSites(taxon);
-    }
-
-    @Override
-    public BitSet allelePresenceForAllSites(int taxon, WHICH_ALLELE allele) {
-        return bitStorage(allele).allelePresenceForAllSites(taxon);
-    }
-
-    @Override
-    public long[] allelePresenceForSitesBlock(int taxon, WHICH_ALLELE allele, int startBlock, int endBlock) {
-        return bitStorage(allele).allelePresenceForSitesBlock(taxon, startBlock, endBlock);
-    }
-
-    @Override
-    public BitSet haplotypeAllelePresenceForAllSites(int taxon, boolean firstParent, WHICH_ALLELE allele) {
-        return bitStorage(allele).haplotypeAllelePresenceForAllSites(taxon, firstParent);
-    }
-
-    @Override
-    public BitSet haplotypeAllelePresenceForAllTaxa(int site, boolean firstParent, WHICH_ALLELE allele) {
-        return bitStorage(allele).haplotypeAllelePresenceForAllTaxa(site, firstParent);
-    }
-
-    @Override
-    public long[] haplotypeAllelePresenceForSitesBlock(int taxon, boolean firstParent, WHICH_ALLELE allele, int startBlock, int endBlock) {
-        return bitStorage(allele).haplotypeAllelePresenceForSitesBlock(taxon, firstParent, startBlock, endBlock);
     }
 
     @Override
@@ -510,40 +482,6 @@ public class CoreGenotypeTable implements GenotypeTable {
                 myLogger.warn("getAllelesByScope: Unsupported type: " + scope);
                 return null;
         }
-    }
-
-    @Override
-    public BitSet allelePresenceForAllTaxa(int site, WHICH_ALLELE allele) {
-        return bitStorage(allele).allelePresenceForAllTaxa(site);
-    }
-
-    @Override
-    public BitStorage bitStorage(WHICH_ALLELE allele) {
-        BitStorage result = myBitStorage.get(allele);
-        if (result != null) {
-            return result;
-        }
-
-        switch (allele) {
-            case Major:
-                result = new DynamicBitStorage(myGenotype, allele, myGenotype.majorAlleleForAllSites());
-                break;
-            case Minor:
-                result = new DynamicBitStorage(myGenotype, allele, myGenotype.minorAlleleForAllSites());
-                break;
-            case Minor2:
-                result = new DynamicBitStorage(myGenotype, allele, myGenotype.thirdAlleleForAllSites());
-                break;
-            case Unknown:
-                result = DynamicBitStorage.getUnknownInstance(myGenotype);
-                break;
-            default:
-                myLogger.warn("bitStorage: Unsupported allele: " + allele);
-                return null;
-        }
-
-        myBitStorage.put(allele, result);
-        return result;
     }
 
     @Override

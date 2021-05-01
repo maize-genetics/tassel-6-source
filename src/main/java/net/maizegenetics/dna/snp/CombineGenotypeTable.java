@@ -3,7 +3,6 @@
  */
 package net.maizegenetics.dna.snp;
 
-import net.maizegenetics.dna.snp.bit.BitStorage;
 import net.maizegenetics.dna.snp.genotypecall.GenotypeCallTable;
 import net.maizegenetics.dna.map.Chromosome;
 import net.maizegenetics.dna.map.PositionList;
@@ -427,16 +426,6 @@ public class CombineGenotypeTable implements GenotypeTable {
     }
 
     @Override
-    public BitSet allelePresenceForAllSites(int taxon, WHICH_ALLELE allele) {
-        throw new UnsupportedOperationException("CombineGenotypeTable: getAllelePresenceForAllSites: This operation isn't possible as it spans multiple GenotypeTables.");
-    }
-
-    @Override
-    public long[] allelePresenceForSitesBlock(int taxon, WHICH_ALLELE allele, int startBlock, int endBlock) {
-        throw new UnsupportedOperationException("CombineGenotypeTable: getAllelePresenceForSitesBlock: This operation isn't possible as it spans multiple GenotypeTables.");
-    }
-
-    @Override
     public String genotypeAsString(int taxon, int site) {
         int translate = translateSite(site);
         return myGenotypeTables[translate].genotypeAsString(taxon, site - mySiteOffsets[translate]);
@@ -704,27 +693,6 @@ public class CombineGenotypeTable implements GenotypeTable {
     }
 
     @Override
-    public BitSet allelePresenceForAllTaxa(int site, WHICH_ALLELE allele) {
-        int translate = translateSite(site);
-        return myGenotypeTables[translate].allelePresenceForAllTaxa(site - mySiteOffsets[translate], allele);
-    }
-
-    @Override
-    public BitSet haplotypeAllelePresenceForAllSites(int taxon, boolean firstParent, WHICH_ALLELE allele) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public BitSet haplotypeAllelePresenceForAllTaxa(int site, boolean firstParent, WHICH_ALLELE allele) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public long[] haplotypeAllelePresenceForSitesBlock(int taxon, boolean firstParent, WHICH_ALLELE allele, int startBlock, int endBlock) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
     public String genotypeAsStringRange(int taxon, int startSite, int endSite) {
         int firstGenotype = translateSite(startSite);
         int secondGenotype = translateSite(endSite);
@@ -924,11 +892,6 @@ public class CombineGenotypeTable implements GenotypeTable {
     public int[] depthForAlleles(int taxon, int site) {
         int translate = translateSite(site);
         return myGenotypeTables[translate].depthForAlleles(taxon, site - mySiteOffsets[translate]);
-    }
-
-    @Override
-    public BitStorage bitStorage(WHICH_ALLELE allele) {
-        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
