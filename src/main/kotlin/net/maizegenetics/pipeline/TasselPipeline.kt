@@ -8,7 +8,6 @@ package net.maizegenetics.pipeline
 
 import net.maizegenetics.analysis.data.*
 import net.maizegenetics.analysis.data.FileLoadPlugin.TasselFileType
-import net.maizegenetics.gui.TasselLogging
 import net.maizegenetics.gui.basicLoggingInfo
 import net.maizegenetics.plugindef.*
 import net.maizegenetics.prefs.TasselPrefs
@@ -177,25 +176,6 @@ class TasselPipeline(args: Array<String>, interactive: Boolean = false, name: St
                 } else if (current.equals("-r", ignoreCase = true)) {
                     val phenotypeFile = args[index++]!!.trim { it <= ' ' }
                     loadFile(phenotypeFile, TasselFileType.Phenotype)
-                } else if (current.equals("-plink", ignoreCase = true)) {
-                    var pedFile: String? = null
-                    var mapFile: String? = null
-                    for (i in 0..1) {
-                        val fileType = args[index++]!!.trim { it <= ' ' }
-                        val filename = args[index++]!!.trim { it <= ' ' }
-                        if (fileType.equals("-ped", ignoreCase = true)) {
-                            pedFile = filename
-                        } else if (fileType.equals("-map", ignoreCase = true)) {
-                            mapFile = filename
-                        } else {
-                            throw IllegalArgumentException("TasselPipeline: parseArgs: -plink: unknown file type: $fileType")
-                        }
-                    }
-                    require(!(pedFile == null || mapFile == null)) { "TasselPipeline: parseArgs: -plink must specify both ped and map files." }
-                    val plugin = PlinkLoadPlugin(myIsInteractive)
-                    integratePlugin(plugin, true)
-                    plugin.pedFile(pedFile)
-                    plugin.mapFile(mapFile)
                 } else if (current.equals("-fasta", ignoreCase = true)) {
                     val fastaFile = args[index++]!!.trim { it <= ' ' }
                     loadFile(fastaFile, TasselFileType.Fasta)
@@ -216,12 +196,7 @@ class TasselPipeline(args: Array<String>, interactive: Boolean = false, name: St
                     if (plugin != null) {
                         plugin.sortPositions(true)
                     } else {
-                        val plink = findLastPluginFromCurrentPipe(arrayOf(PlinkLoadPlugin::class.java)) as PlinkLoadPlugin?
-                        if (plink != null) {
-                            plink.sortPositions(true)
-                        } else {
-                            throw IllegalArgumentException("TasselPipeline: parseArgs: No FileLoadPlugin step defined: $current")
-                        }
+                        throw IllegalArgumentException("TasselPipeline: parseArgs: No FileLoadPlugin step defined: $current")
                     }
                 } else if (current.equals("-noDepth", ignoreCase = true)) {
                     val plugin = findLastPluginFromCurrentPipe(arrayOf(FileLoadPlugin::class.java)) as FileLoadPlugin?
@@ -230,11 +205,6 @@ class TasselPipeline(args: Array<String>, interactive: Boolean = false, name: St
                     } else {
                         throw IllegalArgumentException("TasselPipeline: parseArgs: No FileLoadPlugin step defined: $current")
                     }
-                } else if (current.equals("-projection", ignoreCase = true)) {
-                    val file = args[index++]!!.trim { it <= ' ' }
-                    val plugin = ProjectionLoadPlugin(myIsInteractive)
-                    integratePlugin(plugin, true)
-                    plugin.recombinationBreakpoints(file)
                 } else if (current.equals("-printGenoSummary", ignoreCase = true)) {
                     val plugin = GenotypeSummaryPlugin(myIsInteractive)
                     integratePlugin(plugin, true)
@@ -292,7 +262,7 @@ class TasselPipeline(args: Array<String>, interactive: Boolean = false, name: St
                             ?: throw IllegalArgumentException("TasselPipeline: parseArgs: No Export step defined: $current")
                     val type = args[index++]!!.trim { it <= ' ' }
                     try {
-                        plugin!!.setAlignmentFileType(TasselFileType.valueOf(type))
+                        plugin!!.fileType(TasselFileType.valueOf(type))
                     } catch (e: Exception) {
                         throw IllegalArgumentException("TasselPipeline: parseArgs: -exportType: Unknown type: " + type + "  Should be: " + TasselFileType.values().contentToString())
                     }
@@ -307,7 +277,7 @@ class TasselPipeline(args: Array<String>, interactive: Boolean = false, name: St
                     } else {
                         throw IllegalArgumentException("TasselPipeline: parseArgs: -exportIncludeAnno must be true or false: $temp")
                     }
-                    plugin!!.setIncludeAnnotations(value)
+                    plugin!!.includeAnnotations(value)
                 } else if (current.equals("-exportIncludeDepth", ignoreCase = true)) {
                     val plugin: ExportMultiplePlugin? = findLastPluginFromCurrentPipe(arrayOf(ExportMultiplePlugin::class.java)) as ExportMultiplePlugin?
                             ?: throw IllegalArgumentException("TasselPipeline: parseArgs: No Export step defined: $current")
@@ -319,7 +289,7 @@ class TasselPipeline(args: Array<String>, interactive: Boolean = false, name: St
                     } else {
                         throw IllegalArgumentException("TasselPipeline: parseArgs: -exportIncludeDepth must be true or false: $temp")
                     }
-                    plugin!!.setIncludeDepth(value)
+                    plugin!!.includeDepth(value)
                 } else {
                     try {
                         var plugin: Plugin? = null
