@@ -22,7 +22,7 @@ import java.util.concurrent.*
 import java.util.regex.Pattern
 
 /*
- *  BuilderFromHapMap
+ *  BuilderFromHapmap
  */
 
 /**

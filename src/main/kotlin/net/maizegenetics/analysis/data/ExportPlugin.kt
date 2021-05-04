@@ -20,6 +20,7 @@ import net.maizegenetics.phenotype.Phenotype
 import net.maizegenetics.phenotype.PhenotypeUtils
 import net.maizegenetics.plugindef.AbstractPlugin
 import net.maizegenetics.plugindef.DataSet
+import net.maizegenetics.plugindef.Parameter
 import net.maizegenetics.plugindef.PluginParameter
 import net.maizegenetics.taxa.TaxaList
 import net.maizegenetics.taxa.TaxaListTableReport
@@ -47,21 +48,27 @@ class ExportPlugin(isInteractive: Boolean = false) : AbstractPlugin(isInteractiv
 
     private val myLogger = Logger.getLogger(ExportPlugin::class.java)
 
-    private var mySaveFile = PluginParameter.Builder("saveAs", null, String::class.java)
+    private var mySaveFile = PluginParameter.Builder("saveFile", null, String::class.java)
             .description("Save file as...")
             .outFile()
             .required(true)
             .build()
-    private var myFileType = PluginParameter.Builder("format", null, TasselFileType::class.java)
+    var saveFile by Parameter<String>()
+
+    private var myFileType = PluginParameter.Builder("fileType", null, TasselFileType::class.java)
             .description("Export file format (Default format depends on data being exported)")
             .required(true)
             .objectListSingleSelect()
             .range(TasselFileType.values())
             .build()
+    var fileType by Parameter<TasselFileType?>()
+
     private var myKeepDepth = PluginParameter.Builder("keepDepth", true, Boolean::class.java)
             .description("Whether to keep depth if format supports depth.")
             .dependentOnParameter(myFileType, arrayOf(TasselFileType.VCF))
             .build()
+    var keepDepth by Parameter<Boolean>()
+
     private var myIncludeTaxaAnnotations = PluginParameter.Builder("includeTaxaAnnotations", true, Boolean::class.java)
             .description("Whether to include taxa annotations if format supports taxa annotations.")
             .dependentOnParameter(myFileType, arrayOf(TasselFileType.VCF,
@@ -69,73 +76,92 @@ class ExportPlugin(isInteractive: Boolean = false) : AbstractPlugin(isInteractiv
                     TasselFileType.HapmapDiploid,
                     TasselFileType.HapmapLIX))
             .build()
+    var includeTaxaAnnotations by Parameter<Boolean>()
+
     private var myIncludeBranchLengths = PluginParameter.Builder("includeBranchLengths", true, Boolean::class.java)
             .description("Whether to include branch lengths for Newick formatted files.")
             .dependentOnParameter(myFileType, arrayOf(TasselFileType.Newick))
             .build()
+    var includeBranchLengths by Parameter<Boolean>()
+
 
     override fun preProcessParameters(input: DataSet) {
         require(input.size == 1) { "Please select only one item." }
         val data = input.getData(0).data
-        myFileType = if (data is GenotypeTable) {
-            val genotype = data
-            val temp: MutableList<TasselFileType?> = ArrayList()
-            if (genotype.hasGenotype()) {
-                temp.add(TasselFileType.HaplotypeVCF)
-                temp.add(TasselFileType.Hapmap)
-                temp.add(TasselFileType.HapmapDiploid)
-                temp.add(TasselFileType.VCF)
-                temp.add(TasselFileType.Plink)
-                temp.add(TasselFileType.Phylip_Seq)
-                temp.add(TasselFileType.Phylip_Inter)
-                temp.add(TasselFileType.Table)
+        myFileType = when (data) {
+            is GenotypeTable -> {
+                val genotype = data
+                val temp: MutableList<TasselFileType?> = ArrayList()
+                if (genotype.hasGenotype()) {
+                    temp.add(TasselFileType.HaplotypeVCF)
+                    temp.add(TasselFileType.Hapmap)
+                    temp.add(TasselFileType.HapmapDiploid)
+                    temp.add(TasselFileType.VCF)
+                    temp.add(TasselFileType.Plink)
+                    temp.add(TasselFileType.Phylip_Seq)
+                    temp.add(TasselFileType.Phylip_Inter)
+                    temp.add(TasselFileType.Table)
+                }
+                if (genotype.hasDepth()) {
+                    temp.add(TasselFileType.Depth)
+                }
+                if (genotype.hasReferenceProbablity()) {
+                    temp.add(TasselFileType.ReferenceProbability)
+                }
+                PluginParameter(myFileType, temp)
             }
-            if (genotype.hasDepth()) {
-                temp.add(TasselFileType.Depth)
+            is FactorTable -> {
+                PluginParameter(myFileType, listOf(TasselFileType.HaplotypeVCF))
             }
-            if (genotype.hasReferenceProbablity()) {
-                temp.add(TasselFileType.ReferenceProbability)
+            is Phenotype -> {
+                PluginParameter(myFileType,
+                        listOf(TasselFileType.Phenotype,
+                                TasselFileType.PlinkPhenotype))
             }
-            PluginParameter(myFileType, temp)
-        } else if (data is Phenotype) {
-            PluginParameter(myFileType,
-                    Arrays.asList(TasselFileType.Phenotype,
-                            TasselFileType.PlinkPhenotype))
-        } else if (data is FilterList) {
-            PluginParameter(myFileType, listOf(TasselFileType.Filter))
-        } else if (data is DistanceMatrix) {
-            PluginParameter(myFileType,
-                    Arrays.asList(TasselFileType.SqrMatrix,
-                            TasselFileType.SqrMatrixBin,
-                            TasselFileType.SqrMatrixRaw,
-                            TasselFileType.SqrMatrixDARwinDIS))
-        } else if (data is TaxaList) {
-            PluginParameter(myFileType,
-                    Arrays.asList(TasselFileType.TaxaList,
-                            TasselFileType.Table))
-        } else if (data is TaxaListTableReport) {
-            PluginParameter(myFileType,
-                    Arrays.asList(TasselFileType.TaxaList,
-                            TasselFileType.Table))
-        } else if (data is PositionList) {
-            PluginParameter(myFileType,
-                    Arrays.asList(TasselFileType.PositionList,
-                            TasselFileType.Table))
-        } else if (data is PositionListTableReport) {
-            PluginParameter(myFileType,
-                    Arrays.asList(TasselFileType.PositionList,
-                            TasselFileType.Table))
-        } else if (data is TableReport) {
-            PluginParameter(myFileType, listOf(TasselFileType.Table))
-        } else if (data is SimpleTree) {
-            PluginParameter(myFileType,
-                    Arrays.asList( //FileLoadPlugin.TasselFileType.Newick,
-                            TasselFileType.Report))
-        } else {
-            throw IllegalStateException("Don't know how to export data type: " + data.javaClass.name)
+            is FilterList -> {
+                PluginParameter(myFileType, listOf(TasselFileType.Filter))
+            }
+            is DistanceMatrix -> {
+                PluginParameter(myFileType,
+                        listOf(TasselFileType.SqrMatrix,
+                                TasselFileType.SqrMatrixBin,
+                                TasselFileType.SqrMatrixRaw,
+                                TasselFileType.SqrMatrixDARwinDIS))
+            }
+            is TaxaList -> {
+                PluginParameter(myFileType,
+                        listOf(TasselFileType.TaxaList,
+                                TasselFileType.Table))
+            }
+            is TaxaListTableReport -> {
+                PluginParameter(myFileType,
+                        listOf(TasselFileType.TaxaList,
+                                TasselFileType.Table))
+            }
+            is PositionList -> {
+                PluginParameter(myFileType,
+                        listOf(TasselFileType.PositionList,
+                                TasselFileType.Table))
+            }
+            is PositionListTableReport -> {
+                PluginParameter(myFileType,
+                        listOf(TasselFileType.PositionList,
+                                TasselFileType.Table))
+            }
+            is TableReport -> {
+                PluginParameter(myFileType, listOf(TasselFileType.Table))
+            }
+            is SimpleTree -> {
+                PluginParameter(myFileType,
+                        listOf( //FileLoadPlugin.TasselFileType.Newick,
+                                TasselFileType.Report))
+            }
+            else -> {
+                throw IllegalStateException("Don't know how to export data type: " + data.javaClass.name)
+            }
         }
-        if (!isInteractive && myFileType.isEmpty && myFileType.hasPossibleValues()) {
-            fileType(myFileType.possibleValues()[0])
+        if (!isInteractive && (fileType == null || fileType == TasselFileType.Unknown) && myFileType.hasPossibleValues()) {
+            fileType = myFileType.possibleValues()[0]
         }
     }
 
@@ -161,128 +187,107 @@ class ExportPlugin(isInteractive: Boolean = false) : AbstractPlugin(isInteractiv
         return null
     }
 
-    fun writeDistanceMatrix(matrix: DistanceMatrix, filename: String, type: TasselFileType = TasselFileType.SqrMatrix): String {
-        saveFile(filename)
-        fileType(type)
-        return performFunctionForDistanceMatrix(matrix)
+    fun write(data: Any, filename: String, type: TasselFileType? = null) {
+        saveFile = filename
+        fileType = type
+        performFunction(DataSet.getDataSet(data))
     }
 
     private fun performFunctionForDistanceMatrix(input: DistanceMatrix): String {
-        return if (fileType() == TasselFileType.SqrMatrix) {
-            val filename = Utils.addSuffixIfNeeded(saveFile(), ".txt", arrayOf(".txt", ".txt.gz"))
+        return if (fileType == TasselFileType.SqrMatrix) {
+            val filename = Utils.addSuffixIfNeeded(saveFile, ".txt", arrayOf(".txt", ".txt.gz"))
             WriteDistanceMatrix.saveDelimitedDistanceMatrix(input, filename)
             filename
-        } else if (fileType() == TasselFileType.SqrMatrixRaw) {
-            val grmFiles = DistanceMatrixUtils.getGRMFilenames(saveFile())
+        } else if (fileType == TasselFileType.SqrMatrixRaw) {
+            val grmFiles = DistanceMatrixUtils.getGRMFilenames(saveFile)
             WriteDistanceMatrix.saveRawMultiBlupMatrix(input, grmFiles[0], grmFiles[3])
             grmFiles[3]
-        } else if (fileType() == TasselFileType.SqrMatrixBin) {
-            val grmFiles = DistanceMatrixUtils.getGRMFilenames(saveFile())
+        } else if (fileType == TasselFileType.SqrMatrixBin) {
+            val grmFiles = DistanceMatrixUtils.getGRMFilenames(saveFile)
             WriteDistanceMatrix.saveBinMultiBlupMatrix(input, grmFiles[0], grmFiles[1], grmFiles[2])
             grmFiles[1]
-        } else if (fileType() == TasselFileType.SqrMatrixDARwinDIS) {
-            val filename = Utils.addSuffixIfNeeded(saveFile(), ".dis")
+        } else if (fileType == TasselFileType.SqrMatrixDARwinDIS) {
+            val filename = Utils.addSuffixIfNeeded(saveFile, ".dis")
             WriteDistanceMatrix.saveDARwinMatrix(input, filename)
             filename
         } else {
-            throw IllegalArgumentException("ExportPlugin: performFunctionForDistanceMatrix: Unknown file type: " + fileType())
+            throw IllegalArgumentException("ExportPlugin: performFunctionForDistanceMatrix: Unknown file type: $fileType")
         }
     }
 
-    fun writeTableReport(table: TableReport, filename: String): String {
-        saveFile(filename)
-        fileType(TasselFileType.Table)
-        return performFunctionForTableReport(table)
-    }
-
     private fun performFunctionForTableReport(input: TableReport): String {
-        val theFile = File(Utils.addSuffixIfNeeded(saveFile(), ".txt"))
+        val theFile = File(Utils.addSuffixIfNeeded(saveFile, ".txt"))
         TableReportUtils.saveDelimitedTableReport(input, "\t", theFile)
         return theFile.absolutePath
     }
 
     private fun performFunctionForFilter(filter: FilterList): String {
-        return FilterJSONUtils.exportFilterToJSON(filter, saveFile())
-    }
-
-    fun writePhenotype(phenotype: Phenotype, filename: String, type: TasselFileType = TasselFileType.Phenotype): String {
-        saveFile(filename)
-        fileType(type)
-        return performFunctionForPhenotype(phenotype)
+        return FilterJSONUtils.exportFilterToJSON(filter, saveFile)
     }
 
     private fun performFunctionForPhenotype(input: Phenotype): String {
-        val filename = Utils.addSuffixIfNeeded(saveFile(), ".txt")
-        if (fileType() == TasselFileType.Phenotype) {
+        val filename = Utils.addSuffixIfNeeded(saveFile, ".txt")
+        if (fileType == TasselFileType.Phenotype) {
             PhenotypeUtils.write(input, filename)
-        } else if (fileType() == TasselFileType.PlinkPhenotype) {
+        } else if (fileType == TasselFileType.PlinkPhenotype) {
             PhenotypeUtils.writePlink(input, filename)
         }
         return File(filename).absolutePath
     }
 
-    fun writeFactorTable(table: FactorTable, filename: String, type: TasselFileType = TasselFileType.HaplotypeVCF): String? {
-        saveFile(filename)
-        fileType(type)
-        // TODO
-        return null
+    private fun performFunctionForFactorTable(table: FactorTable): String? {
+
+        var resultFile = saveFile
+        when (fileType) {
+            TasselFileType.HaplotypeVCF -> TODO()
+        }
+
+        return resultFile
+
     }
 
     private fun performFunctionForAlignment(inputAlignment: GenotypeTable): String? {
-        var resultFile = saveFile()
-        if (fileType() == TasselFileType.ReferenceProbability) {
-            resultFile = SiteScoresIO.writeReferenceProbability(inputAlignment, resultFile)
-        } else if (fileType() == TasselFileType.Depth) {
-            resultFile = SiteScoresIO.writeDepth(inputAlignment, resultFile)
-        } else if (fileType() == TasselFileType.Hapmap) {
-            resultFile = ExportUtils.writeToHapmap(inputAlignment, false, saveFile(), '\t', includeTaxaAnnotations(), this)
-        } else if (fileType() == TasselFileType.HapmapDiploid) {
-            resultFile = ExportUtils.writeToHapmap(inputAlignment, true, saveFile(), '\t', includeTaxaAnnotations(), this)
-        } else if (fileType() == TasselFileType.Plink) {
-            resultFile = ExportUtils.writeToPlink(inputAlignment, saveFile(), '\t')
-            //} else if (fileType() == FileLoadPlugin.TasselFileType.Flapjack) {
-            //resultFile = FlapjackUtils.writeToFlapjack(inputAlignment, saveFile(), '\t');
-        } else if (fileType() == TasselFileType.Phylip_Seq) {
-            resultFile = Utils.addSuffixIfNeeded(saveFile(), ".phy")
-            try {
-                PrintWriter(FileWriter(resultFile)).use { out -> ExportUtils.printSequential(inputAlignment, out) }
-            } catch (e: Exception) {
-                myLogger.debug(e.message, e)
-                throw IllegalStateException("ExportPlugin: performFunction: Problem writing file: $resultFile")
+        var resultFile = saveFile
+        when (fileType) {
+            TasselFileType.ReferenceProbability -> resultFile = SiteScoresIO.writeReferenceProbability(inputAlignment, resultFile)
+            TasselFileType.Depth -> resultFile = SiteScoresIO.writeDepth(inputAlignment, resultFile)
+            TasselFileType.Hapmap -> resultFile = ExportUtils.writeToHapmap(inputAlignment, false, saveFile, '\t', includeTaxaAnnotations, this)
+            TasselFileType.HapmapDiploid -> resultFile = ExportUtils.writeToHapmap(inputAlignment, true, saveFile, '\t', includeTaxaAnnotations, this)
+            TasselFileType.Plink -> resultFile = ExportUtils.writeToPlink(inputAlignment, saveFile, '\t')
+            //TasselFileType.Flapjack -> resultFile = FlapjackUtils.writeToFlapjack(inputAlignment, saveFile(), '\t')
+            TasselFileType.Phylip_Seq -> {
+                resultFile = Utils.addSuffixIfNeeded(saveFile, ".phy")
+                try {
+                    PrintWriter(FileWriter(resultFile)).use { out -> ExportUtils.printSequential(inputAlignment, out) }
+                } catch (e: Exception) {
+                    myLogger.debug(e.message, e)
+                    throw IllegalStateException("ExportPlugin: performFunction: Problem writing file: $resultFile")
+                }
             }
-        } else if (fileType() == TasselFileType.Phylip_Inter) {
-            resultFile = Utils.addSuffixIfNeeded(saveFile(), ".phy")
-            try {
-                PrintWriter(FileWriter(resultFile)).use { out -> ExportUtils.printInterleaved(inputAlignment, out) }
-            } catch (e: Exception) {
-                myLogger.debug(e.message, e)
-                throw IllegalStateException("ExportPlugin: performFunction: Problem writing file: $resultFile")
+            TasselFileType.Phylip_Inter -> {
+                resultFile = Utils.addSuffixIfNeeded(saveFile, ".phy")
+                try {
+                    PrintWriter(FileWriter(resultFile)).use { out -> ExportUtils.printInterleaved(inputAlignment, out) }
+                } catch (e: Exception) {
+                    myLogger.debug(e.message, e)
+                    throw IllegalStateException("ExportPlugin: performFunction: Problem writing file: $resultFile")
+                }
             }
-        } else if (fileType() == TasselFileType.Table) {
-            resultFile = ExportUtils.saveDelimitedAlignment(inputAlignment, "\t", saveFile())
-        } else if (fileType() == TasselFileType.Serial) {
-            resultFile = ExportUtils.writeAlignmentToSerialGZ(inputAlignment, saveFile())
-        } else if (fileType() == TasselFileType.VCF) {
-            resultFile = ExportUtils.writeToVCF(inputAlignment, saveFile(), keepDepth(), this)
-        } else {
-            throw IllegalStateException("ExportPlugin: performFunction: Unknown Genotype File Format: " + fileType())
+            TasselFileType.Table -> resultFile = ExportUtils.saveDelimitedAlignment(inputAlignment, "\t", saveFile)
+            TasselFileType.Serial -> resultFile = ExportUtils.writeAlignmentToSerialGZ(inputAlignment, saveFile)
+            TasselFileType.VCF -> resultFile = ExportUtils.writeToVCF(inputAlignment, saveFile, keepDepth, this)
+            else -> throw IllegalStateException("ExportPlugin: performFunction: Unknown Genotype File Format: $fileType")
         }
         return resultFile
     }
 
-    fun writeTree(tree: SimpleTree, filename: String, type: TasselFileType = TasselFileType.Newick): String? {
-        saveFile(filename)
-        fileType(type)
-        return performFunctionForSimpleTree(tree)
-    }
-
     private fun performFunctionForSimpleTree(input: SimpleTree): String? {
         var resultFile: String? = null
-        if (fileType() == TasselFileType.Newick) {
+        if (fileType == TasselFileType.Newick) {
             //resultFile = Utils.addSuffixIfNeeded(saveFile(), FileLoadPlugin.FILE_EXT_NEWICK);
             //NewickUtils.write(resultFile, input, includeBranchLengths());
         } else {
-            resultFile = Utils.addSuffixIfNeeded(saveFile(), ".txt")
+            resultFile = Utils.addSuffixIfNeeded(saveFile, ".txt")
             try {
                 PrintWriter(resultFile).use { writer -> input.report(writer) }
             } catch (e: Exception) {
@@ -293,39 +298,27 @@ class ExportPlugin(isInteractive: Boolean = false) : AbstractPlugin(isInteractiv
         return resultFile
     }
 
-    fun writeTaxa(taxa: TaxaList, filename: String, type: TasselFileType = TasselFileType.TaxaList): String {
-        saveFile(filename)
-        fileType(type)
-        return performFunctionForTaxaList(taxa)
-    }
-
     private fun performFunctionForTaxaList(input: TaxaList): String {
-        return if (fileType() == TasselFileType.TaxaList) {
-            JSONUtils.exportTaxaListToJSON(input, saveFile())
-        } else if (fileType() == TasselFileType.Table) {
-            val theFile = File(Utils.addSuffixIfNeeded(saveFile(), ".txt"))
+        return if (fileType == TasselFileType.TaxaList) {
+            JSONUtils.exportTaxaListToJSON(input, saveFile)
+        } else if (fileType == TasselFileType.Table) {
+            val theFile = File(Utils.addSuffixIfNeeded(saveFile, ".txt"))
             TableReportUtils.saveDelimitedTableReport(TaxaListTableReport(input), "\t", theFile)
             theFile.absolutePath
         } else {
-            throw IllegalStateException("ExportPlugin: performFunctionForTaxaList: Can't export TaxaList as: " + fileType())
+            throw IllegalStateException("ExportPlugin: performFunctionForTaxaList: Can't export TaxaList as: " + fileType)
         }
     }
 
-    fun writePositions(positions: PositionList, filename: String, type: TasselFileType = TasselFileType.PositionList): String {
-        saveFile(filename)
-        fileType(type)
-        return performFunctionForPositionList(positions)
-    }
-
     private fun performFunctionForPositionList(input: PositionList): String {
-        return if (fileType() == TasselFileType.PositionList) {
-            JSONUtils.exportPositionListToJSON(input, saveFile())
-        } else if (fileType() == TasselFileType.Table) {
-            val theFile = File(Utils.addSuffixIfNeeded(saveFile(), ".txt"))
+        return if (fileType == TasselFileType.PositionList) {
+            JSONUtils.exportPositionListToJSON(input, saveFile)
+        } else if (fileType == TasselFileType.Table) {
+            val theFile = File(Utils.addSuffixIfNeeded(saveFile, ".txt"))
             TableReportUtils.saveDelimitedTableReport(PositionListTableReport(input), "\t", theFile)
             theFile.absolutePath
         } else {
-            throw IllegalStateException("ExportPlugin: performFunctionForPositionList: Can't export PositionList as: " + fileType())
+            throw IllegalStateException("ExportPlugin: performFunctionForPositionList: Can't export PositionList as: " + fileType)
         }
     }
 
@@ -349,114 +342,6 @@ class ExportPlugin(isInteractive: Boolean = false) : AbstractPlugin(isInteractiv
 
     override fun pluginUserManualURL(): String {
         return "https://bitbucket.org/tasseladmin/tassel-5-source/wiki/UserManual/Export/Export"
-    }
-
-    /**
-     * Save file as...
-     *
-     * @return Save As
-     */
-    fun saveFile(): String? {
-        return mySaveFile.value()
-    }
-
-    /**
-     * Save file as...
-     *
-     * @param value filename
-     *
-     * @return this plugin
-     */
-    fun saveFile(value: String): ExportPlugin {
-        mySaveFile = PluginParameter(mySaveFile, value)
-        return this
-    }
-
-    /**
-     * Export file format
-     *
-     * @return Format
-     */
-    fun fileType(): TasselFileType? {
-        return myFileType.value()
-    }
-
-    /**
-     * Set Format. Export file format
-     *
-     * @param value Format
-     *
-     * @return this plugin
-     */
-    fun fileType(value: TasselFileType): ExportPlugin {
-        myFileType = PluginParameter(myFileType, value)
-        return this
-    }
-
-    /**
-     * Whether to keep depth if format supports depth.
-     *
-     * @return Keep Depth
-     */
-    fun keepDepth(): Boolean {
-        return myKeepDepth.value()
-    }
-
-    /**
-     * Set Keep Depth. Whether to keep depth if format supports depth.
-     *
-     * @param value Keep Depth
-     *
-     * @return this plugin
-     */
-    fun keepDepth(value: Boolean): ExportPlugin {
-        myKeepDepth = PluginParameter(myKeepDepth, value)
-        return this
-    }
-
-    /**
-     * Whether to include taxa annotations if format supports taxa annotations.
-     *
-     * @return Include Taxa Annotations
-     */
-    fun includeTaxaAnnotations(): Boolean {
-        return myIncludeTaxaAnnotations.value()
-    }
-
-    /**
-     * Set Include Taxa Annotations. Whether to include taxa annotations if
-     * format supports taxa annotations.
-     *
-     * @param value Include Taxa Annotations
-     *
-     * @return this plugin
-     */
-    fun includeTaxaAnnotations(value: Boolean): ExportPlugin {
-        myIncludeTaxaAnnotations = PluginParameter(myIncludeTaxaAnnotations, value)
-        return this
-    }
-
-    /**
-     * Whether to include branch lengths for Newick formatted
-     * files.
-     *
-     * @return Include Branch Lengths
-     */
-    fun includeBranchLengths(): Boolean {
-        return myIncludeBranchLengths.value()
-    }
-
-    /**
-     * Set Include Branch Lengths. Whether to include branch
-     * lengths for Newick formatted files.
-     *
-     * @param value Include Branch Lengths
-     *
-     * @return this plugin
-     */
-    fun includeBranchLengths(value: Boolean): ExportPlugin {
-        myIncludeBranchLengths = PluginParameter(myIncludeBranchLengths, value)
-        return this
     }
 
 }
