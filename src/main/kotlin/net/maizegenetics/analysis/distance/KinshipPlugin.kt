@@ -7,7 +7,7 @@
 package net.maizegenetics.analysis.distance
 
 import com.google.common.collect.Range
-import net.maizegenetics.dna.factor.FactorTable
+import net.maizegenetics.dna.factor.FeatureTable
 import net.maizegenetics.plugindef.*
 import net.maizegenetics.taxa.distance.DistanceMatrix
 import org.apache.log4j.Logger
@@ -52,20 +52,20 @@ class KinshipPlugin(isInteractive: Boolean = false) : AbstractPlugin(isInteracti
     var algorithmVariation by Parameter<ALGORITHM_VARIATION>()
 
     override fun preProcessParameters(input: DataSet) {
-        val alignInList = input.getDataOfType(FactorTable::class.java)
+        val alignInList = input.getDataOfType(FeatureTable::class.java)
         require(!(alignInList == null || alignInList.isEmpty())) { "KinshipPlugin: Nothing selected. Please select a genotype." }
     }
 
     override fun processData(input: DataSet): DataSet {
-        val alignInList = input.getDataOfType(FactorTable::class.java)
+        val alignInList = input.getDataOfType(FeatureTable::class.java)
         val result: MutableList<Datum> = ArrayList()
         val itr: Iterator<Datum> = alignInList.iterator()
         while (itr.hasNext()) {
             val current = itr.next()
             val datasetName = current.name
             var kin: DistanceMatrix? = null
-            if (current.data is FactorTable) {
-                val myGenotype = current.data as FactorTable
+            if (current.data is FeatureTable) {
+                val myGenotype = current.data as FeatureTable
                 if (method == KINSHIP_METHOD.Centered_IBS) {
                     kin = EndelmanDistanceMatrixBuilder(myGenotype, maxAlleles, this).build()
                 } else if (method == KINSHIP_METHOD.Normalized_IBS) {
@@ -119,7 +119,7 @@ class KinshipPlugin(isInteractive: Boolean = false) : AbstractPlugin(isInteracti
     /**
      * Convenience method to run plugin with one return object.
      */
-    fun run(input: FactorTable): DistanceMatrix {
+    fun run(input: FeatureTable): DistanceMatrix {
         return performFunction(DataSet.getDataSet(input)).getData(0).data as DistanceMatrix
     }
 

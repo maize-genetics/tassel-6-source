@@ -7,7 +7,7 @@
 package net.maizegenetics.analysis.data
 
 import net.maizegenetics.analysis.data.FileLoadPlugin.TasselFileType
-import net.maizegenetics.dna.factor.FactorTable
+import net.maizegenetics.dna.factor.FeatureTable
 import net.maizegenetics.dna.map.PositionList
 import net.maizegenetics.dna.map.PositionListTableReport
 import net.maizegenetics.dna.snp.ExportUtils
@@ -110,7 +110,7 @@ class ExportPlugin(isInteractive: Boolean = false) : AbstractPlugin(isInteractiv
                 }
                 PluginParameter(myFileType, temp)
             }
-            is FactorTable -> {
+            is FeatureTable -> {
                 PluginParameter(myFileType, listOf(TasselFileType.HaplotypeVCF))
             }
             is Phenotype -> {
@@ -235,7 +235,7 @@ class ExportPlugin(isInteractive: Boolean = false) : AbstractPlugin(isInteractiv
         return File(filename).absolutePath
     }
 
-    private fun performFunctionForFactorTable(table: FactorTable): String? {
+    private fun performFunctionForFactorTable(table: FeatureTable): String? {
 
         var resultFile = saveFile
         when (fileType) {

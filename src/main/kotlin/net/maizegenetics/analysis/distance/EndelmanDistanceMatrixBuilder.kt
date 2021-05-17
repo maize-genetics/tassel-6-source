@@ -2,9 +2,9 @@ package net.maizegenetics.analysis.distance
 
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
-import net.maizegenetics.dna.factor.FactorTable
+import net.maizegenetics.dna.factor.FeatureTable
 import net.maizegenetics.dna.factor.UNKNOWN_ALLELE
-import net.maizegenetics.dna.factor.site.FactorSite
+import net.maizegenetics.dna.factor.site.FeatureSite
 import net.maizegenetics.taxa.distance.DistanceMatrix
 import net.maizegenetics.taxa.distance.DistanceMatrixBuilder
 import net.maizegenetics.util.GeneralAnnotationStorage
@@ -14,7 +14,7 @@ import java.util.*
 import kotlin.math.roundToLong
 import kotlin.system.measureNanoTime
 
-class EndelmanDistanceMatrixBuilder(val table: FactorTable, val maxAlleles: Int = 255, private val listener: ProgressListener? = null) {
+class EndelmanDistanceMatrixBuilder(val table: FeatureTable, val maxAlleles: Int = 255, private val listener: ProgressListener? = null) {
 
     private val logger = Logger.getLogger(EndelmanDistanceMatrixBuilder::class.java)
 
@@ -24,7 +24,7 @@ class EndelmanDistanceMatrixBuilder(val table: FactorTable, val maxAlleles: Int 
 
     private var numProcessingThreads: Int = 1
 
-    data class PsuedoSite(val site: FactorSite, val allele: Byte, val alleleFreq: Float)
+    data class PsuedoSite(val site: FeatureSite, val allele: Byte, val alleleFreq: Float)
 
     fun build(): DistanceMatrix {
 
