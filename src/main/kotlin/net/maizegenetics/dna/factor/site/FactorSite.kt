@@ -1,7 +1,7 @@
 package net.maizegenetics.dna.factor.site
 
+import net.maizegenetics.dna.factor.UNKNOWN_ALLELE
 import net.maizegenetics.dna.map.GenomicFactor
-import net.maizegenetics.dna.snp.genotypecall.AlleleFreqCache
 import net.maizegenetics.taxa.TaxaList
 
 /**
@@ -25,6 +25,13 @@ abstract class FactorSite(val factor: GenomicFactor, val taxa: TaxaList, val wei
     abstract fun genotype(taxon: Int): ByteArray
 
     abstract fun genotypeAsString(taxon: Int): String
+
+    fun heterozygousCount(): Int {
+        return this
+                .map { alleles -> alleles.filter { it != UNKNOWN_ALLELE }.distinct().count() }
+                .filter { count -> count > 1 }
+                .count()
+    }
 
     override fun compareTo(other: FactorSite): Int {
         return factor.compareTo(other.factor)

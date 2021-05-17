@@ -62,6 +62,12 @@ class AlleleStats(site: FactorSite) {
         }
     }
 
+    fun totalGametesNonMissingForSite(): Int {
+        return alleleCounts
+                .map { it.count }
+                .sum()
+    }
+
 }
 
 private fun sort(data: IntArray): List<AlleleCount> {
