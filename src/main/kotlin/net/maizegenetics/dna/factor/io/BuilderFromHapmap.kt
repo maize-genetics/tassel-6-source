@@ -1,12 +1,12 @@
 package net.maizegenetics.dna.factor.io
 
 import com.google.common.collect.SetMultimap
-import net.maizegenetics.dna.factor.FactorTable
-import net.maizegenetics.dna.factor.FactorTableBuilder
+import net.maizegenetics.dna.factor.FeatureTable
+import net.maizegenetics.dna.factor.FeatureTableBuilder
 import net.maizegenetics.dna.factor.site.SNPSiteBuilder
 import net.maizegenetics.dna.map.Chromosome
-import net.maizegenetics.dna.map.GenomicFactor
-import net.maizegenetics.dna.map.GenomicFactorList
+import net.maizegenetics.dna.map.GenomicFeature
+import net.maizegenetics.dna.map.GenomicFeatureList
 import net.maizegenetics.dna.snp.GenotypeTableUtils
 import net.maizegenetics.dna.snp.NucleotideAlignmentConstants
 import net.maizegenetics.taxa.TaxaListBuilder
@@ -34,7 +34,7 @@ class BuilderFromHapMap private constructor(private val myHapmapFile: String, pr
 
     private var mySortPositions = false
 
-    fun build(): FactorTable {
+    fun build(): FeatureTable {
 
         var pool: ExecutorService? = null
         try {
@@ -111,8 +111,8 @@ class BuilderFromHapMap private constructor(private val myHapmapFile: String, pr
                 }
 
                 var currentSite = 0
-                val positions = GenomicFactorList.Builder()
-                val factorTableBuilder = FactorTableBuilder(taxa)
+                val positions = GenomicFeatureList.Builder()
+                val factorTableBuilder = FeatureTableBuilder(taxa)
                 //val genotypes = SNPSiteBuilder.instance(numTaxa, numLines)
 
                 val numFutures = futures.size
@@ -166,12 +166,12 @@ class BuilderFromHapMap private constructor(private val myHapmapFile: String, pr
     }
 
     private inner class ProcessHapmapBlock(private var myInputLines: List<String>?, private val myNumTaxa: Int, private val myChromosomeLookup: MutableMap<String, Chromosome>, private val myIsOneLetter: Boolean) : Callable<ProcessHapmapBlock> {
-        private val myPositionList: MutableList<GenomicFactor>
+        private val myPositionList: MutableList<GenomicFeature>
         val numberSitesProcessed: Int
         var genotypes: SuperByteMatrix? = null
             private set
 
-        val positions: List<GenomicFactor>
+        val positions: List<GenomicFeature>
             get() = myPositionList
 
         init {
@@ -217,7 +217,7 @@ class BuilderFromHapMap private constructor(private val myHapmapFile: String, pr
                     }
 
                     //input.substring(0, tabPos[SNPID_INDEX]),
-                    val apb = GenomicFactor(currChr, physicalPos)
+                    val apb = GenomicFeature(currChr, physicalPos)
                     // TODO("knownVariants(variants) //TODO   strand, variants,")
 
                     //val glbMajor = NucleotideAlignmentConstants.getNucleotideDiploidByte(variants[0])

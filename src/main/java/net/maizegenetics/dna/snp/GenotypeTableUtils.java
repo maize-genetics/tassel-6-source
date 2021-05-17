@@ -3,7 +3,7 @@
  */
 package net.maizegenetics.dna.snp;
 
-import net.maizegenetics.dna.factor.FactorTableKt;
+import net.maizegenetics.dna.factor.FeatureTableKt;
 import org.apache.log4j.Logger;
 
 import static net.maizegenetics.dna.snp.GenotypeTable.UNKNOWN_GENOTYPE;
@@ -132,8 +132,8 @@ public class GenotypeTableUtils {
         byte[] result = new byte[2];
         result[0] = (byte) ((genotype >>> 4) & 0xf);
         result[1] = (byte) (genotype & 0xf);
-        if (result[0] == 0xF) result[0] = FactorTableKt.UNKNOWN_ALLELE;
-        if (result[1] == 0xF) result[1] = FactorTableKt.UNKNOWN_ALLELE;
+        if (result[0] == 0xF) result[0] = FeatureTableKt.UNKNOWN_ALLELE;
+        if (result[1] == 0xF) result[1] = FeatureTableKt.UNKNOWN_ALLELE;
         return result;
     }
 

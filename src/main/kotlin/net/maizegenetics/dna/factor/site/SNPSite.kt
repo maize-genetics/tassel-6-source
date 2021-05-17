@@ -1,6 +1,6 @@
 package net.maizegenetics.dna.factor.site
 
-import net.maizegenetics.dna.map.GenomicFactor
+import net.maizegenetics.dna.map.GenomicFeature
 import net.maizegenetics.dna.snp.GenotypeTableUtils
 import net.maizegenetics.dna.snp.NucleotideAlignmentConstants
 import net.maizegenetics.taxa.TaxaList
@@ -10,7 +10,7 @@ import net.maizegenetics.taxa.TaxaList
  * Created November 16, 2018
  */
 
-class SNPSite(factor: GenomicFactor, taxa: TaxaList, private val values: ByteArray, weight: Double? = null, isPhased: Boolean = false) : FactorSite(factor, taxa, weight, isPhased) {
+class SNPSite(factor: GenomicFeature, taxa: TaxaList, private val values: ByteArray, weight: Double? = null, isPhased: Boolean = false) : FeatureSite(factor, taxa, weight, isPhased) {
 
     init {
         require(taxa.size == values.size) { "Number of taxa: ${taxa.size} should match number of genotypes: ${values.size}." }

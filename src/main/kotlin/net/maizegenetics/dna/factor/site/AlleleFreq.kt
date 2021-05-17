@@ -5,7 +5,7 @@ package net.maizegenetics.dna.factor.site
 import java.util.*
 import kotlin.Comparator
 
-fun alleleFreq(site: FactorSite, maxNumAlleles: Int): Array<IntArray>? {
+fun alleleFreq(site: FeatureSite, maxNumAlleles: Int): Array<IntArray>? {
 
     val numTaxa = site.taxa.numberOfTaxa()
     val alleleFreq = IntArray(maxNumAlleles)

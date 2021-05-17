@@ -7,7 +7,7 @@
 package net.maizegenetics.analysis.data;
 
 import javafx.stage.FileChooser;
-import net.maizegenetics.dna.factor.FactorTable;
+import net.maizegenetics.dna.factor.FeatureTable;
 import net.maizegenetics.dna.factor.io.BuilderFromHapMap;
 import net.maizegenetics.dna.factor.io.BuilderFromHaplotypeVCF;
 import net.maizegenetics.dna.snp.io.FilterJSONUtils;
@@ -138,8 +138,8 @@ public class FileLoadPlugin extends AbstractPlugin {
         return performFunction(null);
     }
 
-    public FactorTable read(String filename) {
-        return (FactorTable) runPlugin(filename).getData(0).getData();
+    public FeatureTable read(String filename) {
+        return (FeatureTable) runPlugin(filename).getData(0).getData();
     }
 
     @Override

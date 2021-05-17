@@ -4,12 +4,12 @@ import htsjdk.variant.variantcontext.VariantContext
 import htsjdk.variant.vcf.VCFFileReader
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
-import net.maizegenetics.dna.factor.FactorTable
-import net.maizegenetics.dna.factor.FactorTableBuilder
+import net.maizegenetics.dna.factor.FeatureTable
+import net.maizegenetics.dna.factor.FeatureTableBuilder
 import net.maizegenetics.dna.factor.site.HaplotypeSite
 import net.maizegenetics.dna.factor.site.HaplotypeSiteBuilder
 import net.maizegenetics.dna.map.Chromosome
-import net.maizegenetics.dna.map.GenomicFactor
+import net.maizegenetics.dna.map.GenomicFeature
 import net.maizegenetics.taxa.TaxaList
 import net.maizegenetics.taxa.TaxaListBuilder
 import net.maizegenetics.taxa.Taxon
@@ -20,7 +20,7 @@ class BuilderFromHaplotypeVCF {
     private val processingChannel = Channel<HaplotypeSite>(5)
     private lateinit var taxa: TaxaList
 
-    fun read(filename: String): FactorTable {
+    fun read(filename: String): FeatureTable {
 
         VCFFileReader(File(filename), false).use { reader ->
 
@@ -53,7 +53,7 @@ class BuilderFromHaplotypeVCF {
     }
 
     private fun contextToSite(context: VariantContext): HaplotypeSite {
-        val factor = GenomicFactor(Chromosome.instance(context.contig), context.start, endPos = context.end)
+        val factor = GenomicFeature(Chromosome.instance(context.contig), context.start, endPos = context.end)
         val strStates = context.alleles
                 .map { it.displayString }
                 .toTypedArray()
@@ -68,8 +68,8 @@ class BuilderFromHaplotypeVCF {
         return builder.build()
     }
 
-    private suspend fun addSitesToTable(): FactorTable {
-        val builder = FactorTableBuilder(taxa)
+    private suspend fun addSitesToTable(): FeatureTable {
+        val builder = FeatureTableBuilder(taxa)
         for (site in processingChannel) {
             builder.add(site)
         }

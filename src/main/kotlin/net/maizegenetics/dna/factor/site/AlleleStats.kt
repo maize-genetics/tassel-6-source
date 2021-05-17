@@ -3,7 +3,7 @@ package net.maizegenetics.dna.factor.site
 import net.maizegenetics.dna.factor.UNKNOWN_ALLELE
 import java.util.*
 
-class AlleleStats(site: FactorSite) {
+class AlleleStats(site: FeatureSite) {
 
     val alleleCounts: List<AlleleCount>
     val numAlleles: Int

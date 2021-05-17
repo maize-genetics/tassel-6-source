@@ -2,8 +2,6 @@ package net.maizegenetics.tassel
 
 import javafx.application.Application
 import javafx.application.Platform
-import javafx.beans.property.DoubleProperty
-import javafx.beans.value.ChangeListener
 import javafx.event.ActionEvent
 import javafx.event.EventHandler
 import javafx.geometry.Orientation
@@ -17,7 +15,7 @@ import javafx.stage.Stage
 import javafx.stage.WindowEvent
 import net.maizegenetics.analysis.data.FileLoadPlugin
 import net.maizegenetics.analysis.data.GenotypeSummaryPlugin
-import net.maizegenetics.dna.factor.FactorTable
+import net.maizegenetics.dna.factor.FeatureTable
 import net.maizegenetics.gui.*
 import net.maizegenetics.plugindef.AbstractPlugin
 import net.maizegenetics.plugindef.Datum
@@ -195,7 +193,7 @@ class TASSELGUI : Application() {
 
         when (val data = datum.data) {
             is TableReport -> myMainView.children += TableReportViewer.instance(data).view
-            is FactorTable -> {
+            is FeatureTable -> {
                 val viewer = FactorTableViewer.instance(data, myMainView.widthProperty())
                 myMainView.children += viewer.view
                 myMainControls.add(viewer.controls)

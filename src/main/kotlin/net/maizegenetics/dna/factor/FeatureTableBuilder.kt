@@ -11,9 +11,9 @@ class FactorTableBuilder constructor(val taxa: TaxaList) {
         sites.add(site)
     }
 
-    fun build(): FactorTable {
+    fun build(): FeatureTable {
         sites.sort()
-        return FactorTable(taxa, sites)
+        return FeatureTable(taxa, sites)
     }
 
 }

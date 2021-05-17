@@ -1,9 +1,9 @@
 package net.maizegenetics.dna.factor.site
 
-import net.maizegenetics.dna.map.GenomicFactor
+import net.maizegenetics.dna.map.GenomicFeature
 import net.maizegenetics.taxa.TaxaList
 
-class SNPSiteBuilder constructor(val factor: GenomicFactor, val taxa: TaxaList) {
+class SNPSiteBuilder constructor(val factor: GenomicFeature, val taxa: TaxaList) {
 
     private val genotypes = ByteArray(taxa.size)
 

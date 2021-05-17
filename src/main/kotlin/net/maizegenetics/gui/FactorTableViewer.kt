@@ -20,7 +20,7 @@ import javafx.scene.paint.Color
 import javafx.scene.shape.Rectangle
 import javafx.scene.text.Font
 import javafx.scene.text.Text
-import net.maizegenetics.dna.factor.FactorTable
+import net.maizegenetics.dna.factor.FeatureTable
 import net.maizegenetics.dna.factor.site.SNPSite
 
 /**
@@ -106,7 +106,7 @@ private fun TAXA_RECTANGLE(name: String, size: Double): Node {
     return result
 }
 
-class FactorTableViewer private constructor(val table: FactorTable) {
+class FactorTableViewer private constructor(val table: FeatureTable) {
 
     private val grid = GridPane()
     private val taxa = GridPane()
@@ -260,14 +260,14 @@ class FactorTableViewer private constructor(val table: FactorTable) {
 
     companion object {
 
-        private val INSTANCES = object : LinkedHashMap<FactorTable, FactorTableViewer>() {
-            override fun removeEldestEntry(eldest: MutableMap.MutableEntry<FactorTable, FactorTableViewer>?): Boolean {
+        private val INSTANCES = object : LinkedHashMap<FeatureTable, FactorTableViewer>() {
+            override fun removeEldestEntry(eldest: MutableMap.MutableEntry<FeatureTable, FactorTableViewer>?): Boolean {
                 return size > 5;
             }
         }
 
         @JvmStatic
-        fun instance(table: FactorTable, width: ReadOnlyDoubleProperty): FactorTableViewer {
+        fun instance(table: FeatureTable, width: ReadOnlyDoubleProperty): FactorTableViewer {
             var result = INSTANCES[table]
             if (result == null) {
                 result = FactorTableViewer(table)

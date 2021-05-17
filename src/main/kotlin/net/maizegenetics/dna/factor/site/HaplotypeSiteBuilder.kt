@@ -1,10 +1,10 @@
 package net.maizegenetics.dna.factor.site
 
-import net.maizegenetics.dna.map.GenomicFactor
+import net.maizegenetics.dna.map.GenomicFeature
 import net.maizegenetics.taxa.TaxaList
 import net.maizegenetics.util.SuperByteMatrixBuilder
 
-class HaplotypeSiteBuilder constructor(val factor: GenomicFactor, val taxa: TaxaList, val ploidy: Int, val strStates: Array<String>) {
+class HaplotypeSiteBuilder constructor(val factor: GenomicFeature, val taxa: TaxaList, val ploidy: Int, val strStates: Array<String>) {
 
     private val genotypes = SuperByteMatrixBuilder.getInstance(taxa.size, ploidy)
 
