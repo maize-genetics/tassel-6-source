@@ -1,6 +1,6 @@
 package net.maizegenetics.dna.factor
 
-import net.maizegenetics.dna.factor.site.FactorSite
+import net.maizegenetics.dna.factor.site.FeatureSite
 import net.maizegenetics.taxa.TaxaList
 
 /**
@@ -10,7 +10,7 @@ import net.maizegenetics.taxa.TaxaList
 
 const val UNKNOWN_ALLELE = 0xFF.toByte()
 
-class FactorTable(val taxa: TaxaList, private var sites: List<FactorSite>) : List<FactorSite> by sites {
+class FeatureTable(val taxa: TaxaList, private var sites: List<FeatureSite>) : List<FeatureSite> by sites {
 
     init {
         sites = sites.sorted()
@@ -22,6 +22,6 @@ class FactorTable(val taxa: TaxaList, private var sites: List<FactorSite>) : Lis
 
     fun taxa() = taxa
 
-    fun site(index: Int): FactorSite = sites[index]
+    fun site(index: Int): FeatureSite = sites[index]
 
 }

@@ -1,13 +1,13 @@
 package net.maizegenetics.dna.factor
 
-import net.maizegenetics.dna.factor.site.FactorSite
+import net.maizegenetics.dna.factor.site.FeatureSite
 import net.maizegenetics.taxa.TaxaList
 
-class FactorTableBuilder constructor(val taxa: TaxaList) {
+class FeatureTableBuilder constructor(val taxa: TaxaList) {
 
-    private val sites = mutableListOf<FactorSite>()
+    private val sites = mutableListOf<FeatureSite>()
 
-    fun add(site: FactorSite) {
+    fun add(site: FeatureSite) {
         sites.add(site)
     }
 

@@ -1,7 +1,7 @@
 package net.maizegenetics.dna.factor.site
 
 import net.maizegenetics.dna.factor.UNKNOWN_ALLELE
-import net.maizegenetics.dna.map.GenomicFactor
+import net.maizegenetics.dna.map.GenomicFeature
 import net.maizegenetics.taxa.TaxaList
 
 /**
@@ -9,7 +9,7 @@ import net.maizegenetics.taxa.TaxaList
  * Created November 14, 2018
  */
 
-abstract class FactorSite(val factor: GenomicFactor, val taxa: TaxaList, val weight: Double? = null, val isPhased: Boolean = false) : Comparable<FactorSite>, Sequence<ByteArray> {
+abstract class FeatureSite(val factor: GenomicFeature, val taxa: TaxaList, val weight: Double? = null, val isPhased: Boolean = false) : Comparable<FeatureSite>, Sequence<ByteArray> {
 
     val alleleStats by lazy { AlleleStats(this) }
 
@@ -33,7 +33,7 @@ abstract class FactorSite(val factor: GenomicFactor, val taxa: TaxaList, val wei
                 .count()
     }
 
-    override fun compareTo(other: FactorSite): Int {
+    override fun compareTo(other: FeatureSite): Int {
         return factor.compareTo(other.factor)
     }
 
@@ -43,7 +43,7 @@ abstract class FactorSite(val factor: GenomicFactor, val taxa: TaxaList, val wei
 
 }
 
-private class GenotypeIterator(val site: FactorSite) : Iterator<ByteArray> {
+private class GenotypeIterator(val site: FeatureSite) : Iterator<ByteArray> {
 
     private var currentTaxon = 0
 
