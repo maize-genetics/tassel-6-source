@@ -9,25 +9,25 @@ import com.google.common.collect.ImmutableList
  * This is a list of genomic factors paired with it's weight
  */
 
-class GenomicFactorList private constructor(private val factors: ImmutableList<GenomicFactor>) : List<GenomicFactor> by factors {
+class GenomicFeatureList private constructor(private val factors: ImmutableList<GenomicFeature>) : List<GenomicFeature> by factors {
 
     // TODO("Sort")
     // TODO("Validate Order")
 
     class Builder {
 
-        val builder = ImmutableList.builder<GenomicFactor>()
+        val builder = ImmutableList.builder<GenomicFeature>()
 
-        fun add(factor: GenomicFactor) {
+        fun add(factor: GenomicFeature) {
             builder.add(factor)
         }
 
-        fun addAll(factors: List<GenomicFactor>) {
+        fun addAll(factors: List<GenomicFeature>) {
             factors.forEach { add(it) }
         }
 
-        fun build(): GenomicFactorList {
-            return GenomicFactorList(builder.build())
+        fun build(): GenomicFeatureList {
+            return GenomicFeatureList(builder.build())
         }
 
     }

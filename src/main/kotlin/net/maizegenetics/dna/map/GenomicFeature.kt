@@ -7,7 +7,7 @@ import com.google.common.collect.Range
  * Created November 07, 2018
  */
 
-enum class Factor {
+enum class Feature {
     SNP,
     Haplotype,
     Binary,
@@ -17,9 +17,9 @@ enum class Factor {
     Dosage
 }
 
-open class GenomicFactor(val startChr: Chromosome, val startPos: Int, val endChr: Chromosome = startChr, val endPos: Int = startPos) : Comparable<GenomicFactor> {
+open class GenomicFeature(val startChr: Chromosome, val startPos: Int, val endChr: Chromosome = startChr, val endPos: Int = startPos) : Comparable<GenomicFeature> {
 
-    override fun compareTo(other: GenomicFactor): Int {
+    override fun compareTo(other: GenomicFeature): Int {
         val result = startChr.compareTo(other.startChr)
         if (result != 0) return result
         return startPos.compareTo(other.startPos)
