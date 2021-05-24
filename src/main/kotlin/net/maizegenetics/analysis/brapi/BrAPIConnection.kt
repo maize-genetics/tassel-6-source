@@ -2,6 +2,8 @@ package net.maizegenetics.analysis.brapi
 
 import khttp.get
 import kotlinx.serialization.json.*
+import net.maizegenetics.dna.factor.FeatureTable
+import net.maizegenetics.dna.factor.FeatureTableBuilder
 import net.maizegenetics.dna.map.Chromosome
 import net.maizegenetics.dna.map.GenomicFeature
 import net.maizegenetics.dna.map.GenomicFeatureList
@@ -66,7 +68,8 @@ class BrAPIConnection(val baseURL: String) {
         val chromosome = Chromosome.instance(json["referenceName"].toString())
         val startPos = json["start"].toString().toInt()
         val endPos = json["end"].toString().toInt()
-        return GenomicFeature(chromosome, startPos, chromosome, endPos)
+        val name = json["variantNames"]?.jsonArray?.get(0).toString()
+        return GenomicFeature(chromosome, startPos, chromosome, endPos, name)
     }
 
     fun getCallsets(id: String): TaxaList {
@@ -86,6 +89,26 @@ class BrAPIConnection(val baseURL: String) {
     // http://cbsudc01.biohpc.cornell.edu/brapi/v2/variantsets/Ames_MergedReadMapping_AllLines_Haploid/callsets
     private fun taxon(json: JsonObject): Taxon {
         return Taxon(json["callSetName"].toString())
+    }
+
+    // http://cbsudc01.biohpc.cornell.edu/brapi/v2/variantsets/Ames_MergedReadMapping_AllLines_Haploid/calls?page=1
+    fun getCalls(id: String): FeatureTable {
+
+        val url = "$baseURL/variantsets/$id/calls"
+        logger.info("getCalls: query: $url")
+        val json = Json.parseToJsonElement(get(url, timeout = 0.0).text)
+
+        val metadata = metadata(json.jsonObject)
+
+        val builder = FeatureTableBuilder(getCallsets(id), getVariants(id))
+
+        json.jsonObject["result"]?.jsonObject?.get("data")?.jsonArray
+                ?.forEach {
+                    TODO()
+                }
+
+        return builder.build()
+
     }
 
 }

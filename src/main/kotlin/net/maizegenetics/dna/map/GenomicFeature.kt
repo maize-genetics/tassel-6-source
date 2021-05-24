@@ -17,7 +17,7 @@ enum class Feature {
     Dosage
 }
 
-data class GenomicFeature(val startChr: Chromosome, val startPos: Int, val endChr: Chromosome = startChr, val endPos: Int = startPos) : Comparable<GenomicFeature> {
+data class GenomicFeature(val startChr: Chromosome, val startPos: Int, val endChr: Chromosome = startChr, val endPos: Int = startPos, val name: String? = null) : Comparable<GenomicFeature> {
 
     override fun compareTo(other: GenomicFeature): Int {
         val result = startChr.compareTo(other.startChr)
