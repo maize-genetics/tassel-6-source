@@ -94,21 +94,40 @@ class BrAPIConnection(val baseURL: String) {
     // http://cbsudc01.biohpc.cornell.edu/brapi/v2/variantsets/Ames_MergedReadMapping_AllLines_Haploid/calls?page=1
     fun getCalls(id: String): FeatureTable {
 
-        val url = "$baseURL/variantsets/$id/calls"
+        var url = "$baseURL/variantsets/$id/calls"
         logger.info("getCalls: query: $url")
-        val json = Json.parseToJsonElement(get(url, timeout = 0.0).text)
+        var json = Json.parseToJsonElement(get(url, timeout = 0.0).text)
 
         val metadata = metadata(json.jsonObject)
 
+        val numPages = metadata["pagination.totalPages"]?.toInt()
+                ?: error("BrAPIConnection: getCalls: can't get number of pages.")
+
         val builder = FeatureTableBuilder(getCallsets(id), getVariants(id))
 
-        json.jsonObject["result"]?.jsonObject?.get("data")?.jsonArray
-                ?.forEach {
-                    TODO()
-                }
+        setGenotypes(json, builder)
+
+        (1 until numPages).forEach {
+            url = "$baseURL/variantsets/$id/calls?page=$it"
+            logger.info("getCalls: query: $url")
+            json = Json.parseToJsonElement(get(url, timeout = 0.0).text)
+            setGenotypes(json, builder)
+        }
 
         return builder.build()
 
+    }
+
+    private fun setGenotypes(json: JsonElement, builder: FeatureTableBuilder) {
+        json.jsonObject["result"]?.jsonObject?.get("data")?.jsonArray
+                ?.forEach { genotype ->
+                    val taxon = genotype.jsonObject["callSetName"].toString()
+                    val feature = genotype.jsonObject["variantName"].toString()
+                    val genotypeArray = genotype.jsonObject["genotype"]?.jsonObject?.get("values")?.jsonArray
+                    check(genotypeArray != null) { "BrAPIConnection: getCalls: genotype values can't be null" }
+                    val genotypeValues = genotypeArray.map { it.toString() }
+                    builder.set(taxon, feature, genotypeValues)
+                }
     }
 
 }
