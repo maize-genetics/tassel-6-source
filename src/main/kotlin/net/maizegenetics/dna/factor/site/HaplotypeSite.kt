@@ -9,7 +9,7 @@ import net.maizegenetics.util.SuperByteMatrix
  * Created April 6, 2021
  */
 
-class HaplotypeSite(factor: GenomicFeature, taxa: TaxaList, private val strStates: Array<String>, private val genotypes: SuperByteMatrix, val ploidy: Int = 2, weight: Double? = null, isPhased: Boolean = false) : FeatureSite(factor, taxa, weight, isPhased) {
+class HaplotypeSite(feature: GenomicFeature, taxa: TaxaList, private val strStates: Array<String>, private val genotypes: SuperByteMatrix, val ploidy: Int = 2, weight: Double? = null, isPhased: Boolean = false) : FeatureSite(feature, taxa, weight, isPhased) {
 
     init {
         require(taxa.size == genotypes.numRows) { "Number of taxa: ${taxa.size} should match number of genotypes: ${genotypes.numRows}." }

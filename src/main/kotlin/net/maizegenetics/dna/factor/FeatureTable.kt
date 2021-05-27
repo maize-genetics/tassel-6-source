@@ -18,7 +18,7 @@ class FeatureTable(val taxa: TaxaList, private var sites: List<FeatureSite>) : L
 
     fun numTaxa() = taxa.size
 
-    fun numFactors() = sites.size
+    fun numFeatures() = sites.size
 
     fun taxa() = taxa
 

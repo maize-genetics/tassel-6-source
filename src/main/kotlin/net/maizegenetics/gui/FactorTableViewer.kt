@@ -219,9 +219,9 @@ class FactorTableViewer private constructor(val table: FeatureTable) {
         factors.isGridLinesVisible = true
 
         var count = 0
-        for (i in currentSite until Math.min(table.numFactors(), currentSite + maxColumns)) {
+        for (i in currentSite until Math.min(table.numFeatures(), currentSite + maxColumns)) {
             val site = table[i]
-            val text = "${site.factor.startChr}:${site.factor.startPos}"
+            val text = "${site.feature.startChr}:${site.feature.startPos}"
             val result = getVerticalText(text, width)
             factors.add(result, i - currentSite, 0)
             count++

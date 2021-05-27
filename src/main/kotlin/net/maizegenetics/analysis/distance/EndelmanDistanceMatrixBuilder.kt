@@ -30,7 +30,7 @@ class EndelmanDistanceMatrixBuilder(val table: FeatureTable, val maxAlleles: Int
 
         val time = measureNanoTime {
 
-            logger.debug("EndelmanDistanceMatrixBuilder: factor table num taxa: ${table.numTaxa()}  num factors: ${table.numFactors()}")
+            logger.debug("EndelmanDistanceMatrixBuilder: factor table num taxa: ${table.numTaxa()}  num factors: ${table.numFeatures()}")
             numProcessingThreads = (Runtime.getRuntime().availableProcessors() - 2).coerceAtLeast(1)
             logger.debug("EndelmanDistanceMatrixBuilder: numProcessingThreads: $numProcessingThreads")
 
@@ -171,7 +171,7 @@ class EndelmanDistanceMatrixBuilder(val table: FeatureTable, val maxAlleles: Int
             }
 
             numPsuedoSitesProcessed += numPsuedoSitesPerBlock * numBlocksPerChunk
-            val percent = (numPsuedoSitesProcessed.toDouble() / aveAllelesPerSite / table.numFactors().toDouble() * 100.0).toInt()
+            val percent = (numPsuedoSitesProcessed.toDouble() / aveAllelesPerSite / table.numFeatures().toDouble() * 100.0).toInt()
             fireProgress(percent, listener)
 
         }

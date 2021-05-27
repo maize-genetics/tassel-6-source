@@ -9,7 +9,7 @@ import net.maizegenetics.taxa.TaxaList
  * Created November 14, 2018
  */
 
-abstract class FeatureSite(val factor: GenomicFeature, val taxa: TaxaList, val weight: Double? = null, val isPhased: Boolean = false) : Comparable<FeatureSite>, Sequence<ByteArray> {
+abstract class FeatureSite(val feature: GenomicFeature, val taxa: TaxaList, val weight: Double? = null, val isPhased: Boolean = false) : Comparable<FeatureSite>, Sequence<ByteArray> {
 
     val alleleStats by lazy { AlleleStats(this) }
 
@@ -34,7 +34,7 @@ abstract class FeatureSite(val factor: GenomicFeature, val taxa: TaxaList, val w
     }
 
     override fun compareTo(other: FeatureSite): Int {
-        return factor.compareTo(other.factor)
+        return feature.compareTo(other.feature)
     }
 
     override fun iterator(): Iterator<ByteArray> {

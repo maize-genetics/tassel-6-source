@@ -10,6 +10,12 @@ import kotlin.reflect.KClass
 
 class FeatureTableBuilder constructor(val taxa: TaxaList, features: GenomicFeatureList? = null, type: KClass<out FeatureSite> = HaplotypeSite::class, ploidy: Int = 2) {
 
+    private val haplotypeSiteBuilders = mutableListOf<HaplotypeSiteBuilder>()
+
+    private val idMap = mutableMapOf<String, HaplotypeSiteBuilder>()
+
+    private val sites = mutableListOf<FeatureSite>()
+
     init {
 
         when (type) {
@@ -18,7 +24,7 @@ class FeatureTableBuilder constructor(val taxa: TaxaList, features: GenomicFeatu
                         ?.forEach { feature ->
                             val builder = HaplotypeSiteBuilder(feature, taxa, ploidy)
                             haplotypeSiteBuilders.add(builder)
-                            feature.name?.let { featureMap[it] = builder }
+                            feature.id?.let { idMap[it] = builder }
                         }
             }
             SNPSite::class -> {
@@ -28,18 +34,12 @@ class FeatureTableBuilder constructor(val taxa: TaxaList, features: GenomicFeatu
 
     }
 
-    private val featureMap = mutableMapOf<String, HaplotypeSiteBuilder>()
-
-    private val sites = mutableListOf<FeatureSite>()
-
-    private val haplotypeSiteBuilders = mutableListOf<HaplotypeSiteBuilder>()
-
     fun add(site: FeatureSite) {
         sites.add(site)
     }
 
-    fun set(taxon: String, feature: String, values: List<String>) {
-        featureMap[feature]?.set(taxon, values) ?: error("FeatureTableBuilder: set: feature: $feature not found")
+    fun set(taxon: String, id: String, values: List<String>) {
+        idMap[id]?.set(taxon, values) ?: error("FeatureTableBuilder: set: id: $id not found")
     }
 
     fun set(taxon: Int, feature: Int, values: List<String>) {

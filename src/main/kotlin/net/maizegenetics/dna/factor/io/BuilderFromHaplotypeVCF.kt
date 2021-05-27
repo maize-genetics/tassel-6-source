@@ -81,5 +81,5 @@ class BuilderFromHaplotypeVCF {
 fun main() {
     val filename = "/Users/tmc46/git/tassel-5-standalone/small_seq_haplotypes.vcf"
     val factorTable = BuilderFromHaplotypeVCF().read(filename)
-    println(factorTable.numFactors())
+    println(factorTable.numFeatures())
 }

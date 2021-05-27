@@ -10,7 +10,7 @@ import net.maizegenetics.taxa.TaxaList
  * Created November 16, 2018
  */
 
-class SNPSite(factor: GenomicFeature, taxa: TaxaList, private val values: ByteArray, weight: Double? = null, isPhased: Boolean = false) : FeatureSite(factor, taxa, weight, isPhased) {
+class SNPSite(feature: GenomicFeature, taxa: TaxaList, private val values: ByteArray, weight: Double? = null, isPhased: Boolean = false) : FeatureSite(feature, taxa, weight, isPhased) {
 
     init {
         require(taxa.size == values.size) { "Number of taxa: ${taxa.size} should match number of genotypes: ${values.size}." }

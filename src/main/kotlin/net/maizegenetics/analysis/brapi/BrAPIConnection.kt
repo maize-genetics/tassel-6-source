@@ -1,23 +1,27 @@
 package net.maizegenetics.analysis.brapi
 
 import khttp.get
+import khttp.responses.Response
 import kotlinx.serialization.json.*
 import net.maizegenetics.dna.factor.FeatureTable
 import net.maizegenetics.dna.factor.FeatureTableBuilder
 import net.maizegenetics.dna.map.Chromosome
 import net.maizegenetics.dna.map.GenomicFeature
 import net.maizegenetics.dna.map.GenomicFeatureList
+import net.maizegenetics.gui.basicLoggingInfo
 import net.maizegenetics.taxa.TaxaList
 import net.maizegenetics.taxa.TaxaListBuilder
 import net.maizegenetics.taxa.Taxon
 import net.maizegenetics.util.LoggingUtils
 import org.apache.log4j.Logger
+import kotlin.system.measureNanoTime
 
 
 class BrAPIConnection(val baseURL: String) {
 
     private val logger = Logger.getLogger(BrAPIConnection::class.java)
 
+    // http://cbsudc01.biohpc.cornell.edu/brapi/v2/variantsets
     fun getVariantsets(): List<VariantSet>? {
 
         val url = "$baseURL/variantsets"
@@ -32,6 +36,7 @@ class BrAPIConnection(val baseURL: String) {
 
     }
 
+    // http://cbsudc01.biohpc.cornell.edu/brapi/v2/variantsets/Ames_MergedReadMapping_AllLines_Haploid
     fun getVariantset(id: String): VariantSet? {
 
         val url = "$baseURL/variantsets/$id"
@@ -44,7 +49,6 @@ class BrAPIConnection(val baseURL: String) {
 
     }
 
-    // http://cbsudc01.biohpc.cornell.edu/brapi/v2/variantsets/Ames_MergedReadMapping_AllLines_Haploid
     private fun variantset(json: JsonObject): VariantSet {
         return VariantSet(json["variantSetDbId"].toString(), json["variantCount"].toString().toInt(), json["callSetCount"].toString().toInt())
     }
@@ -59,7 +63,11 @@ class BrAPIConnection(val baseURL: String) {
         json.jsonObject["result"]?.jsonObject?.get("data")?.jsonArray
                 ?.forEach { builder.add(genomicFeature(it.jsonObject)) }
 
-        return builder.build()
+        val result = builder.build()
+
+        logger.info("getVariants: number of features: ${result.size}")
+
+        return result
 
     }
 
@@ -69,7 +77,8 @@ class BrAPIConnection(val baseURL: String) {
         val startPos = json["start"].toString().toInt()
         val endPos = json["end"].toString().toInt()
         val name = json["variantNames"]?.jsonArray?.get(0).toString()
-        return GenomicFeature(chromosome, startPos, chromosome, endPos, name)
+        val id = json["variantDbId"].toString()
+        return GenomicFeature(chromosome, startPos, chromosome, endPos, name, id)
     }
 
     fun getCallsets(id: String): TaxaList {
@@ -82,7 +91,11 @@ class BrAPIConnection(val baseURL: String) {
         json.jsonObject["result"]?.jsonObject?.get("data")?.jsonArray
                 ?.forEach { builder.add(taxon(it.jsonObject)) }
 
-        return builder.build()
+        val result = builder.build()
+
+        logger.info("getCallsets: number of taxa: ${result.numberOfTaxa()}")
+
+        return result
 
     }
 
@@ -91,10 +104,14 @@ class BrAPIConnection(val baseURL: String) {
         return Taxon(json["callSetName"].toString())
     }
 
+    private val callsPageSize = 10
+
     // http://cbsudc01.biohpc.cornell.edu/brapi/v2/variantsets/Ames_MergedReadMapping_AllLines_Haploid/calls?page=1
     fun getCalls(id: String): FeatureTable {
 
-        var url = "$baseURL/variantsets/$id/calls"
+        val builder = FeatureTableBuilder(getCallsets(id), getVariants(id))
+
+        var url = "$baseURL/variantsets/$id/calls?pageSize=$callsPageSize"
         logger.info("getCalls: query: $url")
         var json = Json.parseToJsonElement(get(url, timeout = 0.0).text)
 
@@ -103,14 +120,22 @@ class BrAPIConnection(val baseURL: String) {
         val numPages = metadata["pagination.totalPages"]?.toInt()
                 ?: error("BrAPIConnection: getCalls: can't get number of pages.")
 
-        val builder = FeatureTableBuilder(getCallsets(id), getVariants(id))
-
         setGenotypes(json, builder)
 
         (1 until numPages).forEach {
-            url = "$baseURL/variantsets/$id/calls?page=$it"
+            url = "$baseURL/variantsets/$id/calls?pageSize=$callsPageSize;page=$it"
             logger.info("getCalls: query: $url")
-            json = Json.parseToJsonElement(get(url, timeout = 0.0).text)
+            lateinit var response: Response
+            var notFinished = true
+            while (notFinished) {
+                try {
+                    response = get(url, timeout = 0.0)
+                    notFinished = false
+                } catch (e: Exception) {
+                    logger.warn("getCalls: BrAPI Server query failed: ${e.message}")
+                }
+            }
+            json = Json.parseToJsonElement(responseToText(response))
             setGenotypes(json, builder)
         }
 
@@ -118,15 +143,19 @@ class BrAPIConnection(val baseURL: String) {
 
     }
 
+    private fun responseToText(response: Response): String {
+        return response.text
+    }
+
     private fun setGenotypes(json: JsonElement, builder: FeatureTableBuilder) {
         json.jsonObject["result"]?.jsonObject?.get("data")?.jsonArray
                 ?.forEach { genotype ->
                     val taxon = genotype.jsonObject["callSetName"].toString()
-                    val feature = genotype.jsonObject["variantName"].toString()
+                    val id = genotype.jsonObject["variantDbId"].toString()
                     val genotypeArray = genotype.jsonObject["genotype"]?.jsonObject?.get("values")?.jsonArray
                     check(genotypeArray != null) { "BrAPIConnection: getCalls: genotype values can't be null" }
                     val genotypeValues = genotypeArray.map { it.toString() }
-                    builder.set(taxon, feature, genotypeValues)
+                    builder.set(taxon, id, genotypeValues)
                 }
     }
 
@@ -135,13 +164,34 @@ class BrAPIConnection(val baseURL: String) {
 data class VariantSet(val id: String, val numVariants: Int, val numCallsets: Int)
 
 fun main() {
-    LoggingUtils.setupDebugLogging()
-    val connection = BrAPIConnection("http://cbsudc01.biohpc.cornell.edu/brapi/v2")
-    println(connection.getVariantsets())
 
-    println(connection.getVariantset("Ames_MergedReadMapping_AllLines_Haploid"))
+    LoggingUtils.setupDebugLogging()
+    basicLoggingInfo()
+
+    val connection = BrAPIConnection("http://cbsudc01.biohpc.cornell.edu/brapi/v2")
+
+    //println(connection.getVariantsets())
+
+    //println(connection.getVariantset("Ames_MergedReadMapping_AllLines_Haploid"))
 
     //println(connection.getVariants("Ames_MergedReadMapping_AllLines_Haploid").toList())
 
-    println(connection.getCallsets("Ames_MergedReadMapping_AllLines_Haploid").numberOfTaxa())
+    //println(connection.getCallsets("Ames_MergedReadMapping_AllLines_Haploid").numberOfTaxa())
+
+    var featureTable: FeatureTable
+    val time = measureNanoTime {
+        featureTable = connection.getCalls("MergedReadMapping_AllNamParents_Haploid")
+
+        println("num of features: ${featureTable.numFeatures()}")
+        println("num of taxa: ${featureTable.numTaxa()}")
+    }
+
+    val taxonIndex = featureTable.taxa.indexOf("Z001E0104")
+    featureTable.forEach { site ->
+        val genotype = site.genotypeAsString(taxonIndex)
+        println("taxon: Z001E0104  id: ${site.feature.id}  name: ${site.feature.name}  genotype: $genotype")
+    }
+
+    println("time: ${time / 1e9} secs")
+
 }
