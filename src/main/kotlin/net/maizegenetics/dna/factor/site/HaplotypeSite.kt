@@ -1,5 +1,7 @@
 package net.maizegenetics.dna.factor.site
 
+import net.maizegenetics.dna.factor.UNKNOWN_ALLELE
+import net.maizegenetics.dna.factor.UNKNOWN_ALLELE_STR
 import net.maizegenetics.dna.map.GenomicFeature
 import net.maizegenetics.taxa.TaxaList
 import net.maizegenetics.util.SuperByteMatrix
@@ -22,7 +24,16 @@ class HaplotypeSite(feature: GenomicFeature, taxa: TaxaList, private val strStat
     }
 
     override fun genotypeAsString(taxon: Int): String {
-        return genotypes.getAllRows(taxon).joinToString(if (isPhased) "|" else "/") { strStates[it.toInt()] }
+        return genotypes.getAllColumns(taxon).joinToString(if (isPhased) "|" else "/") { alleleCode ->
+            when (alleleCode) {
+                UNKNOWN_ALLELE -> {
+                    UNKNOWN_ALLELE_STR
+                }
+                else -> {
+                    strStates[alleleCode.toInt()]
+                }
+            }
+        }
     }
 
 }

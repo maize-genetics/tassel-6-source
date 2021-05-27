@@ -9,6 +9,7 @@ import net.maizegenetics.taxa.TaxaList
  */
 
 const val UNKNOWN_ALLELE = 0xFF.toByte()
+const val UNKNOWN_ALLELE_STR = "N"
 
 class FeatureTable(val taxa: TaxaList, private var sites: List<FeatureSite>) : List<FeatureSite> by sites {
 

@@ -21,7 +21,11 @@ class BrAPIConnection(val baseURL: String) {
 
     private val logger = Logger.getLogger(BrAPIConnection::class.java)
 
-    // http://cbsudc01.biohpc.cornell.edu/brapi/v2/variantsets
+    /**
+     * Returns list of variant sets available from BrAPI Server.
+     *
+     * Example: http://cbsudc01.biohpc.cornell.edu/brapi/v2/variantsets
+     */
     fun getVariantsets(): List<VariantSet>? {
 
         val url = "$baseURL/variantsets"
@@ -36,7 +40,11 @@ class BrAPIConnection(val baseURL: String) {
 
     }
 
-    // http://cbsudc01.biohpc.cornell.edu/brapi/v2/variantsets/Ames_MergedReadMapping_AllLines_Haploid
+    /**
+     * Returns the variant set information for the given id.
+     *
+     * Example: http://cbsudc01.biohpc.cornell.edu/brapi/v2/variantsets/Ames_MergedReadMapping_AllLines_Haploid
+     */
     fun getVariantset(id: String): VariantSet? {
 
         val url = "$baseURL/variantsets/$id"
@@ -53,6 +61,12 @@ class BrAPIConnection(val baseURL: String) {
         return VariantSet(json["variantSetDbId"].toString(), json["variantCount"].toString().toInt(), json["callSetCount"].toString().toInt())
     }
 
+    /**
+     * Returns a list of genomic features (i.e. position ranges))
+     * for the given variant set id.
+     *
+     * Example: http://cbsudc01.biohpc.cornell.edu/brapi/v2/variantsets/Ames_MergedReadMapping_AllLines_Haploid/variants
+     */
     fun getVariants(id: String): GenomicFeatureList {
 
         val url = "$baseURL/variantsets/$id/variants"
@@ -71,16 +85,20 @@ class BrAPIConnection(val baseURL: String) {
 
     }
 
-    // http://cbsudc01.biohpc.cornell.edu/brapi/v2/variantsets/Ames_MergedReadMapping_AllLines_Haploid/variants
-    private fun genomicFeature(json: JsonObject): GenomicFeature {
-        val chromosome = Chromosome.instance(json["referenceName"].toString())
-        val startPos = json["start"].toString().toInt()
-        val endPos = json["end"].toString().toInt()
-        val name = json["variantNames"]?.jsonArray?.get(0).toString()
-        val id = json["variantDbId"].toString()
+    private fun genomicFeature(json: JsonElement): GenomicFeature {
+        val chromosome = Chromosome.instance(getStringAttribute(json, "referenceName"))
+        val startPos = json.jsonObject["start"].toString().toInt()
+        val endPos = json.jsonObject["end"].toString().toInt()
+        val name = getStringFirstArrayElement(json, "variantNames")
+        val id = getStringAttribute(json, "variantDbId")
         return GenomicFeature(chromosome, startPos, chromosome, endPos, name, id)
     }
 
+    /**
+     * Returns a list of taxa for the given variant set id.
+     *
+     * Example: http://cbsudc01.biohpc.cornell.edu/brapi/v2/variantsets/Ames_MergedReadMapping_AllLines_Haploid/callsets
+     */
     fun getCallsets(id: String): TaxaList {
 
         val url = "$baseURL/variantsets/$id/callsets"
@@ -89,7 +107,7 @@ class BrAPIConnection(val baseURL: String) {
 
         val builder = TaxaListBuilder()
         json.jsonObject["result"]?.jsonObject?.get("data")?.jsonArray
-                ?.forEach { builder.add(taxon(it.jsonObject)) }
+                ?.forEach { builder.add(taxon(it)) }
 
         val result = builder.build()
 
@@ -99,14 +117,17 @@ class BrAPIConnection(val baseURL: String) {
 
     }
 
-    // http://cbsudc01.biohpc.cornell.edu/brapi/v2/variantsets/Ames_MergedReadMapping_AllLines_Haploid/callsets
-    private fun taxon(json: JsonObject): Taxon {
-        return Taxon(json["callSetName"].toString())
+    private fun taxon(json: JsonElement): Taxon {
+        return Taxon(getStringAttribute(json, "callSetName"))
     }
 
-    private val callsPageSize = 10
+    private val callsPageSize = 1
 
-    // http://cbsudc01.biohpc.cornell.edu/brapi/v2/variantsets/Ames_MergedReadMapping_AllLines_Haploid/calls?page=1
+    /**
+     * Returns a feature table for the given variant set id.
+     *
+     * Example: http://cbsudc01.biohpc.cornell.edu/brapi/v2/variantsets/Ames_MergedReadMapping_AllLines_Haploid/calls?page=1
+     */
     fun getCalls(id: String): FeatureTable {
 
         val builder = FeatureTableBuilder(getCallsets(id), getVariants(id))
@@ -135,7 +156,7 @@ class BrAPIConnection(val baseURL: String) {
                     logger.warn("getCalls: BrAPI Server query failed: ${e.message}")
                 }
             }
-            json = Json.parseToJsonElement(responseToText(response))
+            json = Json.parseToJsonElement(response.text)
             setGenotypes(json, builder)
         }
 
@@ -143,20 +164,24 @@ class BrAPIConnection(val baseURL: String) {
 
     }
 
-    private fun responseToText(response: Response): String {
-        return response.text
-    }
-
     private fun setGenotypes(json: JsonElement, builder: FeatureTableBuilder) {
         json.jsonObject["result"]?.jsonObject?.get("data")?.jsonArray
                 ?.forEach { genotype ->
-                    val taxon = genotype.jsonObject["callSetName"].toString()
-                    val id = genotype.jsonObject["variantDbId"].toString()
+                    val taxon = getStringAttribute(genotype, "callSetName")
+                    val id = getStringAttribute(genotype, "variantDbId")
                     val genotypeArray = genotype.jsonObject["genotype"]?.jsonObject?.get("values")?.jsonArray
                     check(genotypeArray != null) { "BrAPIConnection: getCalls: genotype values can't be null" }
                     val genotypeValues = genotypeArray.map { it.toString() }
                     builder.set(taxon, id, genotypeValues)
                 }
+    }
+
+    private fun getStringAttribute(element: JsonElement, attribute: String): String {
+        return element.jsonObject[attribute].toString().removePrefix("\"").removeSuffix("\"").trim()
+    }
+
+    private fun getStringFirstArrayElement(element: JsonElement, attribute: String): String {
+        return element.jsonObject[attribute]?.jsonArray?.get(0).toString().removePrefix("\"").removeSuffix("\"").trim()
     }
 
 }
@@ -169,6 +194,15 @@ fun main() {
     basicLoggingInfo()
 
     val connection = BrAPIConnection("http://cbsudc01.biohpc.cornell.edu/brapi/v2")
+
+    //val taxa = connection.getCallsets("MergedReadMapping_AllNamParents_Haploid")
+    //taxa.take(100).forEach { println(it) }
+
+    //taxa.forEachIndexed { index, taxon ->
+    //    if (taxon.name == "Z001E0104" || taxon.name == "Z001E0103") println("matched: $index  name: ${taxon.name}")
+    //}
+
+    //System.exit(0)
 
     //println(connection.getVariantsets())
 
@@ -189,7 +223,7 @@ fun main() {
     val taxonIndex = featureTable.taxa.indexOf("Z001E0104")
     featureTable.forEach { site ->
         val genotype = site.genotypeAsString(taxonIndex)
-        println("taxon: Z001E0104  id: ${site.feature.id}  name: ${site.feature.name}  genotype: $genotype")
+        println("taxon: Z001E0104  id: ${site.feature.id}  name: ${site.feature.name}  chr: ${site.feature.startChr}  pos: ${site.feature.startPos}  genotype: $genotype")
     }
 
     println("time: ${time / 1e9} secs")
