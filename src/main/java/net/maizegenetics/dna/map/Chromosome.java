@@ -100,6 +100,7 @@ public class Chromosome implements Comparable<Chromosome> {
     /**
      * @deprecated use {@link #instance(String)}
      */
+    @Deprecated
     public Chromosome(String name) {
         this(name, -1, parseAnnotationFromName(name));
     }
