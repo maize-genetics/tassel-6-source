@@ -113,7 +113,6 @@ public class PositionListBuilder {
      * @param element element to be stored at the specified position
      *
      * @return this {@code Builder} object
-     * @throws IndexOutOfBoundsException {@inheritDoc}
      */
     public PositionListBuilder set(int index, Position element) {
         myPositions.set(index, element);

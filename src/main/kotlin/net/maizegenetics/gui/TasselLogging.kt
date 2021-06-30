@@ -180,7 +180,6 @@ fun basicLoggingInfo() {
 
 class TextAreaStream(private val textArea: TextArea) : OutputStream() {
 
-    @Throws(IOException::class)
     override fun write(i: Int) {
         Platform.runLater { textArea.appendText(i.toChar().toString()) }
     }

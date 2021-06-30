@@ -15,11 +15,13 @@ buildscript {
         mavenCentral()
         gradlePluginPortal()
         maven("https://dl.bintray.com/kotlin/kotlin-eap")
+        maven("https://plugins.gradle.org/m2/")
     }
 
     dependencies {
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
         classpath(kotlin("serialization", version = kotlinVersion))
+        classpath("org.jetbrains.dokka:dokka-gradle-plugin:1.4.30")
     }
 }
 
@@ -34,9 +36,9 @@ plugins {
     // Shadow allows for the creation of fat jars (all dependencies)
     id("com.github.johnrengelman.shadow") version "5.2.0"
     id("application")
-    id("org.openjfx.javafxplugin") version "0.0.9"
+    id("org.openjfx.javafxplugin") version "0.0.10"
 
-    id("org.jetbrains.dokka") version "0.10.1"
+    id("org.jetbrains.dokka") version "1.4.30"
     `java-library`
     `maven-publish`
     signing
@@ -49,6 +51,7 @@ application {
 
 apply {
     plugin("kotlinx-serialization")
+    plugin("org.jetbrains.dokka")
 }
 
 repositories {
@@ -82,6 +85,11 @@ dependencies {
     implementation("org.openjfx:javafx-controls:11.0.2")
     implementation("org.openjfx:javafx-web:11.0.2")
 
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib-common:${kotlinVersion}")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:${kotlinVersion}")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:${kotlinVersion}")
+    implementation("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.3")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.1.0")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.1.0")
@@ -107,26 +115,6 @@ tasks.withType<KotlinCompile>().configureEach {
 
 tasks {
     println("Source directories: ${sourceSets["main"].allSource.srcDirs}")
-    val dokka by getting(DokkaTask::class) {
-        //outputFormat = "html"
-        outputFormat = "gfm"
-        outputDirectory = "$buildDir/dokka"
-        configuration {
-            includes = listOf("/Users/edbuckler/Code/biokotlin/src/main/kotlin/biokotlin/packages.md")
-        }
-    }
-}
-
-val dokkaJavadoc = tasks.register<DokkaTask>("dokkaJavadoc") {
-    outputFormat = "javadoc"
-    outputDirectory = "$buildDir/dokkaJavadoc"
-}
-
-val dokkaJar by tasks.creating(Jar::class) {
-    group = JavaBasePlugin.DOCUMENTATION_GROUP
-    description = "BioKotlin: ${property("version")}"
-    archiveClassifier.set("javadoc")
-    from(dokkaJavadoc)
 }
 
 tasks.test {
@@ -136,12 +124,22 @@ tasks.test {
     }
 }
 
+val dokkaHtml by tasks.getting(org.jetbrains.dokka.gradle.DokkaTask::class)
+
+val dokkaJar by tasks.creating(Jar::class) {
+    dependsOn(dokkaHtml)
+    group = JavaBasePlugin.DOCUMENTATION_GROUP
+    description = "TASSEL 6: ${property("version")}"
+    archiveClassifier.set("javadoc")
+    from(dokkaHtml.outputDirectory)
+}
+
 publishing {
     publications {
 
         create<MavenPublication>("maven") {
-            artifactId = "biokotlin"
-            description = "org.biokotlin:biokotlin:$version"
+            artifactId = "tassel6"
+            description = "net.maizegenetics:tassel6:$version"
 
             from(components["java"])
             artifact(dokkaJar)
@@ -172,9 +170,9 @@ publishing {
             }
 
             pom {
-                name.set("BioKotlin")
-                description.set("BioKotlin aims to be a high-performance bioinformatics library that brings the power and speed of compiled programming languages to scripting and big data environments.")
-                url.set("http://www.biokotlin.org/")
+                name.set("tassel-6")
+                description.set("TASSEL 6 is a software package to evaluate traits association. Feature Tables are at the heart of the package where, a feature is a range of positions or a single position. Row in the that table are taxon.")
+                url.set("http://www.maizegenetics.net/tassel")
                 licenses {
                     license {
                         name.set("The Apache License, Version 2.0")
@@ -185,10 +183,6 @@ publishing {
                     developer {
                         name.set("Ed Buckler")
                         email.set("esb33@cornell.edu")
-                    }
-                    developer {
-                        name.set("Vaishnavi Gupta")
-                        email.set("vg222@cornell.edu")
                     }
                     developer {
                         id.set("tmc46")
@@ -213,9 +207,9 @@ publishing {
                     }
                 }
                 scm {
-                    connection.set("scm:git:git://bitbucket.org:bucklerlab/biokotlin.git")
-                    developerConnection.set("scm:git:ssh://bitbucket.org:bucklerlab/biokotlin.git")
-                    url.set("https://bitbucket.org/bucklerlab/biokotlin/src")
+                    connection.set("scm:git:git://bitbucket.org:tasseladmin/tassel-6-source.git")
+                    developerConnection.set("scm:git:ssh://bitbucket.org:tasseladmin/tassel-6-source.git</developer")
+                    url.set("https://bitbucket.org/tasseladmin/tassel-6-source/src")
                 }
             }
         }
