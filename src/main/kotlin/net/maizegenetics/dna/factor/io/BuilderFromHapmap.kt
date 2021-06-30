@@ -179,7 +179,6 @@ class BuilderFromHapMap private constructor(private val myHapmapFile: String, pr
             myPositionList = ArrayList(numberSitesProcessed)
         }
 
-        @Throws(Exception::class)
         override fun call(): ProcessHapmapBlock {
 
             genotypes = SuperByteMatrixBuilder.getInstance(myNumTaxa, numberSitesProcessed)
