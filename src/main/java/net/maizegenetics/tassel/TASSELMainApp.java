@@ -19,15 +19,16 @@
 package net.maizegenetics.tassel;
 
 import javafx.application.Application;
-//import net.maizegenetics.pipeline.TasselPipeline;
 import net.maizegenetics.prefs.TasselPrefs;
 import net.maizegenetics.util.LoggingUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-import org.apache.log4j.Logger;
+//import net.maizegenetics.pipeline.TasselPipeline;
 
 public class TASSELMainApp {
 
-    private static final Logger myLogger = Logger.getLogger(TASSELMainApp.class);
+    private static final Logger myLogger = LogManager.getLogger(TASSELMainApp.class);
 
     public static final String version = "6.0.0";
     public static final String versionDate = "November 1, 2018";

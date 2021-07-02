@@ -3,29 +3,28 @@
 //
 package net.maizegenetics.taxa.distance;
 
-import net.maizegenetics.taxa.Taxon;
-import net.maizegenetics.util.Utils;
-import net.maizegenetics.util.GeneralAnnotationStorage;
 import net.maizegenetics.taxa.TaxaList;
 import net.maizegenetics.taxa.TaxaListBuilder;
+import net.maizegenetics.taxa.Taxon;
+import net.maizegenetics.util.GeneralAnnotationStorage;
+import net.maizegenetics.util.Utils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-import java.io.IOException;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-
 import java.util.regex.Pattern;
-
-import org.apache.log4j.Logger;
 
 /**
  * @author Terry Casstevens
  */
 public class ReadDistanceMatrix {
 
-    private static final Logger myLogger = Logger.getLogger(ReadDistanceMatrix.class);
+    private static final Logger myLogger = LogManager.getLogger(ReadDistanceMatrix.class);
 
     private static final Pattern WHITESPACE_PATTERN = Pattern.compile("\\s+");
 

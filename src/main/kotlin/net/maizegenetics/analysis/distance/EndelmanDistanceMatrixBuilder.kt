@@ -9,14 +9,14 @@ import net.maizegenetics.taxa.distance.DistanceMatrix
 import net.maizegenetics.taxa.distance.DistanceMatrixBuilder
 import net.maizegenetics.util.GeneralAnnotationStorage
 import net.maizegenetics.util.ProgressListener
-import org.apache.log4j.Logger
+import org.apache.logging.log4j.LogManager
 import java.util.*
 import kotlin.math.roundToLong
 import kotlin.system.measureNanoTime
 
 class EndelmanDistanceMatrixBuilder(val table: FeatureTable, val maxAlleles: Int = 255, private val listener: ProgressListener? = null) {
 
-    private val logger = Logger.getLogger(EndelmanDistanceMatrixBuilder::class.java)
+    private val logger = LogManager.getLogger(EndelmanDistanceMatrixBuilder::class.java)
 
     private val psuedoSiteChannel = Channel<List<List<PsuedoSite>>>(1000)
 

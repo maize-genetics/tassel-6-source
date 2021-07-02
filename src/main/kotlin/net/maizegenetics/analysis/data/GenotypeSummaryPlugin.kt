@@ -9,7 +9,7 @@ import net.maizegenetics.dna.snp.genotypecall.AlleleFreqCache
 import net.maizegenetics.plugindef.*
 import net.maizegenetics.util.SimpleTableReport
 import net.maizegenetics.util.TableReport
-import org.apache.log4j.Logger
+import org.apache.logging.log4j.LogManager
 import java.util.*
 
 /**
@@ -363,7 +363,7 @@ class GenotypeSummaryPlugin(isInteractive: Boolean = false) : AbstractPlugin(isI
 
     companion object {
 
-        private val myLogger = Logger.getLogger(GenotypeSummaryPlugin::class.java)
+        private val myLogger = LogManager.getLogger(GenotypeSummaryPlugin::class.java)
 
         private val NA = "NA"
         private val ZERO_DOUBLE = 0.0

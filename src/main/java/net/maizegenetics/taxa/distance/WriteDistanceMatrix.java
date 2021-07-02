@@ -1,15 +1,17 @@
 package net.maizegenetics.taxa.distance;
 
+import net.maizegenetics.taxa.TaxaList;
+import net.maizegenetics.taxa.Taxon;
+import net.maizegenetics.util.GeneralAnnotation;
+import net.maizegenetics.util.Utils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.io.BufferedOutputStream;
 import java.io.BufferedWriter;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Map;
-import net.maizegenetics.taxa.TaxaList;
-import net.maizegenetics.taxa.Taxon;
-import net.maizegenetics.util.GeneralAnnotation;
-import net.maizegenetics.util.Utils;
-import org.apache.log4j.Logger;
 
 /**
  * @author Terry Casstevens
@@ -17,7 +19,7 @@ import org.apache.log4j.Logger;
  */
 public class WriteDistanceMatrix {
 
-    private static final Logger myLogger = Logger.getLogger(WriteDistanceMatrix.class);
+    private static final Logger myLogger = LogManager.getLogger(WriteDistanceMatrix.class);
 
     private WriteDistanceMatrix() {
         //utility
@@ -238,7 +240,7 @@ public class WriteDistanceMatrix {
             myLogger.debug(e.getMessage(), e);
             throw new IllegalStateException("WriteDistanceMatrix: saveDARwinMatrix: problem writing: " + disFile);
         }
-        
+
         myLogger.info("saveDARwinIDs: wrote file: " + disFile);
 
     }
@@ -261,7 +263,7 @@ public class WriteDistanceMatrix {
             myLogger.debug(e.getMessage(), e);
             throw new IllegalStateException("WriteDistanceMatrix: saveDARwinIDs: Problem writing: " + filename + ".  " + e.getMessage());
         }
-        
+
         myLogger.info("saveDARwinIDs: wrote file: " + filename);
 
     }

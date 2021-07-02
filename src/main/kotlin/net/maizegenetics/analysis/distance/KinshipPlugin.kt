@@ -10,7 +10,7 @@ import com.google.common.collect.Range
 import net.maizegenetics.dna.factor.FeatureTable
 import net.maizegenetics.plugindef.*
 import net.maizegenetics.taxa.distance.DistanceMatrix
-import org.apache.log4j.Logger
+import org.apache.logging.log4j.LogManager
 import java.util.*
 
 /**
@@ -18,7 +18,7 @@ import java.util.*
  */
 class KinshipPlugin(isInteractive: Boolean = false) : AbstractPlugin(isInteractive) {
 
-    private val logger = Logger.getLogger(KinshipPlugin::class.java)
+    private val logger = LogManager.getLogger(KinshipPlugin::class.java)
 
     enum class KINSHIP_METHOD {
         Centered_IBS, Normalized_IBS, Dominance_Centered_IBS, Dominance_Normalized_IBS

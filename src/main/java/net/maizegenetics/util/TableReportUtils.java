@@ -2,7 +2,8 @@ package net.maizegenetics.util;
 
 import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Table;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -17,7 +18,7 @@ import java.util.regex.Pattern;
  */
 public class TableReportUtils {
 
-    private static final Logger myLogger = Logger.getLogger(TableReportUtils.class);
+    private static final Logger myLogger = LogManager.getLogger(TableReportUtils.class);
 
     /**
      * Saves Table Report to file delimited by tabs.

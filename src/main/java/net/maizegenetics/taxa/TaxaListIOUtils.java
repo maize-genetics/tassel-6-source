@@ -2,15 +2,14 @@ package net.maizegenetics.taxa;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.*;
-
-import net.maizegenetics.util.Utils;
 import net.maizegenetics.util.TableReportUtils;
+import net.maizegenetics.util.Utils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.util.*;
-
-import org.apache.log4j.Logger;
 
 /**
  * Utilities for reading and writing IdGroup and PedigreeIdGroups.
@@ -19,7 +18,7 @@ import org.apache.log4j.Logger;
  */
 public class TaxaListIOUtils {
 
-    private static final Logger myLogger = Logger.getLogger(TaxaListIOUtils.class);
+    private static final Logger myLogger = LogManager.getLogger(TaxaListIOUtils.class);
 
     private static final String DELIMITER = "\t";
 
@@ -33,6 +32,7 @@ public class TaxaListIOUtils {
      * @param taxaList input taxa list with annotation associated with
      * @param annotation annotation key used to create the multimap, the values
      * of these keys become the key of the resulting Multimap
+     *
      * @return Map of AnnotationValues -> Taxon
      */
     public static Multimap<String, Taxon> getMapOfTaxonByAnnotation(TaxaList taxaList, String annotation) {
@@ -52,13 +52,14 @@ public class TaxaListIOUtils {
      * @param taxaList input taxa list with annotation associated with
      * @param annotation annotation key used to create the map, the values
      * of these keys become the key of the resulting map
+     *
      * @return Map of AnnotationValues -> Taxon
      */
     public static Optional<Map<String, Taxon>> getUniqueMapOfTaxonByAnnotation(TaxaList taxaList, String annotation) {
         Map<String, Taxon> annoMap = new TreeMap<>();
         for (Taxon taxon : taxaList) {
             for (String value : taxon.getAnnotation().getTextAnnotation(annotation)) {
-                if(annoMap.containsKey(value)) return Optional.empty();
+                if (annoMap.containsKey(value)) return Optional.empty();
                 annoMap.put(value, taxon);
             }
         }
@@ -72,6 +73,7 @@ public class TaxaListIOUtils {
      * @param baseTaxaList base annotated taxa list
      * @param annotation annotation name (key)
      * @param annoValue annotation value being tested for
+     *
      * @return TaxaList equal to the annotation value
      */
     public static TaxaList subsetTaxaListByAnnotation(TaxaList baseTaxaList, String annotation, String annoValue) {
@@ -93,6 +95,7 @@ public class TaxaListIOUtils {
      *
      * @param baseTaxaList
      * @param annotationsToKeep the retained keys annotation
+     *
      * @return new TaxaList with a subset of the annotations
      */
     public static TaxaList retainSpecificAnnotations(TaxaList baseTaxaList, String[] annotationsToKeep) {
@@ -117,6 +120,7 @@ public class TaxaListIOUtils {
      *
      * @param baseTaxaList
      * @param annotationsToRemove the retained keys annotation
+     *
      * @return new TaxaList with a subset of the annotations
      */
     public static TaxaList removeSpecificAnnotations(TaxaList baseTaxaList, String[] annotationsToRemove) {
@@ -138,6 +142,7 @@ public class TaxaListIOUtils {
      * Provides the set of all annotation key found in any of taxa
      *
      * @param baseTaxaList
+     *
      * @return
      */
     public static Set<String> allAnnotationKeys(TaxaList baseTaxaList) {
@@ -234,25 +239,26 @@ public class TaxaListIOUtils {
      * @param taxaNameField field name with the taxon name
      * @param filters Map of filter to determine which rows to retain as the
      * file is processed.
+     *
      * @return TaxaList with annotations
      */
-    
+
     // New version calls readTaxaAnnotationFileAL, then creates TaxaList from ArrayList
-    public static TaxaList readTaxaAnnotationFile(String fileName, String taxaNameField, Map<String, String> filters, boolean mergeSameNames) {    
-    	// create list
-    	ArrayList<Taxon> taxaAL = readTaxaAnnotationFileAL( fileName,  taxaNameField, filters);
-    	if (taxaAL == null) return null;
+    public static TaxaList readTaxaAnnotationFile(String fileName, String taxaNameField, Map<String, String> filters, boolean mergeSameNames) {
+        // create list
+        ArrayList<Taxon> taxaAL = readTaxaAnnotationFileAL(fileName, taxaNameField, filters);
+        if (taxaAL == null) return null;
         TaxaListBuilder tlb = new TaxaListBuilder();
-    	taxaAL.stream().forEach(taxa -> {
-    		if (mergeSameNames) {
-    			tlb.addOrMerge(taxa);
-    		} else {
-    			tlb.add(taxa);
-    		}
-    	});
-    	return tlb.sortTaxaAlphabetically().build();   	
+        taxaAL.stream().forEach(taxa -> {
+            if (mergeSameNames) {
+                tlb.addOrMerge(taxa);
+            } else {
+                tlb.add(taxa);
+            }
+        });
+        return tlb.sortTaxaAlphabetically().build();
     }
-    
+
     //  Version of readTaxaAnnotationFile that returns an ArrayList.  This is called
     // from places that wish to allow duplicate taxa.  The TaxaList does not allow for
     // duplicate entries.  An ArrayList does.
@@ -304,8 +310,8 @@ public class TaxaListIOUtils {
                     }
                 }
                 Taxon t = anID.build();
-                if (doesTaxonHaveAllAnnotations(t, filters)) {           	
-                	taxaAL.add(t);
+                if (doesTaxonHaveAllAnnotations(t, filters)) {
+                    taxaAL.add(t);
                 }
             }
             // Sort alphabetically based on name.  This is to remain consistent
@@ -348,6 +354,7 @@ public class TaxaListIOUtils {
      *
      * @param fileName with complete path
      * @param taxaNameField field name with the taxon name
+     *
      * @return TaxaList with annotations
      */
     public static TaxaList readTaxaAnnotationFile(String fileName, String taxaNameField) {
@@ -359,6 +366,7 @@ public class TaxaListIOUtils {
      *
      * @param taxon
      * @param filters
+     *
      * @return true if all present, false is otherwise
      */
     public static boolean doesTaxonHaveAllAnnotations(Taxon taxon, Map<String, String> filters) {
@@ -369,7 +377,7 @@ public class TaxaListIOUtils {
             for (String s1 : taxonAnno.get(entry.getKey())) {
                 if (s1.equals(entry.getValue())) {
                     keep = true;
-                } 
+                }
             }
             if (keep == false) {
                 break;
@@ -383,6 +391,7 @@ public class TaxaListIOUtils {
      * The taxa name is return as the "ID" key, as used by the VCF format.
      *
      * @param s
+     *
      * @return
      */
     public static SetMultimap<String, String> parseVCFHeadersIntoMap(String s) {
@@ -401,13 +410,15 @@ public class TaxaListIOUtils {
         }
         return im.build();
     }
-    
+
     /**
      * This method takes a key file and creates a SortedSet<String> that
      * contains a set of the tissue values.  The set will be null if
      * no tissues are present
+     *
      * @param fileName - name of Keyfile containing Tissue header
      * @param tissueNameField - field name
+     *
      * @return
      */
     public static List<String> readTissueAnnotationFile(String fileName, String tissueNameField) {
@@ -438,17 +449,17 @@ public class TaxaListIOUtils {
             // Found tissue header, read values - no duplicates, into set
             while ((line = fileIn.readLine()) != null) {
                 String[] items = line.split("\\t");
-                for (int idx=0; idx < items.length; idx++) {
+                for (int idx = 0; idx < items.length; idx++) {
                     if (idx == indexOfTissue) {
                         if (!(tissues.contains(items[idx]))) {
                             tissues.add(items[idx]);
                         }
                         continue;
                     }
-                }  
+                }
             }
             Collections.sort(tissues);
-                
+
             return tissues;
         } catch (Exception e) {
             System.err.println("Error in Reading Annotated Tissue File:" + fileName);

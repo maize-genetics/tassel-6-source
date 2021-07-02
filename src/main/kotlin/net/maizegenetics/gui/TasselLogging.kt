@@ -21,8 +21,7 @@ import net.maizegenetics.prefs.TasselPrefs
 import net.maizegenetics.tassel.TASSELMainApp
 import net.maizegenetics.util.LoggingUtils
 import net.maizegenetics.util.Utils
-import org.apache.log4j.Logger
-import java.io.IOException
+import org.apache.logging.log4j.LogManager
 import java.io.OutputStream
 import java.io.PrintStream
 
@@ -32,7 +31,7 @@ import java.io.PrintStream
  * Created November 07, 2018
  */
 
-private val myLogger = Logger.getLogger(TasselLogging::class.java)
+private val myLogger = LogManager.getLogger(TasselLogging::class.java)
 
 class TasselLogging private constructor() : AbstractPlugin() {
 

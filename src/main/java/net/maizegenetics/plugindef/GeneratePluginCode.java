@@ -5,7 +5,8 @@ package net.maizegenetics.plugindef;
 
 import com.google.common.base.CaseFormat;
 import net.maizegenetics.util.Utils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.lang.reflect.Field;
 
@@ -14,7 +15,7 @@ import java.lang.reflect.Field;
  */
 public class GeneratePluginCode {
 
-    private static final Logger myLogger = Logger.getLogger(GeneratePluginCode.class);
+    private static final Logger myLogger = LogManager.getLogger(GeneratePluginCode.class);
 
     private GeneratePluginCode() {
     }

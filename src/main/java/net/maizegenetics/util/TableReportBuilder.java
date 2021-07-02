@@ -1,25 +1,24 @@
 /*
  *  TableReportBuilder
- * 
+ *
  *  Created on Aug 9, 2014
  */
 package net.maizegenetics.util;
 
-import java.io.BufferedWriter;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
+import java.io.BufferedWriter;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.log4j.Logger;
-
 /**
- *
  * @author Terry Casstevens
  */
 public class TableReportBuilder {
 
-    private static final Logger myLogger = Logger.getLogger(TableReportBuilder.class);
+    private static final Logger myLogger = LogManager.getLogger(TableReportBuilder.class);
 
     private static final String DELIMITER = "\t";
 
@@ -40,7 +39,7 @@ public class TableReportBuilder {
         myWriter = null;
         myInMemory = true;
     }
-    
+
     private TableReportBuilder(String tableName, int numColumns) {
         myTableName = tableName;
         myColumnNames = null;
@@ -74,7 +73,7 @@ public class TableReportBuilder {
     public static TableReportBuilder getInstance(String tableName, Object[] columnNames) {
         return new TableReportBuilder(tableName, columnNames);
     }
-    
+
     public static TableReportBuilder getInstance(String tableName, int numColumns) {
         return new TableReportBuilder(tableName, numColumns);
     }

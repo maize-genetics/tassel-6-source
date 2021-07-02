@@ -4,8 +4,13 @@
 package net.maizegenetics.util;
 
 import net.maizegenetics.prefs.TasselPrefs;
-import org.apache.log4j.Logger;
-import org.apache.log4j.PropertyConfigurator;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.appender.ConsoleAppender;
+import org.apache.logging.log4j.core.config.Configurator;
+import org.apache.logging.log4j.core.config.builder.api.*;
+import org.apache.logging.log4j.core.config.builder.impl.BuiltConfiguration;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -16,7 +21,7 @@ import java.io.PrintStream;
  */
 public class LoggingUtils {
 
-    private static final Logger myLogger = Logger.getLogger(LoggingUtils.class);
+    private static final Logger myLogger = LogManager.getLogger(LoggingUtils.class);
     private static final PrintStream myOriginalOutputStream = System.out;
     private static final PrintStream myOriginalErrStream = System.err;
 
@@ -84,7 +89,7 @@ public class LoggingUtils {
      *
      * @param logFileName file name
      *
-     * @throws FileNotFoundException
+     * @throws FileNotFoundException when file doesn't exist
      */
     public static void setupLogfile(String logFileName) throws FileNotFoundException {
         if (TasselPrefs.getLogDebug()) {
@@ -115,39 +120,54 @@ public class LoggingUtils {
         sendDebugLog4jToStdout();
     }
 
-    public static void setupStdOutLogging() {
-        System.setOut(myOriginalOutputStream);
-        System.setErr(myOriginalErrStream);
-        java.util.Properties props = new java.util.Properties();
-        props.setProperty("log4j.logger.net.maizegenetics", "ERROR, stdout");
-        props.setProperty("log4j.appender.stdout", "org.apache.log4j.ConsoleAppender");
-        props.setProperty("log4j.appender.stdout.Threshold", "error");
-        props.setProperty("log4j.appender.stdout.layout", "org.apache.log4j.TTCCLayout");
-        PropertyConfigurator.configure(props);
-    }
-
-    public static void closeLogfile() {
-        if (myPrintStream != null) {
-            myPrintStream.close();
-        }
-    }
-
     private static void sendLog4jToStdout() {
-        java.util.Properties props = new java.util.Properties();
-        props.setProperty("log4j.logger.net.maizegenetics", "INFO, stdout");
-        props.setProperty("log4j.appender.stdout", "org.apache.log4j.ConsoleAppender");
-        props.setProperty("log4j.appender.stdout.Threshold", "info");
-        props.setProperty("log4j.appender.stdout.layout", "org.apache.log4j.TTCCLayout");
-        PropertyConfigurator.configure(props);
+
+        ConfigurationBuilder<BuiltConfiguration> builder = ConfigurationBuilderFactory.newConfigurationBuilder();
+        builder.setStatusLevel(Level.ERROR);
+
+        AppenderComponentBuilder console = builder.newAppender("Stdout", "Console")
+                .addAttribute("target", ConsoleAppender.Target.SYSTEM_OUT);
+        builder.add(console);
+
+        console.add(builder.newLayout("PatternLayout")
+                .addAttribute("pattern", "%r [%t] %p %c %notEmpty{%ndc }- %m%n"));
+
+        RootLoggerComponentBuilder rootLogger = builder.newRootLogger(Level.INFO);
+        rootLogger.add(builder.newAppenderRef("Stdout"));
+        builder.add(rootLogger);
+
+        LoggerComponentBuilder logger = builder.newLogger("net.maizegenetics", Level.INFO);
+        logger.add(builder.newAppenderRef("Stdout"));
+        logger.addAttribute("additivity", false);
+        builder.add(logger);
+
+        Configurator.reconfigure(builder.build());
+
     }
 
     private static void sendDebugLog4jToStdout() {
-        java.util.Properties props = new java.util.Properties();
-        props.setProperty("log4j.logger.net.maizegenetics", "DEBUG, stdout");
-        props.setProperty("log4j.appender.stdout", "org.apache.log4j.ConsoleAppender");
-        props.setProperty("log4j.appender.stdout.Threshold", "debug");
-        props.setProperty("log4j.appender.stdout.layout", "org.apache.log4j.TTCCLayout");
-        PropertyConfigurator.configure(props);
+
+        ConfigurationBuilder<BuiltConfiguration> builder = ConfigurationBuilderFactory.newConfigurationBuilder();
+        builder.setStatusLevel(Level.ERROR);
+
+        AppenderComponentBuilder console = builder.newAppender("Stdout", "Console")
+                .addAttribute("target", ConsoleAppender.Target.SYSTEM_OUT);
+        builder.add(console);
+
+        console.add(builder.newLayout("PatternLayout")
+                .addAttribute("pattern", "%r [%t] %p %c %notEmpty{%ndc }- %m%n"));
+
+        RootLoggerComponentBuilder rootLogger = builder.newRootLogger(Level.DEBUG);
+        rootLogger.add(builder.newAppenderRef("Stdout"));
+        builder.add(rootLogger);
+
+        LoggerComponentBuilder logger = builder.newLogger("net.maizegenetics", Level.DEBUG);
+        logger.add(builder.newAppenderRef("Stdout"));
+        logger.addAttribute("additivity", false);
+        builder.add(logger);
+
+        Configurator.reconfigure(builder.build());
+
     }
 
 }

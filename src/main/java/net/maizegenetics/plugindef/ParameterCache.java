@@ -1,7 +1,8 @@
 package net.maizegenetics.plugindef;
 
 import net.maizegenetics.util.Utils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.BufferedReader;
 import java.util.Enumeration;
@@ -30,7 +31,7 @@ import java.util.Properties;
  */
 public class ParameterCache {
 
-    private static final Logger myLogger = Logger.getLogger(ParameterCache.class);
+    private static final Logger myLogger = LogManager.getLogger(ParameterCache.class);
 
     private static Properties CACHE = null;
 

@@ -1,7 +1,8 @@
 package net.maizegenetics.plugindef;
 
 import com.google.common.collect.Range;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,7 +19,7 @@ import static net.maizegenetics.plugindef.AbstractPlugin.convert;
  */
 public final class PluginParameter<T> {
 
-    private static final Logger myLogger = Logger.getLogger(PluginParameter.class);
+    private static final Logger myLogger = LogManager.getLogger(PluginParameter.class);
 
     private final String myGuiName;
     private final String myUnits;

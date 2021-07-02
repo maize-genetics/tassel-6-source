@@ -5,7 +5,8 @@
 package net.maizegenetics.plugindef;
 
 import net.maizegenetics.util.ProgressListener;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.lang.reflect.Constructor;
 
@@ -179,7 +180,7 @@ public interface Plugin extends PluginListener, ProgressListener, Runnable {
 
     public boolean wasCancelled();
 
-    Logger myLogger = Logger.getLogger(Plugin.class);
+    Logger myLogger = LogManager.getLogger(Plugin.class);
 
     public static Plugin getPluginInstance(String className) {
         return getPluginInstance(className, false);

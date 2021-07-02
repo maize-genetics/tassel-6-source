@@ -31,7 +31,7 @@ import net.maizegenetics.taxa.tree.SimpleTree
 import net.maizegenetics.util.TableReport
 import net.maizegenetics.util.TableReportUtils
 import net.maizegenetics.util.Utils
-import org.apache.log4j.Logger
+import org.apache.logging.log4j.LogManager
 import java.io.File
 import java.io.FileWriter
 import java.io.PrintWriter
@@ -46,7 +46,7 @@ import java.util.*
  */
 class ExportPlugin(isInteractive: Boolean = false) : AbstractPlugin(isInteractive) {
 
-    private val myLogger = Logger.getLogger(ExportPlugin::class.java)
+    private val myLogger = LogManager.getLogger(ExportPlugin::class.java)
 
     private var mySaveFile = PluginParameter.Builder("saveFile", null, String::class.java)
             .description("Save file as...")

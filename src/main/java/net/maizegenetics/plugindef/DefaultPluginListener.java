@@ -10,7 +10,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  *
@@ -18,7 +19,7 @@ import org.apache.log4j.Logger;
  */
 public class DefaultPluginListener implements PluginListener {
 
-    private static final Logger myLogger = Logger.getLogger(DefaultPluginListener.class);
+    private static final Logger myLogger = LogManager.getLogger(DefaultPluginListener.class);
 
     private static DefaultPluginListener SINGLETON = null;
     private final Map<Plugin, Integer> myProgressValues = new HashMap<>();

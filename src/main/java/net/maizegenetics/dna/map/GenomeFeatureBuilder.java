@@ -1,7 +1,7 @@
 package net.maizegenetics.dna.map;
 
-import org.apache.log4j.Logger;
-
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.json.simple.JSONObject;
 
 import java.util.HashMap;
@@ -18,7 +18,7 @@ import java.util.regex.Pattern;
  */
 public class GenomeFeatureBuilder {
 
-    private static final Logger myLogger = Logger.getLogger(GenomeFeatureBuilder.class);
+    private static final Logger myLogger = LogManager.getLogger(GenomeFeatureBuilder.class);
 
     //Variables to store the information on the feature
     private HashMap<String, String> myannotations = null;
@@ -56,13 +56,13 @@ public class GenomeFeatureBuilder {
     private void validateData() {
 
         //Test that feature has the required fields
-        if ( (!myannotations.containsKey("id")) || myannotations.get("id") == "NA") {
+        if ((!myannotations.containsKey("id")) || myannotations.get("id") == "NA") {
             throw new UnsupportedOperationException("GenomeFeatureBuilder: Cannot build a feature without a personal identifier (field 'id')");
         }
 
 
         //Test if start or stop is negative
-        if(myannotations.containsKey("start") && myannotations.containsKey("stop")) {
+        if (myannotations.containsKey("start") && myannotations.containsKey("stop")) {
             int mystart = Integer.parseInt(myannotations.get("start"));
             int mystop = Integer.parseInt(myannotations.get("stop"));
             if (mystart < 0) {
@@ -132,8 +132,8 @@ public class GenomeFeatureBuilder {
 
     public GenomeFeatureBuilder addAnnotation(String key, String value) {
         key = synonymizeKeys(key);
-        if("".equals(value)){   //Convert empty strings to 'NA'
-            value="NA";
+        if ("".equals(value)) {   //Convert empty strings to 'NA'
+            value = "NA";
         }
         myannotations.put(key, value);  //All annotations kept in the hash
 
@@ -156,6 +156,7 @@ public class GenomeFeatureBuilder {
      * pos, position -> position
      *
      * @param key The key to standardize
+     *
      * @return
      */
     public static String synonymizeKeys(String key) {
@@ -191,10 +192,11 @@ public class GenomeFeatureBuilder {
     /**
      * Load all annotations from a hashmap. Keys become the annotations, and values the annotation value. Each key-value
      * pair is added individually (instead of using a putAll() method) to allow for key standardization, etc.
+     *
      * @return This builder, with the new data loaded from the hashmap
      */
-    public GenomeFeatureBuilder loadAll(HashMap<String, String> newAnnotations){
-        for(String key: newAnnotations.keySet()){
+    public GenomeFeatureBuilder loadAll(HashMap<String, String> newAnnotations) {
+        for (String key : newAnnotations.keySet()) {
             addAnnotation(key, newAnnotations.get(key));
         }
         return this;
@@ -205,6 +207,7 @@ public class GenomeFeatureBuilder {
      * purpose, in biojava3-genome/src/main/java/org/biojava3/genome/GFF3Reader.java
      *
      * @param line A single line from a GFF file as a string
+     *
      * @return This builder, with the data loaded from the line
      */
     public GenomeFeatureBuilder parseGffLine(String line) {
@@ -239,6 +242,7 @@ public class GenomeFeatureBuilder {
      * 'gene_id' taken in that order. If nothing is found, returns an empty string ("")
      *
      * @param attributes The string from the attribute field of the GFF file
+     *
      * @return The parent's ID string
      */
     public static String getParentFromGffAttributes(String attributes) {
@@ -276,6 +280,7 @@ public class GenomeFeatureBuilder {
      * Parse a GFF attribute field to identify the name of the current GenomeFeature. Looks for 'ID=' and 'Name=' fields
      *
      * @param attributes The string from the attribute field of the GFF file. REturns null if not found
+     *
      * @return The feature's ID string
      */
     public static String getFeatureIdFromGffAttributes(String attributes) {
@@ -291,7 +296,7 @@ public class GenomeFeatureBuilder {
         return null;
     }
 
-    public GenomeFeatureBuilder parseJsonObject (JSONObject featureData){
+    public GenomeFeatureBuilder parseJsonObject(JSONObject featureData) {
         HashMap<String, String> jsonHash = new HashMap<>();
         for (String key : (Set<String>) featureData.keySet()) {
             addAnnotation(key, featureData.get(key).toString());

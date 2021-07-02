@@ -18,7 +18,7 @@ import net.maizegenetics.taxa.TaxaList
 import net.maizegenetics.taxa.distance.DistanceMatrix
 import net.maizegenetics.taxa.tree.Tree
 import net.maizegenetics.util.TableReport
-import org.apache.log4j.Logger
+import org.apache.logging.log4j.LogManager
 import java.util.ArrayList
 import kotlin.collections.HashMap
 
@@ -48,7 +48,7 @@ const val NODE_TYPE_STEPWISE = "Stepwise"
 const val NODE_TYPE_GENO_SUMMARY = "Genotype Summary"
 const val NODE_TYPE_DEFAULT = NODE_TYPE_DATA
 
-private val myLogger = Logger.getLogger(DataTree::class.java)
+private val myLogger = LogManager.getLogger(DataTree::class.java)
 
 class DataTree : PluginListener {
 

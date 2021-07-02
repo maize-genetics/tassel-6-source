@@ -5,18 +5,13 @@
  */
 package net.maizegenetics.util;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.*;
 import java.net.URL;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Stream;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
@@ -28,7 +23,7 @@ import java.util.zip.ZipFile;
  */
 public final class Utils {
 
-    private static final Logger myLogger = Logger.getLogger(Utils.class);
+    private static final Logger myLogger = LogManager.getLogger(Utils.class);
     private static Collection<String> myJavaPackages = null;
 
     private Utils() {
@@ -324,6 +319,7 @@ public final class Utils {
     }
 
     /**
+     *
      */
     public static String shortenStrLineLen(String str, int preferredLen, int preferredLines) {
 
@@ -491,11 +487,11 @@ public final class Utils {
      * @param path the path to the file
      *
      * @return the lines from the file as a {@code Stream}
-     * @throws IOException if an I/O error occurs opening the file
+     * @throws IOException       if an I/O error occurs opening the file
      * @throws SecurityException In the case of the default provider, and a
-     * security manager is installed, the
-     * {@link SecurityManager#checkRead(String) checkRead} method is invoked to
-     * check read access to the file
+     *                           security manager is installed, the
+     *                           {@link SecurityManager#checkRead(String) checkRead} method is invoked to
+     *                           check read access to the file
      * @see java.io.BufferedReader#lines()
      * @since 1.8
      */

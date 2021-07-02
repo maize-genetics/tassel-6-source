@@ -15,8 +15,8 @@ import net.maizegenetics.tassel.TASSELMainApp
 import net.maizegenetics.util.ExceptionUtils
 import net.maizegenetics.util.LoggingUtils
 import net.maizegenetics.util.Utils
-import org.apache.log4j.Level
-import org.apache.log4j.Logger
+import org.apache.logging.log4j.Level
+import org.apache.logging.log4j.LogManager
 import java.io.File
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -33,7 +33,7 @@ import kotlin.system.exitProcess
  */
 class TasselPipeline(args: Array<String>, interactive: Boolean = false, name: String? = null) : PluginListener {
 
-    private val myLogger = Logger.getLogger(TasselPipeline::class.java)
+    private val myLogger = LogManager.getLogger(TasselPipeline::class.java)
 
     enum class FLAGS {
         t, s, k, q, h, r, plink, fasta, table, vcf, readSerialAlignment, importGuess, projection, convertTOPMtoHDF5, retainRareAlleles, union, intersect, separate, homozygous, synonymizer, mergeGenotypeTables, mergeAlignmentsSameSites, excludeLastTrait, mlm, glm, td_csv, td_tab, td_gui, diversity, ld, ldd, ck, tree, gs, distanceMatrix, distMatrixRanges, genotypeSummary, export, filterAlign, numericalGenoTransform, includeTaxa, includeTaxaInFile, excludeTaxa, excludeTaxaInFile, includeSiteNames, includeSiteNamesInFile, excludeSiteNames, excludeSiteNamesInFile, subsetSites, subsetTaxa, newCoordinates, archaeopteryx, filterTaxaNames, maxThreads, mhd, pca, printGenoSummary, printMemoryUsage;

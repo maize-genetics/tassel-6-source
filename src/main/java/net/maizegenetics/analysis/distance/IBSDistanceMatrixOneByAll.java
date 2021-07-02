@@ -12,7 +12,8 @@ import java.util.stream.StreamSupport;
 import net.maizegenetics.dna.snp.GenotypeTable;
 import net.maizegenetics.dna.snp.genotypecall.AlleleFreqCache;
 import net.maizegenetics.util.ProgressListener;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  *
@@ -20,7 +21,7 @@ import org.apache.log4j.Logger;
  */
 public class IBSDistanceMatrixOneByAll {
 
-    private static final Logger myLogger = Logger.getLogger(IBSDistanceMatrixOneByAll.class);
+    private static final Logger myLogger = LogManager.getLogger(IBSDistanceMatrixOneByAll.class);
 
     private IBSDistanceMatrixOneByAll() {
         // utility

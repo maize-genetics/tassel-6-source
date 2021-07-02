@@ -11,7 +11,8 @@ import net.maizegenetics.phenotype.Phenotype.ATTRIBUTE_TYPE;
 import net.maizegenetics.taxa.Taxon;
 import net.maizegenetics.util.TableReportUtils;
 import net.maizegenetics.util.Utils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.BufferedWriter;
 import java.util.ArrayList;
@@ -25,7 +26,7 @@ import java.util.stream.Collectors;
  */
 public class PhenotypeUtils {
 
-    private static final Logger myLogger = Logger.getLogger(PhenotypeUtils.class);
+    private static final Logger myLogger = LogManager.getLogger(PhenotypeUtils.class);
 
     private static final String DELIMITER = "\t";
 

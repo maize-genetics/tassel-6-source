@@ -5,19 +5,20 @@
  */
 package net.maizegenetics.gui;
 
-import java.awt.Component;
-import javax.swing.JOptionPane;
 import net.maizegenetics.util.ExceptionUtils;
 import net.maizegenetics.util.Utils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import javax.swing.*;
+import java.awt.*;
 
 /**
- *
  * @author Terry Casstevens
  */
 public class DialogUtils {
 
-    private static final Logger myLogger = Logger.getLogger(DialogUtils.class);
+    private static final Logger myLogger = LogManager.getLogger(DialogUtils.class);
 
     private static final int DEFAULT_MESSAGE_LINE_LENGTH = 50;
 

@@ -13,13 +13,13 @@ import net.maizegenetics.taxa.TaxaList
 import net.maizegenetics.taxa.TaxaListBuilder
 import net.maizegenetics.taxa.Taxon
 import net.maizegenetics.util.LoggingUtils
-import org.apache.log4j.Logger
+import org.apache.logging.log4j.LogManager
 import kotlin.system.measureNanoTime
 
 
 class BrAPIConnection(val baseURL: String) {
 
-    private val logger = Logger.getLogger(BrAPIConnection::class.java)
+    private val logger = LogManager.getLogger(BrAPIConnection::class.java)
 
     /**
      * Returns list of variant sets available from BrAPI Server.
@@ -222,6 +222,48 @@ fun main() {
 
     val taxonIndex = featureTable.taxa.indexOf("Z001E0104")
     featureTable.forEach { site ->
+        val genotype = site.genotypeAsString(taxonIndex)
+        println("taxon: Z001E0104  id: ${site.feature.id}  name: ${site.feature.name}  chr: ${site.feature.startChr}  pos: ${site.feature.startPos}  genotype: $genotype")
+    }
+
+    println("time: ${time / 1e9} secs")
+
+}
+
+fun main1() {
+
+    val connection = BrAPIConnection("http://cbsudc01.biohpc.cornell.edu/brapi/v2")
+
+    //val taxa = connection.getCallsets("MergedReadMapping_AllNamParents_Haploid")
+    //taxa.take(100).forEach { println(it) }
+
+    //taxa.forEachIndexed { index, taxon ->
+    //    if (taxon.name == "Z001E0104" || taxon.name == "Z001E0103") println("matched: $index  name: ${taxon.name}")
+    //}
+
+    //System.exit(0)
+
+    //println(connection.getVariantsets())
+
+    //println(connection.getVariantset("Ames_MergedReadMapping_AllLines_Haploid"))
+
+    //println(connection.getVariants("Ames_MergedReadMapping_AllLines_Haploid").toList())
+
+    //println(connection.getCallsets("Ames_MergedReadMapping_AllLines_Haploid").numberOfTaxa())
+
+    var featureTable: FeatureTable
+    val time = measureNanoTime {
+        featureTable = connection.getCalls("MergedReadMapping_AllNamParents_Haploid")
+
+        println("num of features: ${featureTable.numFeatures()}")
+        println("num of taxa: ${featureTable.numTaxa()}")
+    }
+
+    val taxonIndex = featureTable.taxa.indexOf("Z001E0104")
+    featureTable.forEach { site ->
+        site.forEach { alleles ->
+            // TODO
+        }
         val genotype = site.genotypeAsString(taxonIndex)
         println("taxon: Z001E0104  id: ${site.feature.id}  name: ${site.feature.name}  chr: ${site.feature.startChr}  pos: ${site.feature.startPos}  genotype: $genotype")
     }

@@ -11,7 +11,7 @@ import net.maizegenetics.plugindef.AbstractPlugin
 import net.maizegenetics.plugindef.DataSet
 import net.maizegenetics.plugindef.Datum
 import net.maizegenetics.util.Utils
-import org.apache.log4j.Logger
+import org.apache.logging.log4j.LogManager
 import java.io.File
 
 /**
@@ -19,7 +19,7 @@ import java.io.File
  */
 class ExportMultiplePlugin : AbstractPlugin(false) {
 
-    private val logger = Logger.getLogger(ExportMultiplePlugin::class.java)
+    private val logger = LogManager.getLogger(ExportMultiplePlugin::class.java)
 
     private val myExportPlugin = ExportPlugin()
 

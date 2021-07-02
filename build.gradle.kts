@@ -1,12 +1,11 @@
 import org.gradle.api.JavaVersion.VERSION_11
-import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 // Note Kotlin version needs to be updated in both the buildscript and plugins.
 // Dependencies will follow the buildscript
 
 group = "net.maizegenetics"
-version = "6.0"
+version = "6.0.0"
 
 buildscript {
     val kotlinVersion by extra ("1.4.32")
@@ -72,7 +71,8 @@ dependencies {
 
     val kotlinVersion = rootProject.extra["kotlinVersion"]
 
-    implementation("log4j:log4j:1.2.17")
+    implementation("org.apache.logging.log4j:log4j-api:2.14.1")
+    implementation("org.apache.logging.log4j:log4j-core:2.14.1")
     implementation("com.google.guava:guava:29.0-jre")
     implementation("com.github.samtools:htsjdk:2.24.1")
     implementation("com.googlecode.efficient-java-matrix-library:ejml:0.23")

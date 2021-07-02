@@ -1,8 +1,8 @@
 package net.maizegenetics.taxa;
 
 import com.google.common.collect.ImmutableMap;
-
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.*;
 
@@ -13,11 +13,10 @@ import java.util.*;
  * Use {@link TaxaListBuilder} to instantiate.
  *
  * @author Ed Buckler
- *
  */
 class TaxaArrayList implements TaxaList {
 
-    private static final Logger myLogger = Logger.getLogger(TaxaArrayList.class);
+    private static final Logger myLogger = LogManager.getLogger(TaxaArrayList.class);
     private final List<Taxon> myTaxaList;
     private final int myNumTaxa;
     private final ImmutableMap<String, Integer> myNameToIndex;
@@ -27,13 +26,13 @@ class TaxaArrayList implements TaxaList {
         myTaxaList = new ArrayList<Taxon>(srcList.size());
         myNumTaxa = srcList.size();
         int index = 0;
-        ImmutableMap.Builder<String, Integer> nToIBuilder=new ImmutableMap.Builder<>();
+        ImmutableMap.Builder<String, Integer> nToIBuilder = new ImmutableMap.Builder<>();
         for (Taxon Taxon : srcList) {
             myTaxaList.add(Taxon);
             nToIBuilder.put(Taxon.getName(), index);
             index++;
         }
-        myNameToIndex=nToIBuilder.build();
+        myNameToIndex = nToIBuilder.build();
     }
 
     @Override
@@ -53,8 +52,8 @@ class TaxaArrayList implements TaxaList {
 
     @Override
     public int indexOf(String name) {
-        Integer index=myNameToIndex.get(name);
-        if(index==null) return -1;
+        Integer index = myNameToIndex.get(name);
+        if (index == null) return -1;
         return index;
     }
 
@@ -219,11 +218,11 @@ class TaxaArrayList implements TaxaList {
         Iterator<Taxon> myIter = myTaxaList.iterator();
         Iterator<Taxon> otherIter = otherTaxa.iterator();
         while (myIter.hasNext()) {
-            if ( !(myIter.next().equals(otherIter.next())) ) {
+            if (!(myIter.next().equals(otherIter.next()))) {
                 return false;
             }
         }
-        
+
         return true;
     }
 }

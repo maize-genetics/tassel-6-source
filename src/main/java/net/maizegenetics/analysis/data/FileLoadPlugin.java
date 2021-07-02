@@ -23,7 +23,8 @@ import net.maizegenetics.taxa.distance.DistanceMatrixBuilder;
 import net.maizegenetics.taxa.distance.ReadDistanceMatrix;
 import net.maizegenetics.util.TableReportUtils;
 import net.maizegenetics.util.Utils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -41,7 +42,7 @@ import java.util.regex.Pattern;
  */
 public class FileLoadPlugin extends AbstractPlugin {
 
-    private static final Logger myLogger = Logger.getLogger(FileLoadPlugin.class);
+    private static final Logger myLogger = LogManager.getLogger(FileLoadPlugin.class);
 
     private PluginParameter<TasselFileType> myFileType = new PluginParameter.Builder<>("format", TasselFileType.Unknown, TasselFileType.class)
             .description("Import file format")

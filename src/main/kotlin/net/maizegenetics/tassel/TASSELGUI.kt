@@ -21,7 +21,7 @@ import net.maizegenetics.plugindef.AbstractPlugin
 import net.maizegenetics.plugindef.Datum
 import net.maizegenetics.plugindef.Plugin
 import net.maizegenetics.util.TableReport
-import org.apache.log4j.Logger
+import org.apache.logging.log4j.LogManager
 import java.util.*
 
 
@@ -30,7 +30,7 @@ import java.util.*
  * Created November 01, 2018
  */
 
-private val myLogger = Logger.getLogger(TASSELGUI::class.java)
+private val myLogger = LogManager.getLogger(TASSELGUI::class.java)
 
 private val EMPTY_NODE = StackPane().also {
     it.background = Background(BackgroundFill(Paint.valueOf("grey"), null, null))

@@ -16,7 +16,7 @@ import net.maizegenetics.util.ProgressListener
 import net.maizegenetics.util.SuperByteMatrix
 import net.maizegenetics.util.SuperByteMatrixBuilder
 import net.maizegenetics.util.Utils
-import org.apache.log4j.Logger
+import org.apache.logging.log4j.LogManager
 import java.util.*
 import java.util.concurrent.*
 import java.util.regex.Pattern
@@ -310,7 +310,7 @@ class BuilderFromHapMap private constructor(private val myHapmapFile: String, pr
 
     companion object {
 
-        private val myLogger = Logger.getLogger(BuilderFromHapMap::class.java)
+        private val myLogger = LogManager.getLogger(BuilderFromHapMap::class.java)
         private val WHITESPACE_PATTERN = Pattern.compile("\\t")
         private val NUM_HAPMAP_NON_TAXA_HEADERS = 11
         private val SNPID_INDEX = 0
