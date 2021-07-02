@@ -11,7 +11,8 @@ import htsjdk.samtools.util.BlockCompressedInputStream;
 import net.maizegenetics.dna.snp.GenotypeTableUtils;
 import net.maizegenetics.dna.snp.NucleotideAlignmentConstants;
 import net.maizegenetics.dna.snp.io.LineIndex;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -23,7 +24,7 @@ import java.util.concurrent.ForkJoinPool;
  */
 public class LineIndexHapmapGenotypeCallTable extends AbstractGenotypeCallTable {
 
-    private static final Logger myLogger = Logger.getLogger(LineIndexHapmapGenotypeCallTable.class);
+    private static final Logger myLogger = LogManager.getLogger(LineIndexHapmapGenotypeCallTable.class);
     private static final int NUM_HAPMAP_NON_TAXA_HEADERS = 11;
     private static final int NUM_LOOK_AHEAD_BLOCKS = 103;
 

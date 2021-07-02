@@ -7,7 +7,8 @@ import net.maizegenetics.dna.snp.GenotypeTable;
 import net.maizegenetics.dna.snp.NucleotideAlignmentConstants;
 import net.maizegenetics.util.SuperByteMatrix;
 import net.maizegenetics.util.SuperByteMatrixBuilder;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +26,7 @@ import java.util.regex.Pattern;
  */
 public class GenotypeCallTableBuilder {
 
-    private static Logger myLogger = Logger.getLogger(GenotypeCallTableBuilder.class);
+    private static Logger myLogger = LogManager.getLogger(GenotypeCallTableBuilder.class);
 
     private SuperByteMatrix myGenotype;
     private boolean myIsPhased = false;

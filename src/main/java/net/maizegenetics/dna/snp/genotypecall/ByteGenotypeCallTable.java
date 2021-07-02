@@ -8,7 +8,8 @@ import java.util.stream.Stream;
 import net.maizegenetics.util.SuperByteMatrix;
 import net.maizegenetics.util.SuperByteMatrixBuilder;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * In memory byte implementation of GenotypeCallTable backed the high efficiency
@@ -22,7 +23,7 @@ import org.apache.log4j.Logger;
  */
 class ByteGenotypeCallTable extends AbstractGenotypeCallTable {
 
-    private static final Logger myLogger = Logger.getLogger(ByteGenotypeCallTable.class);
+    private static final Logger myLogger = LogManager.getLogger(ByteGenotypeCallTable.class);
     SuperByteMatrix myGenotype;
     private SuperByteMatrix mySiteInnerLoop;
     private SuperByteMatrix myTaxonInnerLoop;
