@@ -17,7 +17,8 @@ import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.List;
 import net.maizegenetics.util.Tuple;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  *
@@ -25,7 +26,7 @@ import org.apache.log4j.Logger;
  */
 public class LineIndexBuilder {
 
-    private static final Logger myLogger = Logger.getLogger(LineIndexBuilder.class);
+    private static final Logger myLogger = LogManager.getLogger(LineIndexBuilder.class);
 
     public static final String LINE_INDEX_FILE_EXTENSION = ".lix";
     private static final byte[] MAGIC = {'L', 'I', 'X', 1};

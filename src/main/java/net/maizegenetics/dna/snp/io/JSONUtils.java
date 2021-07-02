@@ -32,14 +32,15 @@ import net.maizegenetics.taxa.Taxon;
 import net.maizegenetics.util.GeneralAnnotation;
 import net.maizegenetics.util.GeneralAnnotationStorage;
 import net.maizegenetics.util.Utils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * @author Terry Casstevens
  */
 public class JSONUtils {
 
-    private static final Logger myLogger = Logger.getLogger(JSONUtils.class);
+    private static final Logger myLogger = LogManager.getLogger(JSONUtils.class);
 
     private JSONUtils() {
         // utility

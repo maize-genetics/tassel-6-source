@@ -12,7 +12,8 @@ import com.google.common.collect.TreeRangeMap;
 import com.google.common.collect.TreeRangeSet;
 import net.maizegenetics.dna.map.Position;
 import net.maizegenetics.util.Utils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.BufferedReader;
 import java.util.ArrayList;
@@ -26,7 +27,7 @@ import static java.util.stream.Collectors.collectingAndThen;
  */
 public class ReadBedfile {
 
-    private static final Logger myLogger = Logger.getLogger(ReadBedfile.class);
+    private static final Logger myLogger = LogManager.getLogger(ReadBedfile.class);
 
     private ReadBedfile() {
         // utility

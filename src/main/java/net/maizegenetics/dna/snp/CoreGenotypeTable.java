@@ -9,18 +9,15 @@ import net.maizegenetics.dna.map.PositionList;
 import net.maizegenetics.dna.snp.genotypecall.GenotypeCallTable;
 import net.maizegenetics.dna.snp.score.AlleleDepth;
 import net.maizegenetics.dna.snp.score.AlleleProbability;
-import net.maizegenetics.dna.snp.score.ReferenceProbability;
 import net.maizegenetics.dna.snp.score.Dosage;
+import net.maizegenetics.dna.snp.score.ReferenceProbability;
 import net.maizegenetics.dna.snp.score.SiteScore.SITE_SCORE_TYPE;
 import net.maizegenetics.taxa.TaxaList;
-import net.maizegenetics.util.BitSet;
 import net.maizegenetics.util.GeneralAnnotationStorage;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-import org.apache.log4j.Logger;
-
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -28,14 +25,13 @@ import java.util.stream.Stream;
  * Basic implementation of a {@link GenotypeTable}. Use the GenotypeTableBuilder
  * to construct.
  *
+ * @author Terry Casstevens
  * @see GenotypeTable
  * @see GenotypeTableBuilder
- *
- * @author Terry Casstevens
  */
 public class CoreGenotypeTable implements GenotypeTable {
 
-    private static final Logger myLogger = Logger.getLogger(CoreGenotypeTable.class);
+    private static final Logger myLogger = LogManager.getLogger(CoreGenotypeTable.class);
     private final GenotypeCallTable myGenotype;
     private final PositionList myPositionList;
     private final TaxaList myTaxaList;

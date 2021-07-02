@@ -7,14 +7,15 @@ import java.math.BigDecimal;
 
 import java.util.Arrays;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * @author Terry Casstevens
  */
 public class SiteScoreUtil {
 
-    private static final Logger myLogger = Logger.getLogger(SiteScoreUtil.class);
+    private static final Logger myLogger = LogManager.getLogger(SiteScoreUtil.class);
 
     private static final float[] BYTE_TO_FLOAT = new float[256];
     public static final byte BYTE_REPRESENTING_NAN = (byte) 255;

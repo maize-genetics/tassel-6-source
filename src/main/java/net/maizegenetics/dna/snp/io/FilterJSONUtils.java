@@ -16,7 +16,8 @@ import net.maizegenetics.dna.snp.FilterList;
 import net.maizegenetics.dna.snp.FilterSite;
 import net.maizegenetics.dna.snp.FilterTaxa;
 import net.maizegenetics.util.Utils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  *
@@ -24,7 +25,7 @@ import org.apache.log4j.Logger;
  */
 public class FilterJSONUtils {
 
-    private static final Logger myLogger = Logger.getLogger(FilterJSONUtils.class);
+    private static final Logger myLogger = LogManager.getLogger(FilterJSONUtils.class);
 
     private FilterJSONUtils() {
         // utility

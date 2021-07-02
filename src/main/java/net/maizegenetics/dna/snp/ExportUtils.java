@@ -12,7 +12,8 @@ import net.maizegenetics.dna.snp.io.VCFUtil;
 import net.maizegenetics.taxa.TaxaList;
 import net.maizegenetics.taxa.Taxon;
 import net.maizegenetics.util.*;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -31,7 +32,7 @@ import java.util.zip.GZIPOutputStream;
  */
 public class ExportUtils {
 
-    private static final Logger myLogger = Logger.getLogger(ExportUtils.class);
+    private static final Logger myLogger = LogManager.getLogger(ExportUtils.class);
     private static FormattedOutput format = FormattedOutput.getInstance();
 
     private ExportUtils() {

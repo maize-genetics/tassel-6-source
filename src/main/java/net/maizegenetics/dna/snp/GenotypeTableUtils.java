@@ -4,7 +4,8 @@
 package net.maizegenetics.dna.snp;
 
 import net.maizegenetics.dna.factor.FeatureTableKt;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import static net.maizegenetics.dna.snp.GenotypeTable.UNKNOWN_GENOTYPE;
 
@@ -16,7 +17,7 @@ import static net.maizegenetics.dna.snp.GenotypeTable.UNKNOWN_GENOTYPE;
  */
 public class GenotypeTableUtils {
 
-    private static final Logger myLogger = Logger.getLogger(GenotypeTableUtils.class);
+    private static final Logger myLogger = LogManager.getLogger(GenotypeTableUtils.class);
 
     private static final byte HIGHMASK = (byte) 0x0F;
 

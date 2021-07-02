@@ -13,7 +13,8 @@ import net.maizegenetics.dna.map.Position;
 import net.maizegenetics.dna.snp.GenotypeTable;
 import net.maizegenetics.dna.snp.NucleotideAlignmentConstants;
 import net.maizegenetics.util.Tuple;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -25,7 +26,7 @@ import java.util.stream.IntStream;
  */
 public class VCFUtil {
 
-    private static final Logger myLogger = Logger.getLogger(VCFUtil.class);
+    private static final Logger myLogger = LogManager.getLogger(VCFUtil.class);
 
     // variables for calculating OS and PL for VCF, might not be in the correct class
     private static double error;
