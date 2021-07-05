@@ -26,7 +26,7 @@ object ChangeLog {
     @JvmStatic
     fun main(args: Array<String>) {
 
-        LoggingUtils.setupDebugLogging()
+        setupDebugLogging()
 
         // <h3>(V5.2.14) August 27, 2015</h3>
         // <ul>

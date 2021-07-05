@@ -31,7 +31,7 @@ public class TASSELMainApp {
     private static final Logger myLogger = LogManager.getLogger(TASSELMainApp.class);
 
     public static final String version = "6.0.0";
-    public static final String versionDate = "November 1, 2018";
+    public static final String versionDate = "July 5, 2021";
 
     private TASSELMainApp() {
     }

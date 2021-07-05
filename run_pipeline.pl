@@ -29,12 +29,9 @@ for (my $i=0; $i<=$#ARGV; $i++){
 if ($java_mem_min eq "") { $java_mem_min = $java_mem_min_default; }
 if ($java_mem_max eq "") { $java_mem_max = $java_mem_max_default; }
 
-$ENV{'GRADLE_OPTS'} = "$java_mem_min $java_mem_max";
-print "GRADLE_OPTS = $ENV{'GRADLE_OPTS'}\n";
+$ENV{'_JAVA_OPTIONS'} = "$java_mem_min $java_mem_max";
 
 print "Memory Settings: $java_mem_min $java_mem_max\n";
 print "Tassel Pipeline Arguments: " . "@args\n";
-
-#system "java -classpath '$CP' $java_mem_min $java_mem_max net.maizegenetics.pipeline.TasselPipeline @args";
 
 system "time ./gradlew -q run --args='-debug @args'";

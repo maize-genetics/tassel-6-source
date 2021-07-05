@@ -12,9 +12,7 @@ import net.maizegenetics.gui.basicLoggingInfo
 import net.maizegenetics.plugindef.*
 import net.maizegenetics.prefs.TasselPrefs
 import net.maizegenetics.tassel.TASSELMainApp
-import net.maizegenetics.util.ExceptionUtils
-import net.maizegenetics.util.LoggingUtils
-import net.maizegenetics.util.Utils
+import net.maizegenetics.util.*
 import org.apache.logging.log4j.Level
 import org.apache.logging.log4j.LogManager
 import java.io.File
@@ -476,7 +474,7 @@ class TasselPipeline(args: Array<String>, interactive: Boolean = false, name: St
                 args[i] = args[i].replaceFirst(emDash.toRegex(), "-")
             }
             TasselPrefs.setPersistPreferences(false)
-            LoggingUtils.setupLogging()
+            setupLogging()
             if (args.size >= 2 && args[0].equals("-createXML", ignoreCase = true)) {
                 val xmlFilename = args[1].trim { it <= ' ' }
                 val temp = addForkFlagsIfNeeded(args.copyOfRange(2, args.size))
@@ -504,9 +502,9 @@ class TasselPipeline(args: Array<String>, interactive: Boolean = false, name: St
                     if (filename != null && !filename.startsWith("-")) {
                         try {
                             if (currentArgs[0].equals("-debug", ignoreCase = true)) {
-                                LoggingUtils.setupDebugLogfile(filename)
+                                setupDebugLogfile(filename)
                             } else {
-                                LoggingUtils.setupLogfile(filename)
+                                setupLogfile(filename)
                             }
                         } catch (e: Exception) {
                             println("Problem with file: " + filename + "\n" + e.message)
@@ -514,9 +512,9 @@ class TasselPipeline(args: Array<String>, interactive: Boolean = false, name: St
                         currentArgs = currentArgs.copyOfRange(2, currentArgs.size)
                     } else {
                         if (currentArgs[0].equals("-debug", ignoreCase = true)) {
-                            LoggingUtils.setupDebugLogging()
+                            setupDebugLogging()
                         } else {
-                            LoggingUtils.setupLogging()
+                            setupLogging()
                         }
                         currentArgs = currentArgs.copyOfRange(1, currentArgs.size)
                     }

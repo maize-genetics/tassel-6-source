@@ -7,8 +7,9 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 group = "net.maizegenetics"
 version = "6.0.0"
 
+
 buildscript {
-    val kotlinVersion by extra ("1.4.32")
+    val kotlinVersion by extra("1.4.32")
 
     repositories {
         mavenCentral()
@@ -45,7 +46,7 @@ plugins {
 }
 
 application {
-    mainClassName = "net.maizegenetics.pipeline.TasselPipeline"
+    mainClass.set("net.maizegenetics.pipeline.TasselPipeline")
 }
 
 apply {
@@ -138,6 +139,7 @@ publishing {
     publications {
 
         create<MavenPublication>("maven") {
+            groupId = "net.maizegenetics"
             artifactId = "tassel6"
             description = "net.maizegenetics:tassel6:$version"
 
@@ -170,7 +172,7 @@ publishing {
             }
 
             pom {
-                name.set("tassel-6")
+                name.set("tassel6")
                 description.set("TASSEL 6 is a software package to evaluate traits association. Feature Tables are at the heart of the package where, a feature is a range of positions or a single position. Row in the that table are taxon.")
                 url.set("http://www.maizegenetics.net/tassel")
                 licenses {

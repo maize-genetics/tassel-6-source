@@ -19,8 +19,9 @@ import net.maizegenetics.plugindef.AbstractPlugin
 import net.maizegenetics.plugindef.DataSet
 import net.maizegenetics.prefs.TasselPrefs
 import net.maizegenetics.tassel.TASSELMainApp
-import net.maizegenetics.util.LoggingUtils
 import net.maizegenetics.util.Utils
+import net.maizegenetics.util.setupDebugLogging
+import net.maizegenetics.util.setupLogging
 import org.apache.logging.log4j.LogManager
 import java.io.OutputStream
 import java.io.PrintStream
@@ -46,16 +47,16 @@ class TasselLogging private constructor() : AbstractPlugin() {
         dialog.title = "TASSEL Logging"
 
         createDialog()
-        LoggingUtils.setupLogging(printStream)
+        setupLogging(printStream)
         basicLoggingInfo()
 
         if (TasselPrefs.getLogSendToConsole()) {
-            LoggingUtils.setupLogging()
+            setupLogging()
         }
     }
 
     override fun performFunction(input: DataSet?): DataSet? {
-        LoggingUtils.setupLogging(printStream)
+        setupLogging(printStream)
         Platform.runLater { dialog.show() }
         fireProgress(100)
         return null
@@ -89,7 +90,7 @@ class TasselLogging private constructor() : AbstractPlugin() {
             val debugMode = isDebug.isSelected
             isDebug.isSelected = debugMode
             TasselPrefs.putLogDebug(debugMode)
-            LoggingUtils.setupLogging(printStream)
+            setupLogging(printStream)
         }
 
         val closeButton = Button("Close")
@@ -133,9 +134,9 @@ class TasselLogging private constructor() : AbstractPlugin() {
 
     private fun updateLogging() {
         if (TasselPrefs.getLogSendToConsole()) {
-            LoggingUtils.setupLogging()
+            setupLogging()
         } else {
-            LoggingUtils.setupDebugLogging(printStream)
+            setupDebugLogging(printStream)
         }
     }
 
@@ -144,7 +145,7 @@ class TasselLogging private constructor() : AbstractPlugin() {
         TasselPrefs.putLogYDim(dialog.height.toInt())
         dialog.close()
         if (TasselPrefs.getLogSendToConsole()) {
-            LoggingUtils.setupLogging()
+            setupLogging()
         }
     }
 
