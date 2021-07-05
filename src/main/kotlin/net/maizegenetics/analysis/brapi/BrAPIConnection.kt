@@ -12,7 +12,7 @@ import net.maizegenetics.gui.basicLoggingInfo
 import net.maizegenetics.taxa.TaxaList
 import net.maizegenetics.taxa.TaxaListBuilder
 import net.maizegenetics.taxa.Taxon
-import net.maizegenetics.util.LoggingUtils
+import net.maizegenetics.util.setupDebugLogging
 import org.apache.logging.log4j.LogManager
 import kotlin.system.measureNanoTime
 
@@ -190,7 +190,7 @@ data class VariantSet(val id: String, val numVariants: Int, val numCallsets: Int
 
 fun main() {
 
-    LoggingUtils.setupDebugLogging()
+    setupDebugLogging()
     basicLoggingInfo()
 
     val connection = BrAPIConnection("http://cbsudc01.biohpc.cornell.edu/brapi/v2")
