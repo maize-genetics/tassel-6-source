@@ -11,7 +11,16 @@ import net.maizegenetics.util.SuperByteMatrix
  * Created April 6, 2021
  */
 
-class HaplotypeSite(feature: GenomicFeature, taxa: TaxaList, private val strStates: Array<String>, private val genotypes: SuperByteMatrix, val ploidy: Int = 2, weight: Double? = null, isPhased: Boolean = false) : FeatureSite(feature, taxa, weight, isPhased) {
+class HaplotypeSite(
+    feature: GenomicFeature,
+    taxa: TaxaList,
+    private val strStates: Array<String>,
+    private val genotypes: SuperByteMatrix,
+    val ploidy: Int = 2,
+    weight: Double? = null,
+    isPhased: Boolean = false,
+    private val hapAnnotations: Array<HaplotypeAnnotation?>? = null
+) : FeatureSite(feature, taxa, weight, isPhased) {
 
     init {
         require(taxa.size == genotypes.numRows) { "Number of taxa: ${taxa.size} should match number of genotypes: ${genotypes.numRows}." }
@@ -36,4 +45,14 @@ class HaplotypeSite(feature: GenomicFeature, taxa: TaxaList, private val strStat
         }
     }
 
+    /**
+     * Returns the Haplotype Annotations for given allele code.
+     * If no annotation, then returns null
+     */
+    fun haplotypeAnnotation(allele: Byte): HaplotypeAnnotation? {
+        return hapAnnotations?.get(allele.toInt())
+    }
+
 }
+
+data class HaplotypeAnnotation(val taxon: String, val asmContig: String, val asmStart: Int, val asmEnd: Int)
