@@ -5,7 +5,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 // Dependencies will follow the buildscript
 
 group = "net.maizegenetics"
-version = "6.0.0"
+version = "6.0.1"
 
 
 buildscript {
