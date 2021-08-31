@@ -139,7 +139,7 @@ public class PhenotypeUtils {
         ArrayList<Taxon> taxaList = new ArrayList<Taxon>();
 
         for (String taxaName : taxaNames) {
-            taxaList.add(new Taxon(taxaName));
+            taxaList.add(Taxon.instance(taxaName));
 
         }
 
@@ -190,7 +190,7 @@ public class PhenotypeUtils {
         for (Integer key : plotNoToTaxaNameMap.keySet()) {
             plotNoMapping.add(key);
             taxaNames.add(plotNoToTaxaNameMap.get(key));
-            taxaList.add(new Taxon(plotNoToTaxaNameMap.get(key)));
+            taxaList.add(Taxon.instance(plotNoToTaxaNameMap.get(key)));
         }
 
         //Get the unique Variable names:
@@ -265,7 +265,7 @@ public class PhenotypeUtils {
         }
 
         //Create a new List of Taxon objects
-        ArrayList<Taxon> taxaList = (ArrayList<Taxon>) taxaListNames.stream().map((name) -> new Taxon(name)).collect(Collectors.toList());
+        ArrayList<Taxon> taxaList = (ArrayList<Taxon>) taxaListNames.stream().map((name) -> Taxon.instance(name)).collect(Collectors.toList());
 
         ArrayList<PhenotypeAttribute> attributes = new ArrayList<>(variableNames.size() + 1);
 

@@ -37,7 +37,7 @@ class BuilderFromHaplotypeVCF {
 
             val taxaListBuilder = TaxaListBuilder()
             samples
-                .map { Taxon(it) }
+                .map { Taxon.instance(it) }
                 .forEach { taxaListBuilder.add(it) }
             taxa = taxaListBuilder.build()
 

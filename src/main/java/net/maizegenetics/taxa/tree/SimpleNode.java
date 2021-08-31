@@ -157,7 +157,7 @@ public class SimpleNode implements AttributeNode {
 
     public SimpleNode(String name, double branchLength) {
         this();
-        identifier = new Taxon(name);
+        identifier = Taxon.instance(name);
         length = branchLength;
 
     }

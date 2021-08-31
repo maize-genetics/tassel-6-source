@@ -118,7 +118,7 @@ class BrAPIConnection(val baseURL: String) {
     }
 
     private fun taxon(json: JsonElement): Taxon {
-        return Taxon(getStringAttribute(json, "callSetName"))
+        return Taxon.instance(getStringAttribute(json, "callSetName"))
     }
 
     private val callsPageSize = 1
@@ -126,7 +126,7 @@ class BrAPIConnection(val baseURL: String) {
     /**
      * Returns a feature table for the given variant set id.
      *
-     * Example: http://cbsudc01.biohpc.cornell.edu/brapi/v2/variantsets/Ames_MergedReadMapping_AllLines_Haploid/calls?page=1
+     * Example: http://cbsudc01.biohpc.cornell.edu/brapi/v2/variantsets/Ames_MergedReadMapping_AllLines_Haploid/calls?pageSize=1
      */
     fun getCalls(id: String): FeatureTable {
 

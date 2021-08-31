@@ -157,7 +157,7 @@ public class JSONUtils {
         if (anno != null) {
             return new Taxon(name, generalAnnotationFromJSON(anno));
         } else {
-            return new Taxon(name);
+            return Taxon.instance(name);
         }
     }
 

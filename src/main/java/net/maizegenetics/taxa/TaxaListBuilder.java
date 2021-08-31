@@ -38,7 +38,7 @@ public class TaxaListBuilder {
     public static TaxaList getInstance(int numTaxa) {
         TaxaListBuilder builder = new TaxaListBuilder();
         for (int i = 0; i < numTaxa; i++) {
-            builder.add(new Taxon("Taxa_" + i));
+            builder.add(Taxon.instance("Taxa_" + i));
         }
         return builder.build();
     }
@@ -53,7 +53,7 @@ public class TaxaListBuilder {
     }
 
     public TaxaListBuilder add(String taxon) {
-        Taxon obj = new Taxon(taxon);
+        Taxon obj = Taxon.instance(taxon);
         return add(obj);
     }
 
@@ -109,8 +109,8 @@ public class TaxaListBuilder {
     }
 
     public TaxaListBuilder addAll(Taxon[] taxa) {
-        for (int i = 0, n = taxa.length; i < n; i++) {
-            add(new Taxon.Builder(taxa[i]).build());
+        for (Taxon taxon : taxa) {
+            add(taxon);
         }
         return this;
     }

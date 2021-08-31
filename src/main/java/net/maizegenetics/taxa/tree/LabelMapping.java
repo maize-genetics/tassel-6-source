@@ -52,7 +52,7 @@ public class LabelMapping implements java.io.Serializable {
 		if(id==null) {
 			return null;
 		}
-		return new Taxon(getLabel(id.getName(),id.getName()));
+		return Taxon.instance(getLabel(id.getName(),id.getName()));
 	}
 
 }

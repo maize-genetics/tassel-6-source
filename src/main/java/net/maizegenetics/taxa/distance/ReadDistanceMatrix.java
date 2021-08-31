@@ -79,7 +79,7 @@ public class ReadDistanceMatrix {
                 if (tokens.length != numTaxa + 1) {
                     throw new IllegalStateException("ReadDistanceMatrix: Incorrect number of values on line number: " + (index + 2) + " expected: " + (numTaxa + 1) + " counting taxon name. actual: " + tokens.length);
                 }
-                builder.addTaxon(new Taxon(tokens[0]));
+                builder.addTaxon(Taxon.instance(tokens[0]));
 
                 for (int i = 0; i < numTaxa; i++) {
                     try {
@@ -159,7 +159,7 @@ public class ReadDistanceMatrix {
                 if (tokens.length != 2) {
                     throw new IllegalStateException("ReadDistanceMatrix: readBinMultiBlupID: Rows must have two columns: " + filename);
                 }
-                builder.add(new Taxon(tokens[1]));
+                builder.add(Taxon.instance(tokens[1]));
                 current = reader.readLine();
             }
         } catch (Exception e) {

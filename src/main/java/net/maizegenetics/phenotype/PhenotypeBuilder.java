@@ -393,7 +393,7 @@ public class PhenotypeBuilder {
             } else if (typeString[pheno].toLowerCase().startsWith("tax")) {
                 ArrayList<Taxon> taxa = new ArrayList<>();
                 for (String[] inputLine : stringData) {
-                    taxa.add(new Taxon(inputLine[pheno]));
+                    taxa.add(Taxon.instance(inputLine[pheno]));
                 }
                 attributes.add(new TaxaAttribute(taxa, phenoNames[pheno]));
                 types.add(ATTRIBUTE_TYPE.taxa);
@@ -486,7 +486,7 @@ public class PhenotypeBuilder {
                     phenotypeReader.close();
                     throw new IllegalArgumentException(msg);
                 }
-                taxaList.add(new Taxon(values[0]));
+                taxaList.add(Taxon.instance(values[0]));
                 for (int i = 0; i < ntraits; i++) {
                     float val;
                     String inval = values[i + 1].trim();
@@ -544,7 +544,7 @@ public class PhenotypeBuilder {
                     phenotypeReader.close();
                     throw new IllegalArgumentException(msg);
                 }
-                taxaList.add(new Taxon(values[0]));
+                taxaList.add(Taxon.instance(values[0]));
                 for (int i = 0; i < ntraits; i++) {
                     traitValues.get(i)[dataCount] = values[i + 1];
                 }
@@ -648,7 +648,7 @@ public class PhenotypeBuilder {
                     br.close();
                     throw new IllegalArgumentException(msg);
                 }
-                tempTaxa.add(new Taxon(values[0]));
+                tempTaxa.add(Taxon.instance(values[0]));
                 for (int i = 0; i < ntraitnames; i++) {
                     float val;
                     int traitnum = traitMap.get(traitnames[i]);

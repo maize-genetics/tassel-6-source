@@ -9,7 +9,8 @@ package net.maizegenetics.taxa;
 import net.maizegenetics.util.GeneralAnnotation;
 import net.maizegenetics.util.GeneralAnnotationStorage;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * An identifier for some sampled data. This will most often be for example, the
@@ -25,8 +26,10 @@ import java.util.*;
  */
 public class Taxon implements Comparable<Taxon> {
 
+    private static final Map<String, Taxon> TAXON_CACHE = new HashMap();
+
     public static final String DELIMITER = ":";
-    public static Taxon ANONYMOUS = new Taxon("");
+    public static Taxon ANONYMOUS = Taxon.instance("");
     /**
      * Standard key for the father of the taxon
      */
@@ -75,7 +78,8 @@ public class Taxon implements Comparable<Taxon> {
     private final String myName;
     private final int hashCode;
 
-    public Taxon(String name) {
+    // Use instance(String name)
+    private Taxon(String name) {
         this(name, GeneralAnnotationStorage.EMPTY_ANNOTATION_STORAGE);
     }
 
@@ -83,6 +87,15 @@ public class Taxon implements Comparable<Taxon> {
         myName = name.trim();
         hashCode = myName.hashCode();
         myAnno = anno;
+    }
+
+    public static Taxon instance(String name) {
+        Taxon result = TAXON_CACHE.get(name);
+        if (result == null) {
+            result = new Taxon(name);
+            TAXON_CACHE.put(name, result);
+        }
+        return result;
     }
 
     @Override
