@@ -31,7 +31,13 @@ data class GenomicFeature(val startChr: Chromosome,
         return startPos.compareTo(other.startPos)
     }
 
+    override fun toString(): String {
+        return "$startChr:$startPos-$endChr:$endPos${name?.let { ":$it" }}${id?.let { ":$id" }}"
+    }
+
     val range: Range<ChrPos> by lazy { Range.closed(ChrPos(startChr, startPos), ChrPos(endChr, endPos)) }
+
+
 
 }
 
