@@ -9,7 +9,7 @@ version = "6.0.1"
 
 
 buildscript {
-    val kotlinVersion by extra("1.4.32")
+    val kotlinVersion by extra ("1.5.31")
 
     repositories {
         mavenCentral()
@@ -28,7 +28,7 @@ buildscript {
 
 plugins {
 
-    val kotlinVersion = "1.4.32"
+    val kotlinVersion = "1.5.31"
     java
     kotlin("jvm") version kotlinVersion
     kotlin("plugin.serialization") version kotlinVersion
@@ -90,9 +90,9 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:${kotlinVersion}")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:${kotlinVersion}")
     implementation("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.3")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.1.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.1.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.3.0-RC")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.2.2")
     implementation("org.jetbrains.kotlin:kotlin-script-runtime:${kotlinVersion}")
 
     implementation("khttp:khttp:1.0.0")
