@@ -5,6 +5,7 @@ import net.maizegenetics.dna.factor.UNKNOWN_ALLELE_STR
 import net.maizegenetics.dna.map.GenomicFeature
 import net.maizegenetics.taxa.TaxaList
 import net.maizegenetics.util.SuperByteMatrix
+import org.apache.logging.log4j.LogManager
 
 /**
  * @author Terry Casstevens
@@ -21,6 +22,8 @@ class HaplotypeSite(
     isPhased: Boolean = false,
     private val hapAnnotations: Array<HaplotypeAnnotation?>? = null
 ) : FeatureSite(feature, taxa, weight, isPhased) {
+
+    private val logger = LogManager.getLogger(HaplotypeSite::class.java)
 
     init {
         require(taxa.size == genotypes.numRows) { "Number of taxa: ${taxa.size} should match number of genotypes: ${genotypes.numRows}." }
@@ -50,7 +53,13 @@ class HaplotypeSite(
      * If no annotation, then returns null
      */
     fun haplotypeAnnotation(allele: Byte): HaplotypeAnnotation? {
-        return hapAnnotations?.get(allele.toInt())
+        if (allele == UNKNOWN_ALLELE) return null
+        try {
+            return hapAnnotations?.get(allele.toInt())
+        } catch (ie: IndexOutOfBoundsException) {
+            logger.warn("haplotypeAnnotation: allele value: $allele doesn't exist for this site")
+            return null
+        }
     }
 
 }
