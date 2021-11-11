@@ -33,8 +33,6 @@ plugins {
     kotlin("jvm") version kotlinVersion
     kotlin("plugin.serialization") version kotlinVersion
 
-    // Shadow allows for the creation of fat jars (all dependencies)
-    id("com.github.johnrengelman.shadow") version "5.2.0"
     id("application")
     id("org.openjfx.javafxplugin") version "0.0.10"
 
@@ -62,6 +60,7 @@ repositories {
     maven("https://dl.bintray.com/kotlin/kotlin-eap")
     maven("https://kotlin.bintray.com/kotlinx")
     maven("https://oss.sonatype.org/content/repositories/snapshots/")
+    maven("https://plugins.gradle.org/m2/")
 }
 
 javafx {
@@ -94,8 +93,11 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.3")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.1.0")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.1.0")
+    implementation("org.jetbrains.kotlin:kotlin-script-runtime:${kotlinVersion}")
 
     implementation("khttp:khttp:1.0.0")
+
+    implementation("com.github.johnrengelman.shadow:com.github.johnrengelman.shadow.gradle.plugin:7.1.0")
 
     val kotestVersion = "4.2.6"
     listOf("runner-junit5", "assertions-core", "property").forEach {
