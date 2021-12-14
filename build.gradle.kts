@@ -58,7 +58,6 @@ apply {
 
 repositories {
     mavenCentral()
-    jcenter()
     maven("https://maven.imagej.net/content/groups/public/")
     maven("https://jitpack.io")
     maven("https://dl.bintray.com/kotlin/kotlin-eap")
@@ -75,8 +74,8 @@ dependencies {
 
     val kotlinVersion = rootProject.extra["kotlinVersion"]
 
-    implementation("org.apache.logging.log4j:log4j-api:2.14.1")
-    implementation("org.apache.logging.log4j:log4j-core:2.14.1")
+    implementation("org.apache.logging.log4j:log4j-api:2.15.0")
+    implementation("org.apache.logging.log4j:log4j-core:2.15.0")
     implementation("com.google.guava:guava:29.0-jre")
     implementation("com.github.samtools:htsjdk:2.24.1")
     implementation("com.googlecode.efficient-java-matrix-library:ejml:0.23")
