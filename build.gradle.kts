@@ -22,6 +22,7 @@ buildscript {
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
         classpath(kotlin("serialization", version = kotlinVersion))
         classpath("org.jetbrains.dokka:dokka-gradle-plugin:1.4.30")
+        classpath("gradle.plugin.com.github.johnrengelman:shadow:7.1.0")
     }
 }
 
@@ -32,6 +33,8 @@ plugins {
     java
     kotlin("jvm") version kotlinVersion
     kotlin("plugin.serialization") version kotlinVersion
+
+    id("com.github.johnrengelman.shadow") version "7.1.0"
 
     id("application")
     id("org.openjfx.javafxplugin") version "0.0.10"
@@ -50,6 +53,7 @@ application {
 apply {
     plugin("kotlinx-serialization")
     plugin("org.jetbrains.dokka")
+    plugin("com.github.johnrengelman.shadow")
 }
 
 repositories {
@@ -96,8 +100,6 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-script-runtime:${kotlinVersion}")
 
     implementation("khttp:khttp:1.0.0")
-
-    implementation("com.github.johnrengelman.shadow:com.github.johnrengelman.shadow.gradle.plugin:7.1.0")
 
     val kotestVersion = "4.2.6"
     listOf("runner-junit5", "assertions-core", "property").forEach {
